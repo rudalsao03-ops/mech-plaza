@@ -685,20 +685,20 @@ const validScene = id => Object.prototype.hasOwnProperty.call(SCENES, id);
 
 async function initNet() {
   if (!CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY) { startDemo('데모 모드 · 서버 연결 전이라 봇이랑 노는 중'); return; }
-  setStatus('[v8] 서버 연결 중… (1/3 라이브러리)');
+  setStatus('[v9] 서버 연결 중… (1/3 라이브러리)');
   try { await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'); }
-  catch (e) { startDemo('[v8] 라이브러리 로드 실패 · 데모 모드'); return; }
-  try { await connectSupabase(); } catch (e) { setStatus('[v8] 오류: ' + (e && e.message || e)); console.error(e); }
+  catch (e) { startDemo('[v9] 라이브러리 로드 실패 · 데모 모드'); return; }
+  try { await connectSupabase(); } catch (e) { setStatus('[v9] 오류: ' + (e && e.message || e)); console.error(e); }
 }
 async function connectSupabase() {
-  setStatus('[v8] 서버 연결 중… (2/3 채널)');
+  setStatus('[v9] 서버 연결 중… (2/3 채널)');
   const client = net.client = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY,
     { realtime: { params: { eventsPerSecond: 10 }, heartbeatIntervalMs: 15000, worker: true } });
   let chn = null, subscribed = false, firstSync = true, retryT = 0, backoff = 1000, gen = 0, reconnects = 0;
   const live = () => chn && subscribed;
   function presenceSync() {
     const state = chn.presenceState(), ids = new Set(Object.keys(state));
-    setStatus(`● 실시간 연결됨 · 서버 접속 ${ids.size}명`, true);
+    setStatus(`● 실시간 연결됨 · 서버 접속 ${ids.size}명` + (reconnects ? ` · 재연결 ${reconnects}회` : ''), true);
     for (const id of ids) {
       if (id === me.id) continue;
       const m = state[id][0]; if (!m) continue;
@@ -715,9 +715,19 @@ async function connectSupabase() {
       c.pose = POSE_SET.has(m.pose) ? m.pose : null;
       if (m.v && typeof m.v === 'object') for (const k of Object.keys(m.v)) applyVideo(k, m.v[k], false);
     }
-    for (const id of Object.keys(chars)) if (id !== me.id && !ids.has(id)) { if (chars[id].scene === scene.id) sys(`${chars[id].name}님이 나갔어요`); delete chars[id]; }
+    const now = Date.now();
+    for (const id of ids) if (chars[id]) chars[id].missing = 0;
+    for (const id of Object.keys(chars)) if (id !== me.id && !chars[id].bot && !ids.has(id) && !chars[id].missing) chars[id].missing = now;
     firstSync = false; updateOnline();
   }
+  // 잠깐 끊겼다 붙는 사람은 바로 지우지 않고 10초 기다림
+  setInterval(() => {
+    const now = Date.now();
+    for (const id of Object.keys(chars)) {
+      const c = chars[id];
+      if (c.missing && now - c.missing > 10000 && live()) { if (c.scene === scene.id) sys(`${c.name}님이 나갔어요`); delete chars[id]; updateOnline(); }
+    }
+  }, 2000);
   function join() {
     const my = ++gen; subscribed = false;
     chn = client.channel(CONFIG.ROOM, { config: { presence: { key: me.id }, broadcast: { self: false } } });
@@ -745,8 +755,10 @@ async function connectSupabase() {
         try { await chn.track(myMeta()); } catch (e) {}
         sendPos();
       } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-        subscribed = false; reconnects++; setStatus(`재연결 중… (${reconnects}회 · ${status}${err ? ' · ' + (err.message || err) : ''})`);
-        reconnect(backoff); backoff = Math.min(backoff * 2, 15000);
+        subscribed = false; reconnects++;
+        const msg = `재연결 중… (${reconnects}회 · ${status}${err ? ' · ' + (err.message || err) : ''})`;
+        setTimeout(() => { if (!subscribed) setStatus(msg); }, 4000);
+        reconnect(backoff === 1000 ? 300 : backoff); backoff = Math.min(backoff * 2, 15000);
       }
     });
   }
