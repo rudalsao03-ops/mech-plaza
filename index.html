@@ -685,14 +685,20 @@ const validScene = id => Object.prototype.hasOwnProperty.call(SCENES, id);
 
 async function initNet() {
   if (!CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY) { startDemo('데모 모드 · 서버 연결 전이라 봇이랑 노는 중'); return; }
-  setStatus('서버 연결 중…');
+  setStatus('[v5] 서버 연결 중… (1/3 라이브러리)');
   try { await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'); }
-  catch (e) { startDemo('연결 실패 · 데모 모드'); return; }
+  catch (e) { startDemo('[v5] 라이브러리 로드 실패 · 데모 모드'); return; }
+  try { await connectSupabase(); } catch (e) { setStatus('[v5] 오류: ' + (e && e.message || e)); console.error(e); }
+}
+async function connectSupabase() {
+  setStatus('[v5] 서버 연결 중… (2/3 채널)');
   const client = net.client = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, { realtime: { params: { eventsPerSecond: 20 } } });
   const chn = client.channel(CONFIG.ROOM, { config: { presence: { key: me.id }, broadcast: { self: false } } });
   let firstSync = true;
-  chn.on('presence', { event: 'sync' }, () => {
+  chn.on('presence', { event: 'sync' }, () => { try { presenceSync(); } catch (e) { setStatus('presence 오류: ' + e.message); console.error(e); } });
+  function presenceSync() {
     const state = chn.presenceState(), ids = new Set(Object.keys(state));
+    if (subscribed) setStatus(`● 실시간 연결됨 · 서버 접속 ${ids.size}명`, true);
     for (const id of ids) {
       if (id === me.id) continue;
       const m = state[id][0]; if (!m) continue;
@@ -711,7 +717,7 @@ async function initNet() {
     }
     for (const id of Object.keys(chars)) if (id !== me.id && !ids.has(id)) { if (chars[id].scene === scene.id) sys(`${chars[id].name}님이 나갔어요`); delete chars[id]; }
     firstSync = false; updateOnline();
-  });
+  }
   chn.on('broadcast', { event: 'pos' }, ({ payload: p }) => {
     const c = chars[p.id]; if (!c || !validScene(p.s)) return;
     const x = +p.x, y = +p.y; if (!isFinite(x) || !isFinite(y)) return;
@@ -728,9 +734,14 @@ async function initNet() {
     const sc = Math.max(0, Math.min(999999, p.score | 0)); sys(`${c.name}님 ${g.name} ${g.fmt(sc)}!`); addReact(c, g.emoji);
   });
   chn.on('broadcast', { event: 'pose' }, ({ payload: p }) => { const c = chars[p.id]; if (c && POSE_SET.has(p.pose)) setPose(c, p.pose); });
-  chn.subscribe(async status => {
-    if (status === 'SUBSCRIBED') { setStatus('● 실시간 연결됨', true); await chn.track(myMeta()); }
-    else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') setStatus('연결 끊김 · 새로고침 해줘');
+  let subscribed = false;
+  setTimeout(() => { if (!subscribed) setStatus('[v5] 연결 지연 (10초 넘음) · 상태: 대기'); }, 10000);
+  chn.subscribe(async (status, err) => {
+    if (status === 'SUBSCRIBED') {
+      subscribed = true; setStatus('● 실시간 연결됨 (3/3)', true);
+      try { const r = await chn.track(myMeta()); if (r !== 'ok') setStatus('● 연결됨 · 위치 공유 실패: ' + r, true); }
+      catch (e) { setStatus('● 연결됨 · track 오류: ' + (e && e.message || e), true); }
+    } else setStatus('[v5] ' + status + (err ? ' · ' + (err.message || err) : ''));
   });
   net.mode = 'live';
   net.send = (event, payload) => chn.send({ type: 'broadcast', event, payload });
