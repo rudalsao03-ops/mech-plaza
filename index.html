@@ -1556,9 +1556,9 @@ const Rank = {
   local() { const l = store.get('mech-plaza-scores', {}); if (l.week !== WEEK) return { week: WEEK, rows: [] }; return l; },
   myBest(game) { return Math.max(0, ...this.local().rows.filter(r => r.game === game).map(r => r.score)); },
   async submit(game, score) {
-    const l = this.local(); l.rows.push({ game, score, uid: me.id, name: me.name, grade: me.grade });
+    const l = this.local(); l.rows.push({ game, score, uid: me.uid, name: me.name, grade: me.grade });
     l.rows = l.rows.sort((a, b) => b.score - a.score).slice(0, 100); store.set('mech-plaza-scores', l);
-    if (net.client) { try { await net.client.from('scores').insert({ game, score, uid: me.id, name: me.name, grade: me.grade, week: WEEK }); } catch (e) {} }
+    if (net.client) { try { await net.client.from('scores').insert({ game, score, uid: me.uid, name: me.name, grade: me.grade, week: WEEK }); } catch (e) {} }
   },
   async rows(game) {
     if (net.client) {
@@ -1842,14 +1842,14 @@ async function renderRank(id) {
   const h = document.createElement('div'); h.className = 'sect'; h.textContent = net.client ? '개인 TOP 10 (전체)' : (demo ? '개인 TOP 10 (데모 · 서버 연결하면 전체 랭킹)' : '개인 TOP 10'); list.appendChild(h);
   if (!best.length) { const e = document.createElement('div'); e.className = 'muted'; e.textContent = '아직 기록이 없어요. 첫 1등 해봐!'; list.appendChild(e); }
   best.slice(0, 10).forEach((r, i) => {
-    const row = document.createElement('div'); row.className = 'rk' + ((r.uid === me.id) ? ' me' : '');
+    const row = document.createElement('div'); row.className = 'rk' + ((r.uid === me.uid) ? ' me' : '');
     const n = document.createElement('span'); n.className = 'n'; n.textContent = ['🥇','🥈','🥉'][i] || (i + 1);
     const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = clean(r.name || '익명').slice(0, 10);
     const gr = document.createElement('span'); gr.className = 'gr'; gr.textContent = r.grade || '';
     const sc = document.createElement('span'); sc.className = 'sc'; sc.textContent = g.fmt(r.score);
     row.append(n, nm, gr, sc); list.appendChild(row);
   });
-  const myIdx = best.findIndex(r => r.uid === me.id);
+  const myIdx = best.findIndex(r => r.uid === me.uid);
   if (myIdx >= 10) { const m = document.createElement('div'); m.className = 'muted'; m.style.marginTop = '6px'; m.textContent = `내 순위: ${myIdx + 1}위 (${g.fmt(best[myIdx].score)})`; list.appendChild(m); }
   // 학년 대항: 학년별 상위 5명 점수 합
   const byG = {};
@@ -1898,7 +1898,7 @@ $('#enter').onclick = () => {
   const id = baseId + '-' + Math.random().toString(36).slice(2, 6);
   store.set('mech-plaza-id', baseId); store.set('mech-plaza-me', { name, hair: pick.hair, shirt: pick.shirt, g: pick.g, grade: pick.grade });
   const sp = nearestWalkable(campus, 13 + Math.floor(Math.random() * 2), 21 + Math.floor(Math.random() * 3));
-  me = makeChar(id, { name, g: pick.g, hair: pick.hair, shirt: pick.shirt, grade: pick.grade, hat: Wallet.d.hat, facc: Wallet.d.facc, x: sp.x + 0.5, y: sp.y + 0.5, scene: 'campus' });
+  me = makeChar(id, { uid: baseId, name, g: pick.g, hair: pick.hair, shirt: pick.shirt, grade: pick.grade, hat: Wallet.d.hat, facc: Wallet.d.facc, x: sp.x + 0.5, y: sp.y + 0.5, scene: 'campus' });
   const p = iso(me.x, me.y); camX = p.x; camY = p.y - 30;
   $('#join').classList.add('hidden');
   Music.start(); Music.play('campus'); syncMusicBtn();
