@@ -909,13 +909,13 @@ const validScene = id => Object.prototype.hasOwnProperty.call(SCENES, id);
 
 async function initNet() {
   if (!CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY) { startDemo('데모 모드 · 서버 연결 전이라 봇이랑 노는 중'); return; }
-  setStatus('[v13] 서버 연결 중… (1/3 라이브러리)');
+  setStatus('[v14] 서버 연결 중… (1/3 라이브러리)');
   try { await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'); }
-  catch (e) { startDemo('[v13] 라이브러리 로드 실패 · 데모 모드'); return; }
-  try { await connectSupabase(); } catch (e) { setStatus('[v13] 오류: ' + (e && e.message || e)); console.error(e); }
+  catch (e) { startDemo('[v14] 라이브러리 로드 실패 · 데모 모드'); return; }
+  try { await connectSupabase(); } catch (e) { setStatus('[v14] 오류: ' + (e && e.message || e)); console.error(e); }
 }
 async function connectSupabase() {
-  setStatus('[v13] 서버 연결 중…');
+  setStatus('[v14] 서버 연결 중…');
   const client = net.client = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY,
     { realtime: { params: { eventsPerSecond: 10 }, heartbeatIntervalMs: 15000, worker: true } });
   const LOBBY = net.lobby = new Map();
@@ -1014,27 +1014,29 @@ async function connectSupabase() {
     }
   }, 2000);
   // 보내는 양 제한: 초당 최대 6개, 위치는 최신 것만, presence 갱신은 2~3초 간격
-  const out = { q: [], pos: null, lastPos: '', zT: false, lT: false, lastZT: 0, lastLT: 0 };
+  const out = { q: [], pos: null, lastPos: '', lastPosT: 0, zT: false, lT: false, lastZT: 0, lastLT: 0 };
   setInterval(() => {
     const now = Date.now();
     const qi = out.q.findIndex(([tg]) => (tg === 'l' ? lobby : zone).live);
     if (qi >= 0) { const [tg, event, payload] = out.q.splice(qi, 1)[0]; (tg === 'l' ? lobby : zone).chn.send({ type: 'broadcast', event, payload }).catch(() => {}); return; }
-    if (zone.live && out.pos) { const k = JSON.stringify(out.pos); const p = out.pos; out.pos = null; if (k !== out.lastPos) { out.lastPos = k; zone.chn.send({ type: 'broadcast', event: 'pos', payload: p }).catch(() => {}); return; } }
-    if (zone.live && out.zT && now - out.lastZT > 2000) { out.zT = false; out.lastZT = now; zone.chn.track(myMeta()).catch(() => {}); return; }
-    if (lobby.live && out.lT && now - out.lastLT > 3000) { out.lT = false; out.lastLT = now; lobby.chn.track(lobbyMeta()).catch(() => {}); }
+    if (zone.live && out.pos && now - out.lastPosT > 330) { const k = JSON.stringify(out.pos); const p = out.pos; out.pos = null; if (k !== out.lastPos) { out.lastPos = k; out.lastPosT = now; zone.chn.send({ type: 'broadcast', event: 'pos', payload: p }).catch(() => {}); return; } }
+    // presence 갱신은 서버 제한(30초에 5번)보다 적게
+    if (zone.live && out.zT && now - out.lastZT > 9000) { out.zT = false; out.lastZT = now; zone.chn.track(myMeta()).catch(() => {}); return; }
+    if (lobby.live && out.lT && now - out.lastLT > 15000) { out.lT = false; out.lastLT = now; lobby.chn.track(lobbyMeta()).catch(() => {}); }
   }, 170);
   net.mode = 'live';
   net.send = (event, payload) => { if (event === 'pos') out.pos = payload; else if (out.q.length < 20) out.q.push([event === 'dm' ? 'l' : 'z', event, payload]); };
-  net.track = () => { out.zT = true; out.lT = true; };
+  net.track = () => { out.zT = true; };
+  net.trackAll = () => { out.zT = true; out.lT = true; };
   net.zoneChanged = () => {
     for (const id of Object.keys(chars)) if (id !== me.id && !chars[id].bot) delete chars[id];
     out.pos = null; out.q = out.q.filter(([tg]) => tg === 'l'); zoneFirstSync = true;
-    zone.rejoin(); out.lT = true; out.lastLT = 0; recountZones(); updateOnline();
+    zone.rejoin(); out.lT = true; out.lastLT = Math.min(out.lastLT, Date.now() - 12000); recountZones(); updateOnline();
   };
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState !== 'visible') return;
     for (const m of [lobby, zone]) if (!m.live) m.rejoin();
-    net.track(); sendPos();
+    net.trackAll(); sendPos();
   });
   window.addEventListener('online', () => { for (const m of [lobby, zone]) if (!m.live) m.rejoin(); });
   setInterval(() => { for (const m of [lobby, zone]) if (!m.live && !m.retry) m.schedule(500); }, 20000);
@@ -1797,7 +1799,7 @@ function update(dt, now) {
       moved = slide(me, scene, tx * sp, ty * sp);
       me.moving = moved;
     } else if (me.path.length) { moved = followPath(me, dt); }
-    if (moved && now - lastPosSend > 200) { lastPosSend = now; sendPos(); }
+    if (moved && now - lastPosSend > 330) { lastPosSend = now; sendPos(); }
     if (wasMoving && !me.moving) { sendPos(); scheduleTrack(); }
     wasMoving = me.moving;
     checkTrigger();
@@ -1973,7 +1975,7 @@ function checkAttendance() {
   $('#attend').classList.remove('hidden');
 }
 $('#atOk').onclick = () => $('#attend').classList.add('hidden');
-function applyLook() { if (!me) return; me.hat = Wallet.d.hat; me.facc = Wallet.d.facc; scheduleTrack(); }
+function applyLook() { if (!me) return; me.hat = Wallet.d.hat; me.facc = Wallet.d.facc; if (net.trackAll) net.trackAll(); else scheduleTrack(); }
 function openShop() {
   const d = Wallet.d;
   $('#shopCoins').textContent = `보유 코인 🪙 ${d.coins} · 출석, 미니게임으로 모을 수 있어요`;
