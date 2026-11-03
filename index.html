@@ -10,8 +10,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="기계과 광장">
-<title>기계공학과 광장</title>
+<meta name="apple-mobile-web-app-title" content="캠퍼스 광장">
+<title>캠퍼스 광장</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@latest/dist/galmuri.css">
 <style>
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -59,7 +59,7 @@
   .rk .n{width:26px;text-align:center;font-weight:bold}.rk .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .rk .gr{color:#8a6b2a;font-size:11px}.rk .sc{font-weight:bold}.rk.me{background:#fff7dc;border-radius:8px}
   .sect{font-size:12px;color:#555;margin:14px 0 4px}
-  .grow{display:flex;align-items:center;gap:8px;font-size:12px;margin:6px 0}.grow .gl{width:44px}.grow .gb{flex:1;background:#eef0f4;border-radius:6px;height:16px;overflow:hidden}
+  .grow{display:flex;align-items:center;gap:8px;font-size:12px;margin:6px 0}.grow .gl{width:56px}.grow .gb{flex:1;background:#eef0f4;border-radius:6px;height:16px;overflow:hidden}
   .grow .gb div{height:100%;background:linear-gradient(90deg,#2f7cf6,#8a5ad8)}.grow .gv{width:54px;text-align:right;font-weight:bold}
   #gview{position:fixed;inset:0;background:#14161d;z-index:9;display:flex;flex-direction:column}
   .gtop{position:relative;z-index:2;display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;color:#fff}
@@ -123,6 +123,7 @@
   .seg{display:flex;gap:8px}
   .seg button{flex:1;border:2px solid #e3e6ec;background:#fff;border-radius:12px;padding:10px;font:14px "Galmuri11",sans-serif;color:#333}
   .seg button.on{border-color:#1d2030;background:#1d2030;color:#fff}
+  .seg.dept{display:grid;grid-template-columns:1fr 1fr;gap:6px}.seg.dept button{padding:9px 6px;font-size:13px}
   .primary{width:100%;margin-top:18px;border:0;background:#1d2030;color:#fff;font:bold 16px "Galmuri11",sans-serif;padding:14px;border-radius:14px}
   .ghost{width:100%;margin-top:8px;border:0;background:#f0f2f5;color:#333;font:14px "Galmuri11",sans-serif;padding:12px;border-radius:14px}
   #preview{display:block;margin:6px auto 0;background:linear-gradient(#dff0ff 60%,#8fd47c 60%);border-radius:18px;image-rendering:pixelated}
@@ -134,8 +135,8 @@
 <canvas id="c"></canvas>
 
 <div id="top">
-  <div class="title"><span id="sceneName">기계공학과 광장</span> <span id="online">1명</span></div>
-  <div class="sub" id="sceneSub">정문 광장 · 대형 스크린 · 건물마다 들어갈 수 있어요</div>
+  <div class="title"><span id="sceneName">중앙 광장</span> <span id="online">1명</span></div>
+  <div class="sub" id="sceneSub">모든 과가 모이는 곳 · 둘레 문으로 학과 구역 이동</div>
   <div id="status">연결 준비 중</div>
 </div>
 <div id="tr">
@@ -278,15 +279,17 @@
 
 <div id="join" class="overlay">
   <div class="card">
-    <div class="kicker">DAELIM · MECHANICAL</div>
-    <h1>기계공학과 광장</h1>
-    <p class="muted">캐릭터로 캠퍼스를 돌아다니면서 같은 과 사람들이랑 얘기하는 곳</p>
+    <div class="kicker">DAELIM CAMPUS</div>
+    <h1>캠퍼스 광장</h1>
+    <p class="muted">캐릭터로 캠퍼스를 돌아다니면서 여러 과 사람들이랑 만나는 곳</p>
     <canvas id="preview" width="240" height="200" style="width:120px;height:100px"></canvas>
     <label>닉네임</label>
     <input id="nick" maxlength="10" placeholder="최대 10자">
     <label>성별</label>
     <div class="seg" id="gender"><button data-g="m">남자</button><button data-g="f">여자</button></div>
-    <label>학년 (학년 대항 랭킹에 쓰여요)</label>
+    <label>학과 (학과 대항 랭킹에 쓰여요)</label>
+    <div class="seg dept" id="dept"></div>
+    <label>학년</label>
     <div class="seg" id="grade"><button data-v="1학년">1학년</button><button data-v="2학년">2학년</button><button data-v="3학년">3학년</button><button data-v="기타">기타</button></div>
     <label>머리색</label>
     <div id="hairs" class="sw"></div>
@@ -308,7 +311,8 @@ const CONFIG = {
   SUPABASE_ANON_KEY: 'sb_publishable_HkZjK14uHrUpVgybOEhdkA_liVHEb71',
   ROOM: 'daelim-mech-plaza',
   NOTICES: [
-    '기계공학과 광장 오픈! 같은 과 친구들 불러와요',
+    '캠퍼스 광장 오픈! 친구들 불러와요',
+    '둘레 문으로 가면 학과 구역으로 이동해요 (문 위에 접속 인원 표시)',
     '건물 문으로 걸어가면 안으로 들어갈 수 있어요',
     '서로 존중하는 대화 부탁해요. 신고 기능은 곧 추가됩니다',
   ],
@@ -338,45 +342,49 @@ function newScene(id, o) {
   SCENES[id] = s; return s;
 }
 
-/* ---------- 캠퍼스 ---------- */
-const BUILDINGS = [
-  { id:'main', name:'기계관', x:3, y:3, w:6, h:5, H:150, style:'glass', door:{face:'L',tx:6,ty:8}, desc:'강의실. 과목 질문하고 답해주는 곳.' },
-  { id:'club', name:'과방', x:9, y:4, w:3, h:3, H:46, style:'house', door:{face:'L',tx:10,ty:7}, desc:'기계공학과 라운지. 소파에서 수다 떠는 곳.' },
-  { id:'pray', name:'벼락치기 기도실', x:15, y:4, w:3, h:3, H:42, style:'pagoda', door:{face:'L',tx:16,ty:7}, desc:'시험기간 한정. 같이 A+ 기원하는 곳.' },
-  { id:'lab', name:'실습동', x:19, y:3, w:6, h:5, H:72, style:'brick', door:{face:'L',tx:22,ty:8}, desc:'CNC·선반·밀링 있는 실습실. 실습 얘기하는 곳.' },
-  { id:'food', name:'학식당', x:3, y:16, w:5, h:4, H:56, style:'cafe', door:{face:'R',tx:8,ty:17}, desc:'오늘 학식 보고 밥친구 구하는 곳.' },
-  { id:'lib', name:'도서관', x:19, y:16, w:6, h:5, H:88, style:'lib', door:{face:'L',tx:21,ty:21}, desc:'조용히 같이 공부하는 곳.' },
-  { id:'arcade', name:'오락실', x:4, y:22, w:4, h:3, H:54, style:'arcade', door:{face:'R',tx:8,ty:23}, desc:'미니게임 4종 · 주간 랭킹 · 학년 대항전.' },
+/* ---------- 학과 · 구역 ---------- */
+const DEPTS = [
+  { id:'auto', name:'미래자동차공학부', short:'자동차', zone:'z_auto' },
+  { id:'mech', name:'기계공학과', short:'기계', zone:'z_mech' },
+  { id:'semi', name:'반도체학과', short:'반도체', zone:'z_semi' },
+  { id:'air', name:'항공호텔관광과', short:'항공호텔', zone:'z_air' },
+  { id:'cook', name:'호텔조리과', short:'호텔조리', zone:'z_air' },
+  { id:'arch', name:'건축과', short:'건축', zone:'z_arch' },
+  { id:'etc', name:'기타', short:'기타', zone:null },
 ];
-const campus = newScene('campus', { name:'기계공학과 광장', sub:'정문 광장 · 대형 스크린 · 건물마다 들어갈 수 있어요', W:28, H:28, track:'campus' });
-(function buildCampus(s) {
+const deptOf = id => DEPTS.find(d => d.id === id) || DEPTS[DEPTS.length - 1];
+const ZONE_LABEL = { hub:'중앙 광장', z_mech:'기계공학과', z_auto:'미래자동차', z_semi:'반도체', z_air:'항공·호텔', z_arch:'건축' };
+const ZONE_COUNT = {};
+
+function buildOutdoor(id, o) {
+  const s = newScene(id, Object.assign({ zone: id, track: 'campus' }, o));
   const { W, H, I } = s;
-  const fill = (x0, y0, x1, y1, t) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) s.ground[I(x, y)] = t; };
-  fill(2, 13, 25, 14, 'p'); fill(13, 15, 14, 27, 'p');
-  fill(6, 8, 6, 12, 'p'); fill(22, 8, 22, 12, 'p');
-  fill(10, 7, 10, 8, 'p'); fill(16, 7, 16, 8, 'p');
-  fill(8, 17, 12, 17, 'p'); fill(15, 21, 21, 21, 'p'); fill(8, 23, 12, 23, 'p');
-  fill(10, 9, 17, 17, 'z');
+  const fill = (x0, y0, x1, y1, t) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) if (s.in(x, y)) s.ground[I(x, y)] = t; };
+  for (const p of o.paint || []) fill(...p);
   s.shade = Array.from({ length: W * H }, () => rnd());
-  const BIG = [
-    ...BUILDINGS.map(b => ({ ...b, kind:'building' })),
-    { id:'screen', kind:'screen', name:'대형 스크린', x:12, y:9, w:4, h:1, door:{tx:13,ty:11},
-      desc:'다음 단계: 유튜브 링크 넣으면 광장에 있는 사람 다 같이 같은 장면 보기.' },
-    { id:'fountain', kind:'fountain', x:13, y:12, w:2, h:2 },
-    { id:'gate', kind:'gate', x:12, y:25, w:4, h:1 },
-  ];
-  for (const b of BIG) for (let y = b.y; y < b.y + b.h; y++) for (let x = b.x; x < b.x + b.w; x++) {
-    if (b.kind === 'gate' && x !== b.x && x !== b.x + b.w - 1) continue;
+  s.doorMats = [];
+  const big = [];
+  for (const b of o.buildings || []) {
+    big.push({ ...b, kind:'building', big: true, parent: id });
+    if (b.door) {
+      s.trig.set(I(b.door.tx, b.door.ty), { to: b.id }); s.doorMats.push(b.door);
+      if (s.ground[I(b.door.tx, b.door.ty)] === 'g') s.ground[I(b.door.tx, b.door.ty)] = 'p';
+    }
+  }
+  for (const b of o.big || []) big.push({ ...b, big: true });
+  for (const g of o.gates || []) big.push({ ...g, kind:'gate', big: true });
+  for (const b of big) for (let y = b.y; y < b.y + b.h; y++) for (let x = b.x; x < b.x + b.w; x++) {
+    if (!s.in(x, y)) continue;
+    if (b.kind === 'gate') {
+      const pillar = b.w > 1 ? (x === b.x || x === b.x + b.w - 1) : (y === b.y || y === b.y + b.h - 1);
+      if (!pillar) { if (b.to) s.trig.set(I(x, y), { to: b.to, tx: b.tx, ty: b.ty }); continue; }
+    }
     s.blocked[I(x, y)] = 1; s.owner[I(x, y)] = b;
   }
-  for (const b of BUILDINGS) s.trig.set(I(b.door.tx, b.door.ty), { to: b.id });
-  const DECOR = [
-    { kind:'notice', x:17, y:10 }, { kind:'bench', x:11, y:16 }, { kind:'bench', x:16, y:16 },
-    { kind:'lamp', x:10, y:10 }, { kind:'lamp', x:10, y:16 }, { kind:'lamp', x:17, y:16 },
-    { kind:'lamp', x:12, y:22 }, { kind:'lamp', x:15, y:22 },
-  ];
-  for (const d of DECOR) s.blocked[I(d.x, d.y)] = 1;
-  const pre = s.blocked.slice();
+  for (const g of o.gates || []) for (const [x, y] of g.extra || []) if (g.to) s.trig.set(I(x, y), { to: g.to, tx: g.tx, ty: g.ty });
+  const decor = (o.decor || []).map(d => ({ ...d }));
+  for (const d of decor) s.blocked[I(d.x, d.y)] = 1;
+  const pre = s.blocked.slice(), bd = o.border ?? 2;
   const crowded = (x, y) => {
     for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
       const nx = x + dx, ny = y + dy; if (!s.in(nx, ny)) continue;
@@ -384,56 +392,151 @@ const campus = newScene('campus', { name:'기계공학과 광장', sub:'정문 �
     }
     return false;
   };
-  const TREES = [];
+  const trees = [];
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    if (s.ground[I(x, y)] !== 'g' || s.blocked[I(x, y)]) continue;
-    const border = x < 2 || y < 2 || x > 25 || y > 25;
-    if (border ? rnd() < 0.9 : (!crowded(x, y) && rnd() < 0.14)) {
-      TREES.push({ kind:'tree', x, y, pine: rnd() < 0.3, s: 0.85 + rnd() * 0.35 }); s.blocked[I(x, y)] = 1;
+    if (s.ground[I(x, y)] !== 'g' || s.blocked[I(x, y)] || s.trig.has(I(x, y))) continue;
+    const border = x < bd || y < bd || x > W - 1 - bd || y > H - 1 - bd;
+    if (border ? rnd() < 0.9 : (!crowded(x, y) && rnd() < (o.trees ?? 0.12))) {
+      trees.push({ kind:'tree', x, y, pine: rnd() < (o.pine ?? 0.3), s: 0.85 + rnd() * 0.35 }); s.blocked[I(x, y)] = 1;
     }
   }
   for (let y = -5; y < H + 4; y++) for (let x = -5; x < W + 4; x++) {
     if (s.in(x, y)) continue;
-    if (rnd() < 0.75) TREES.push({ kind:'tree', x, y, pine: rnd() < 0.35, s: 0.85 + rnd() * 0.4 });
+    if (rnd() < 0.72) trees.push({ kind:'tree', x, y, pine: rnd() < 0.35, s: 0.85 + rnd() * 0.4 });
   }
-  s.static = [...TREES, ...DECOR, ...BIG.map(b => ({ ...b, big: true }))];
-  s.spawn = { x: 13, y: 22 };
-})(campus);
+  s.static = [...trees, ...decor, ...big];
+  s.spawn = o.spawn;
+  return s;
+}
 
-/* ---------- 건물 내부 ---------- */
+/* ---------- 중앙 광장 ---------- */
+const HUB_RETURN = { z_auto:[5,3], z_mech:[14,3], z_semi:[23,3], z_arch:[3,5], z_air:[3,23] };
+const ZONE_ENTRY = [11, 20];
+buildOutdoor('hub', {
+  name:'중앙 광장', sub:'모든 과가 모이는 곳 · 둘레 문으로 학과 구역 이동', W:30, H:30, zone:'hub', track:'campus', trees:0.1,
+  paint: [ [14,0,15,29,'p'], [1,14,28,15,'p'], [5,0,6,13,'p'], [23,0,24,13,'p'], [0,5,13,6,'p'], [0,23,13,24,'p'],
+    [8,18,9,18,'p'], [16,21,22,21,'p'], [16,27,22,27,'p'], [10,10,19,19,'z'] ],
+  buildings: [
+    { id:'arcade', name:'오락실', x:4, y:17, w:4, h:3, H:54, style:'arcade', door:{face:'R',tx:8,ty:18}, desc:'미니게임 4종 · 주간 랭킹 · 학과 대항전.' },
+    { id:'food', name:'학식당', x:20, y:17, w:5, h:4, H:56, style:'cafe', door:{face:'L',tx:22,ty:21}, desc:'오늘 학식 보고 밥친구 구하는 곳.' },
+    { id:'lib', name:'도서관', x:20, y:23, w:6, h:4, H:88, style:'lib', door:{face:'L',tx:22,ty:27}, desc:'조용히 같이 공부하는 곳.' },
+  ],
+  big: [
+    { id:'screen', kind:'screen', name:'대형 스크린', x:13, y:10, w:4, h:1 },
+    { id:'fountain', kind:'fountain', x:14, y:14, w:2, h:2 },
+  ],
+  gates: [
+    { x:4, y:1, w:4, h:1, label:'미래자동차', to:'z_auto', tx:ZONE_ENTRY[0], ty:ZONE_ENTRY[1], extra:[[5,0],[6,0]] },
+    { x:13, y:1, w:4, h:1, label:'기계공학과', to:'z_mech', tx:ZONE_ENTRY[0], ty:ZONE_ENTRY[1], extra:[[14,0],[15,0]] },
+    { x:22, y:1, w:4, h:1, label:'반도체', to:'z_semi', tx:ZONE_ENTRY[0], ty:ZONE_ENTRY[1], extra:[[23,0],[24,0]] },
+    { x:1, y:4, w:1, h:4, label:'건축', to:'z_arch', tx:ZONE_ENTRY[0], ty:ZONE_ENTRY[1], extra:[[0,5],[0,6]] },
+    { x:1, y:22, w:1, h:4, label:'항공·호텔', to:'z_air', tx:ZONE_ENTRY[0], ty:ZONE_ENTRY[1], extra:[[0,23],[0,24]] },
+    { x:13, y:27, w:4, h:1, label:'캠퍼스 광장' },
+  ],
+  decor: [ { kind:'notice', x:18, y:11 }, { kind:'bench', x:11, y:18 }, { kind:'bench', x:18, y:18 },
+    { kind:'lamp', x:10, y:11 }, { kind:'lamp', x:19, y:13 }, { kind:'lamp', x:10, y:19 }, { kind:'lamp', x:19, y:19 },
+    { kind:'lamp', x:13, y:22 }, { kind:'lamp', x:16, y:24 }, { kind:'lamp', x:7, y:13 }, { kind:'lamp', x:22, y:16 } ],
+  spawn: { x:14, y:24 },
+});
+
+/* ---------- 학과 구역 (24×24 공통 틀) ---------- */
+const SLOT = {
+  TL: { x:3, y:3, w:6, h:5, door:{face:'L',tx:6,ty:8} },
+  TR: { x:15, y:3, w:6, h:5, door:{face:'L',tx:17,ty:8} },
+  BL: { x:3, y:15, w:5, h:4, door:{face:'R',tx:8,ty:16} },
+  BR: { x:16, y:15, w:5, h:4, door:{face:'L',tx:18,ty:19} },
+};
+const ZONE_PAINT = [ [11,2,12,23,'p'], [2,11,21,12,'p'], [6,8,6,10,'p'], [17,8,17,10,'p'], [8,16,10,16,'p'], [13,19,18,19,'p'], [9,9,14,14,'z'] ];
+function makeZone(id, o) {
+  const back = HUB_RETURN[id];
+  return buildOutdoor(id, Object.assign({ W:24, H:24, spawn:{ x:ZONE_ENTRY[0], y:ZONE_ENTRY[1] } }, o, {
+    paint: ZONE_PAINT.concat(o.paint || []),
+    buildings: o.buildings.map(b => Object.assign({}, SLOT[b.slot], b)),
+    gates: [{ x:10, y:22, w:4, h:1, label:'중앙 광장', to:'hub', tx:back[0], ty:back[1], extra:[[11,23],[12,23]] }],
+    decor: [ { kind:'lamp', x:9, y:9 }, { kind:'lamp', x:14, y:14 }, { kind:'lamp', x:10, y:20 }, { kind:'lamp', x:13, y:20 } ].concat(o.decor || []),
+    exitTo: { to:'hub', tx:back[0], ty:back[1] },
+  }));
+}
+const FC = (x, y, w, h, H, pal, fk, extra) => Object.assign({ x, y, w, h, H, c: PAL[pal], fk, kind:'furn', big: true }, extra || {});
 const PAL = {
   wood:['#d2a46c','#b0804f','#8f643c'], dark:['#7a5538','#5f402a','#4a3220'], white:['#f7f7f4','#dcdcd8','#c1c1bd'],
   grey:['#c3c8d0','#9aa1ad','#7e8591'], green:['#74c483','#56a465','#438852'], red:['#e66356','#c4473c','#a03a31'],
   blue:['#6f9fea','#5180cb','#3f66a8'], cream:['#f2e9d6','#dacdb3','#c1b496'], yellow:['#f4c552','#d4a031','#b5861f'],
-  navy:['#4a5878','#36425e','#2a344b'],
+  navy:['#4a5878','#36425e','#2a344b'], teal:['#5fd0c0','#3fb0a0','#2d8f82'], black:['#3a3d45','#2a2c33','#1e2026'],
 };
-const F = (x, y, w, h, H, pal, kind = 'box', label = '') => ({ x, y, w, h, H, c: PAL[pal], fk: kind, label, kind:'furn', big: true });
+makeZone('z_mech', { name:'기계공학과 구역', sub:'실습동 · 기계관 · 과방 · 기도실', track:'work',
+  buildings: [
+    { slot:'TL', id:'main', name:'기계관', H:150, style:'glass', desc:'강의실. 과목 질문하고 답해주는 곳.' },
+    { slot:'TR', id:'lab', name:'실습동', H:72, style:'brick', desc:'CNC·선반·밀링 있는 실습실.' },
+    { slot:'BL', id:'club', name:'기계과 과방', H:46, style:'house', desc:'기계공학과 라운지.' },
+    { slot:'BR', id:'pray', name:'벼락치기 기도실', H:42, style:'pagoda', desc:'시험기간 한정. 같이 A+ 기원하는 곳.' },
+  ],
+  big: [ { kind:'statue', variant:'gear', x:11, y:9, w:2, h:2 } ],
+});
+makeZone('z_auto', { name:'미래자동차 구역', sub:'정비 공장 · 전기차 연구소 · 모터쇼', track:'upbeat',
+  paint: [ [9,9,14,14,'a'] ],
+  buildings: [
+    { slot:'TL', id:'garage', name:'정비 공장', H:70, style:'garage', desc:'리프트에 차 올려놓고 정비하는 실습장.' },
+    { slot:'TR', id:'ev', name:'전기차 연구소', H:110, style:'ev', desc:'배터리랑 충전기 실습하는 연구소.' },
+    { slot:'BL', id:'club_auto', name:'자동차과 과방', H:46, style:'house', colors:{ L:'#e66356', R:'#c4473c' }, desc:'미래자동차공학부 라운지.' },
+    { slot:'BR', id:'showroom', name:'모터쇼 전시관', H:64, style:'showroom', desc:'멋진 차 구경하는 전시관.' },
+  ],
+  big: [ FC(9,9,2,1,0,'red','car'), FC(13,9,2,1,0,'blue','car'), FC(9,14,2,1,0,'yellow','car'), FC(13,14,2,1,0,'white','car'),
+    FC(10,11,1,1,44,'teal','charger'), FC(13,11,1,1,44,'teal','charger') ],
+});
+makeZone('z_semi', { name:'반도체 구역', sub:'클린룸 · 장비실 · 칩 설계실', track:'chill',
+  paint: [ [9,9,14,14,'c'] ],
+  buildings: [
+    { slot:'TL', id:'cleanroom', name:'클린룸', H:80, style:'clean', desc:'방진복 입고 들어가는 반도체 공정실.' },
+    { slot:'TR', id:'fab', name:'반도체 장비실', H:76, style:'equip', desc:'공정 장비 모여 있는 곳.' },
+    { slot:'BL', id:'club_semi', name:'반도체과 과방', H:46, style:'house', colors:{ L:'#5fd0c0', R:'#3fb0a0' }, desc:'반도체학과 라운지.' },
+    { slot:'BR', id:'chiplab', name:'칩 설계실', H:70, style:'ev', colors:{ L:'#6f9fea', R:'#5180cb', T:'#dbe7fc' }, desc:'회로 설계 공부하는 곳.' },
+  ],
+  big: [ { kind:'statue', variant:'wafer', x:11, y:9, w:2, h:2 } ],
+});
+makeZone('z_air', { name:'항공·호텔 구역', sub:'실습 호텔 · 기내 실습실 · 조리 실습실', track:'chill',
+  paint: [ [8,8,15,15,'c'] ],
+  buildings: [
+    { slot:'TL', id:'hotel', name:'실습 호텔', H:150, style:'hotel', desc:'호텔 로비. 프런트 실습하는 곳.' },
+    { slot:'TR', id:'cabin', name:'기내 실습실', H:72, style:'hangar', desc:'비행기 좌석이 그대로 있는 기내 실습실.' },
+    { slot:'BL', id:'kitchen', name:'조리 실습실', H:56, style:'kitchen', desc:'호텔조리과 주방 실습실.' },
+    { slot:'BR', id:'club_air', name:'과방 · 카페', H:50, style:'cafe', colors:{ L:'#f2a93b', R:'#d48a24' }, desc:'항공호텔관광과 · 호텔조리과 라운지.' },
+  ],
+  big: [ { kind:'plane', x:9, y:9, w:5, h:2 } ],
+});
+makeZone('z_arch', { name:'건축 구역', sub:'설계실 · 모형 전시관 · 공사 현장', track:'campus',
+  paint: [ [16,15,21,19,'d'] ],
+  buildings: [
+    { slot:'TL', id:'studio', name:'설계실', H:80, style:'studio', desc:'제도판 놓고 도면 그리는 곳.' },
+    { slot:'TR', id:'gallery', name:'모형 전시관', H:64, style:'gallery', desc:'건축 모형 전시하는 곳.' },
+    { slot:'BL', id:'club_arch', name:'건축과 과방', H:46, style:'house', colors:{ L:'#9a8a6a', R:'#7d6f53' }, desc:'건축과 라운지.' },
+  ],
+  big: [ { kind:'frame', x:16, y:15, w:3, h:3 }, { kind:'crane', x:20, y:16, w:1, h:1 } ],
+  decor: [ { kind:'cone', x:16, y:19 }, { kind:'cone', x:19, y:19 }, { kind:'cone', x:15, y:15 }, { kind:'bench', x:10, y:14 }, { kind:'bench', x:13, y:9 } ],
+});
+
+/* ---------- 건물 내부 ---------- */
+const F = (x, y, w, h, H, pal, kind = 'box', label = '', extra) => Object.assign({ x, y, w, h, H, c: PAL[pal], fk: kind, label, kind:'furn', big: true }, extra || {});
 const plant = (x, y) => ({ kind:'plant', x, y });
+const clubRoom = (sub, color, text, track = 'upbeat') => ({ W:10, H:8, track, sub,
+  floor:(x, y) => (x + y) % 2 ? '#a3bcd4' : '#98b2cb', wall:'#f3ebda', wall2:'#e0d5bf',
+  items:[ F(1,1,4,1,34,'green','box'), F(1,2,4,1,14,'green','box'), F(2,4,2,1,16,'wood','desk'), F(8,1,1,1,64,'white','fridge'), plant(1,6), plant(8,6) ],
+  wall_items:[ { wall:'back', at:5, len:2, v0:34, h:32, kind:'tv', text:'롤 한판?' }, { wall:'side', at:2, len:2, v0:28, h:44, kind:'poster', color, text } ] });
 const ROOMS = {
   main: { W:14, H:10, track:'chill', sub:'강의실 · 질문하고 답해주는 곳',
     floor:(x, y) => x % 2 ? '#d0af80' : '#c8a677', wall:'#efeae0', wall2:'#dcd5c6',
-    items:[ F(5,1,4,1,30,'dark','box'),
-      ...[4,6].flatMap(y => [2,5,8,11].map(x => F(x,y,2,1,24,'wood','desk'))), plant(13,1), plant(1,8) ],
+    items:[ F(5,1,4,1,30,'dark','box'), ...[4,6].flatMap(y => [2,5,8,11].map(x => F(x,y,2,1,24,'wood','desk'))), plant(13,1), plant(1,8) ],
     wall_items:[ { wall:'back', at:3, len:7, v0:26, h:50, kind:'board', lines:['오늘의 공식', 'σ = F / A', '질문은 채팅으로!'] },
-      { wall:'side', at:2, len:2, v0:30, h:38, kind:'window' }, { wall:'side', at:6, len:2, v0:30, h:38, kind:'window' },
-      { wall:'back', at:11, len:1, v0:58, h:26, kind:'clock' } ] },
-  club: { W:10, H:8, track:'upbeat', sub:'기계공학과 라운지',
-    floor:(x, y) => (x + y) % 2 ? '#a3bcd4' : '#98b2cb', wall:'#f3ebda', wall2:'#e0d5bf',
-    items:[ F(1,1,4,1,34,'green','box'), F(1,2,4,1,14,'green','box'), F(2,4,2,1,16,'wood','desk'),
-      F(8,1,1,1,64,'white','fridge'), plant(1,6), plant(8,6) ],
-    wall_items:[ { wall:'back', at:5, len:2, v0:34, h:32, kind:'tv', text:'롤 한판?' },
-      { wall:'side', at:2, len:2, v0:28, h:44, kind:'poster', color:'#2f7cf6', text:'기계과 화이팅' } ] },
+      { wall:'side', at:2, len:2, v0:30, h:38, kind:'window' }, { wall:'side', at:6, len:2, v0:30, h:38, kind:'window' }, { wall:'back', at:11, len:1, v0:58, h:26, kind:'clock' } ] },
+  club: clubRoom('기계공학과 라운지', '#2f7cf6', '기계과 화이팅'),
   pray: { W:10, H:8, track:'pray', sub:'시험기간 한정 · A+ 기원',
     floor:(x, y) => x % 2 ? '#ddcc8f' : '#d3c284', wall:'#f0e4c9', wall2:'#ddcda8',
     items:[ F(4,1,2,1,26,'red','altar'), ...[3,5].flatMap(y => [2,4,6].map(x => F(x,y,1,1,6,'red','box'))) ],
-    wall_items:[ { wall:'back', at:3, len:4, v0:42, h:30, kind:'banner', text:'A+ 기원' },
-      { wall:'side', at:2, len:3, v0:36, h:28, kind:'banner', text:'재수강 금지' } ] },
+    wall_items:[ { wall:'back', at:3, len:4, v0:42, h:30, kind:'banner', text:'A+ 기원' }, { wall:'side', at:2, len:3, v0:36, h:28, kind:'banner', text:'재수강 금지' } ] },
   lab: { W:14, H:10, track:'work', sub:'CNC · 선반 · 밀링 실습실',
     floor:(x, y) => y === 6 ? '#dcbc42' : (x + y) % 2 ? '#aeb2b8' : '#a6aab0', wall:'#dcdfe4', wall2:'#c6cad1',
-    items:[ F(2,1,3,2,64,'grey','cnc','CNC'), F(7,1,4,1,36,'blue','lathe','선반'), F(2,4,2,2,46,'navy','cnc','밀링'),
-      F(10,4,3,1,28,'wood','desk'), F(12,1,1,1,40,'red','box') ],
-    wall_items:[ { wall:'side', at:3, len:4, v0:24, h:46, kind:'tools' },
-      { wall:'back', at:11, len:2, v0:52, h:22, kind:'sign', text:'안전제일', color:'#2f8a4a' } ] },
+    items:[ F(2,1,3,2,64,'grey','cnc','CNC'), F(7,1,4,1,36,'blue','lathe','선반'), F(2,4,2,2,46,'navy','cnc','밀링'), F(10,4,3,1,28,'wood','desk'), F(12,1,1,1,40,'red','box') ],
+    wall_items:[ { wall:'side', at:3, len:4, v0:24, h:46, kind:'tools' }, { wall:'back', at:11, len:2, v0:52, h:22, kind:'sign', text:'안전제일', color:'#2f8a4a' } ] },
   food: { W:14, H:10, track:'upbeat', sub:'오늘 학식 · 밥친구 구하기',
     floor:(x, y) => (x + y) % 2 ? '#f1f1ee' : '#dfe7ea', wall:'#fff6e6', wall2:'#f0e2c8',
     items:[ F(2,1,8,1,30,'cream','counter'), ...[4,6].flatMap(y => [2,6,10].map(x => F(x,y,2,1,20,'white','desk'))), plant(12,1), plant(1,8) ],
@@ -445,28 +548,83 @@ const ROOMS = {
     wall_items:[ { wall:'side', at:6, len:2, v0:40, h:30, kind:'neon', text:'ARCADE' } ] },
   lib: { W:14, H:10, track:'chill', sub:'조용히 같이 공부하는 곳',
     floor:(x, y) => (x + y) % 2 ? '#629271' : '#5a8968', wall:'#ebe4d6', wall2:'#d8cfbd',
-    items:[ F(1,1,3,1,70,'dark','shelf'), F(5,1,3,1,70,'dark','shelf'), F(10,1,3,1,70,'dark','shelf'),
-      F(1,3,1,3,70,'dark','shelf'), F(4,4,3,2,22,'wood','desk'), F(9,4,3,2,22,'wood','desk'), plant(12,8) ],
+    items:[ F(1,1,3,1,70,'dark','shelf'), F(5,1,3,1,70,'dark','shelf'), F(10,1,3,1,70,'dark','shelf'), F(1,3,1,3,70,'dark','shelf'), F(4,4,3,2,22,'wood','desk'), F(9,4,3,2,22,'wood','desk'), plant(12,8) ],
     wall_items:[ { wall:'back', at:8, len:2, v0:74, h:18, kind:'sign', text:'정숙', color:'#1d2030' } ] },
+  garage: { W:14, H:10, track:'work', sub:'정비 공장 · 리프트 실습',
+    floor:(x, y) => (x === 5 || x === 6) ? '#d9b93f' : (x + y) % 2 ? '#9ea3ab' : '#979ca4', wall:'#d5d9df', wall2:'#bfc4cc',
+    items:[ F(1,2,3,2,0,'red','car','', { lift:30 }), F(8,2,3,2,0,'blue','car'), F(12,1,1,2,34,'grey','box'), F(1,6,1,1,22,'black','box'), F(2,6,1,1,22,'black','box'), plant(12,8) ],
+    wall_items:[ { wall:'side', at:4, len:4, v0:26, h:46, kind:'tools' }, { wall:'back', at:5, len:3, v0:56, h:24, kind:'sign', text:'정비 공장', color:'#e2453c' } ] },
+  ev: { W:14, H:10, track:'chill', sub:'전기차 · 배터리 · 충전 실습',
+    floor:(x, y) => (x + y) % 2 ? '#eef6f5' : '#e2efed', wall:'#f2f7f7', wall2:'#dde9e8',
+    items:[ F(3,3,3,2,0,'white','car'), F(9,1,3,1,34,'green','battery','배터리'), F(1,1,1,1,56,'teal','charger'), F(9,5,3,1,24,'white','desk'), plant(12,8) ],
+    wall_items:[ { wall:'back', at:5, len:3, v0:44, h:40, kind:'board', lines:['배터리 팩 실습', '고전압 주의 ⚡', '질문 환영'] }, { wall:'side', at:3, len:2, v0:30, h:38, kind:'window' } ] },
+  club_auto: clubRoom('미래자동차공학부 라운지', '#e2453c', '자동차과 화이팅'),
+  showroom: { W:14, H:10, track:'upbeat', sub:'모터쇼 전시관',
+    floor:(x, y) => (x + y) % 2 ? '#2f323a' : '#292c33', wall:'#24262c', wall2:'#1d1f24',
+    items:[ F(2,2,3,2,0,'yellow','car'), F(8,2,3,2,0,'navy','car'), F(9,6,3,2,0,'red','car'), plant(1,8), plant(12,1) ],
+    wall_items:[ { wall:'side', at:4, len:3, v0:40, h:30, kind:'neon', text:'MOTOR SHOW' } ] },
+  cleanroom: { W:14, H:10, track:'chill', sub:'클린룸 · 방진복 필수',
+    floor:(x, y) => (x + y) % 2 ? '#f5f7f9' : '#eceff3', wall:'#fff6c8', wall2:'#f2e8b2',
+    items:[ F(2,1,3,1,56,'white','cnc','노광기'), F(7,1,3,1,56,'white','cnc','식각기'), F(2,4,2,2,50,'grey','cnc','증착기'), F(10,4,2,2,40,'grey','wafer'), plant(12,8) ],
+    wall_items:[ { wall:'back', at:11, len:2, v0:50, h:22, kind:'sign', text:'방진복 착용', color:'#2f7cf6' }, { wall:'side', at:3, len:3, v0:40, h:24, kind:'sign', text:'옐로우룸', color:'#d4a031' } ] },
+  fab: { W:14, H:10, track:'work', sub:'반도체 공정 장비실',
+    floor:(x, y) => (x + y) % 2 ? '#c8ced6' : '#bfc6cf', wall:'#dfe4ea', wall2:'#cad1d9',
+    items:[ F(2,1,2,2,60,'navy','cnc','CMP'), F(6,1,2,2,60,'navy','cnc','이온주입'), F(10,1,2,2,60,'navy','cnc','검사'), F(5,5,4,1,24,'white','desk'), F(1,5,1,2,40,'grey','wafer') ],
+    wall_items:[ { wall:'side', at:4, len:3, v0:44, h:24, kind:'sign', text:'공정 장비실', color:'#36425e' } ] },
+  club_semi: clubRoom('반도체학과 라운지', '#2bb3c9', '반도체 화이팅'),
+  chiplab: { W:14, H:10, track:'chill', sub:'칩 설계 · 회로 공부',
+    floor:(x, y) => (x + y) % 2 ? '#8fa6c8' : '#879ec0', wall:'#eef1f6', wall2:'#dce2ec',
+    items:[ ...[2,5,8,11].map(x => F(x,4,2,1,24,'white','desk')), ...[2,5,8,11].map(x => F(x,6,2,1,24,'white','desk')), plant(13,1) ],
+    wall_items:[ { wall:'back', at:3, len:7, v0:26, h:50, kind:'board', lines:['칩 설계', '회로도 → 레이아웃', '질문은 채팅으로!'] } ] },
+  hotel: { W:14, H:10, track:'chill', sub:'실습 호텔 로비 · 프런트',
+    floor:(x, y) => (x + y) % 2 ? '#efe7d6' : '#e4dbc7', wall:'#f6eedc', wall2:'#e6dcc4',
+    items:[ F(4,1,5,1,30,'dark','counter'), F(2,5,3,1,18,'red','box'), F(9,5,3,1,18,'red','box'), F(6,5,2,1,14,'wood','desk'), plant(1,1), plant(12,1), plant(1,8), plant(12,8) ],
+    wall_items:[ { wall:'back', at:4, len:5, v0:52, h:24, kind:'sign', text:'RECEPTION', color:'#b9975b' }, { wall:'side', at:3, len:4, v0:40, h:26, kind:'banner', text:'WELCOME' } ] },
+  cabin: { W:14, H:8, track:'chill', sub:'기내 실습실 · 좌석에서 승무원 실습',
+    floor:(x, y) => y === 3 ? '#3f66a8' : (x + y) % 2 ? '#d5d9e0' : '#ccd1d9', wall:'#f4f5f8', wall2:'#e2e5eb',
+    items:[ ...[1,2,3,4,9,10,11,12].flatMap(x => [F(x,1,1,1,0,'blue','seat'), F(x,2,1,1,0,'blue','seat'), F(x,4,1,1,0,'blue','seat'), F(x,5,1,1,0,'blue','seat')]) ],
+    wall_items:[ ...[2,4,6,8,10].map(at => ({ wall:'back', at, len:1, v0:40, h:22, kind:'window' })), { wall:'side', at:2, len:3, v0:46, h:22, kind:'sign', text:'기내 실습', color:'#3f66a8' } ] },
+  kitchen: { W:14, H:10, track:'upbeat', sub:'호텔조리과 · 조리 실습실',
+    floor:(x, y) => (x + y) % 2 ? '#f5f5f2' : '#e8c9c4', wall:'#fafafa', wall2:'#e8e8e8',
+    items:[ F(2,1,3,1,30,'grey','stove'), F(7,1,3,1,30,'grey','stove'), F(12,1,1,1,64,'white','fridge'), F(2,4,4,1,26,'grey','box'), F(8,4,4,1,26,'grey','box'), plant(1,8) ],
+    wall_items:[ { wall:'back', at:10, len:2, v0:50, h:22, kind:'sign', text:'위생 제일', color:'#2f8a4a' }, { wall:'side', at:3, len:4, v0:40, h:44, kind:'menu', lines:['오늘의 실습', '파스타 · 스테이크'] } ] },
+  club_air: { W:10, H:8, track:'chill', sub:'항공호텔관광과 · 호텔조리과 라운지',
+    floor:(x, y) => (x + y) % 2 ? '#d9c3a3' : '#cfb796', wall:'#f6ecdc', wall2:'#e7d8c0',
+    items:[ F(1,1,5,1,30,'wood','counter'), F(2,4,1,1,18,'white','desk'), F(5,4,1,1,18,'white','desk'), F(8,1,1,1,64,'white','fridge'), plant(8,6) ],
+    wall_items:[ { wall:'side', at:2, len:3, v0:28, h:44, kind:'poster', color:'#f2a93b', text:'항공호텔 · 호텔조리' }, { wall:'back', at:6, len:2, v0:40, h:26, kind:'sign', text:'CAFE', color:'#7a5538' } ] },
+  studio: { W:14, H:10, track:'chill', sub:'설계실 · 제도판에서 도면 작업',
+    floor:(x, y) => x % 2 ? '#d6c8ae' : '#cec0a5', wall:'#f2ede4', wall2:'#e2dbcf',
+    items:[ ...[2,5,8].flatMap(x => [F(x,4,2,1,26,'white','drafting'), F(x,6,2,1,26,'white','drafting')]), F(11,1,2,1,30,'wood','pedestal'), plant(12,8) ],
+    wall_items:[ { wall:'back', at:2, len:7, v0:26, h:50, kind:'board', lines:['건축 설계', '평면도 · 입면도 · 단면도', '모델링 질문 환영'] } ] },
+  gallery: { W:14, H:10, track:'chill', sub:'모형 전시관',
+    floor:(x, y) => (x + y) % 2 ? '#34363d' : '#2d2f35', wall:'#3a3c43', wall2:'#303238',
+    items:[ ...[[2,2],[5,2],[8,2],[11,2],[3,5],[7,5],[10,6]].map(([x, y]) => F(x,y,1,1,26,'white','pedestal')) ],
+    wall_items:[ { wall:'side', at:4, len:3, v0:40, h:28, kind:'neon', text:'GALLERY' } ] },
+  club_arch: clubRoom('건축과 라운지', '#7d6f53', '건축과 화이팅'),
 };
-for (const b of BUILDINGS) {
-  const d = ROOMS[b.id];
-  const s = newScene(b.id, { name: b.name, sub: d.sub, W: d.W, H: d.H, indoor: true, wallH: 96, track: d.track, bg: '#14161d',
-    floorFn: d.floor, wallC: d.wall, wall2C: d.wall2, wallItems: d.wall_items });
-  for (const it of d.items) {
-    if (it.kind === 'plant') { s.blocked[s.I(it.x, it.y)] = 1; s.static.push(it); continue; }
-    for (let y = it.y; y < it.y + it.h; y++) for (let x = it.x; x < it.x + it.w; x++) s.blocked[s.I(x, y)] = 1;
-    s.static.push(it);
+for (const zs of Object.values(SCENES).slice()) {
+  if (zs.indoor) continue;
+  for (const b of zs.static.filter(e => e.kind === 'building')) {
+    const d = ROOMS[b.id]; if (!d) continue;
+    const s = newScene(b.id, { name: b.name, sub: d.sub, W: d.W, H: d.H, indoor: true, wallH: 96, track: d.track, bg: '#14161d',
+      floorFn: d.floor, wallC: d.wall, wall2C: d.wall2, wallItems: d.wall_items, zone: zs.zone, parent: zs.id });
+    for (const it of d.items) {
+      if (it.kind === 'plant') { s.blocked[s.I(it.x, it.y)] = 1; s.static.push(it); continue; }
+      for (let y = it.y; y < it.y + it.h; y++) for (let x = it.x; x < it.x + it.w; x++) s.blocked[s.I(x, y)] = 1;
+      s.static.push(it);
+    }
+    const ex = Math.floor(d.W / 2), ey = d.H - 1;
+    s.exit = { x: ex, y: ey };
+    s.exitTo = { to: zs.id, tx: b.door.tx, ty: b.door.ty };
+    for (let k = -1; k <= 1; k++) s.trig.set(s.I(ex + k, ey), s.exitTo);
+    s.spawn = { x: ex, y: ey - 1 };
   }
-  const ex = Math.floor(d.W / 2), ey = d.H - 1;
-  s.exit = { x: ex, y: ey };
-  for (let k = -1; k <= 1; k++) s.trig.set(s.I(ex + k, ey), { to: 'campus', tx: b.door.tx, ty: b.door.ty });
-  s.spawn = { x: ex, y: ey - 1 };
 }
 for (const s of Object.values(SCENES)) {
   for (const e of s.static) e.d = e.big ? 0 : e.x + e.y + 1;
   if (s.indoor) s.screen = { cx: (s.W - s.H) * 16, by: -s.wallH - 12, w: 320, h: 180 };
-  else { const c = iso(14, 9.5); s.screen = { cx: c.x, by: c.y - 40, w: 256, h: 144 }; }
+  else if (s.id === 'hub') { const c = iso(15, 10.5); s.screen = { cx: c.x, by: c.y - 40, w: 256, h: 144 }; }
+  else s.screen = null;
 }
 
 /* ================== 바닥/벽 미리 그리기 ================== */
@@ -502,15 +660,20 @@ function ensureGround(s) {
       let col, line;
       if (t === 'g') { col = sh < 0.5 ? '#6cc35a' : '#67bc55'; line = col; }
       else if (t === 'p') { col = '#e9e0ca'; line = '#d9cdb2'; }
+      else if (t === 'a') { col = sh < 0.5 ? '#4d525b' : '#51565f'; line = '#454a52'; }
+      else if (t === 'c') { col = (x + y) % 2 ? '#cfd4db' : '#c7ccd4'; line = '#b9bfc8'; }
+      else if (t === 'd') { col = sh < 0.5 ? '#b8895a' : '#b08254'; line = col; }
       else { col = (x + y) % 2 ? '#dcd7cb' : '#d0cabc'; line = '#c3bcab'; }
       tilePath(g, x, y); g.fillStyle = col; g.fill(); g.strokeStyle = line; g.lineWidth = 1; g.stroke();
+      if (t === 'a' && (x + y) % 3 === 0) { const m = iso(x + 0.5, y + 0.5); g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(m.x - 6, m.y - 1, 12, 2); }
+      if (t === 'd' && sh > 0.5) { const m = iso(x + 0.5, y + 0.5); g.fillStyle = '#8f6a43'; g.fillRect(m.x - 8, m.y, 3, 2); g.fillRect(m.x + 5, m.y - 3, 3, 2); }
       if (t === 'g' && sh > 0.62) {
         const m = iso(x + 0.5, y + 0.5); g.fillStyle = '#56a746';
         g.fillRect(m.x - 9, m.y - 2, 2, 3); g.fillRect(m.x - 7, m.y - 3, 2, 4); g.fillRect(m.x + 6, m.y + 3, 2, 3); g.fillRect(m.x + 8, m.y + 2, 2, 4);
       }
     }
     // 건물 문 앞 발판
-    for (const b of BUILDINGS) { tilePath(g, b.door.tx, b.door.ty, 0.62); g.fillStyle = '#b5523f'; g.fill(); }
+    for (const d of s.doorMats || []) { tilePath(g, d.tx, d.ty, 0.62); g.fillStyle = '#b5523f'; g.fill(); }
   } else {
     dpoly(g, [L, S, dn(S, 12), dn(L, 12)], '#3b302a'); dpoly(g, [S, E, dn(E, 12), dn(S, 12)], '#2c241f');
     for (let y = 0; y < s.H; y++) for (let x = 0; x < s.W; x++) {
@@ -645,10 +808,10 @@ function drawSprite(c, cx, footY, px, hair, shirt, o = {}) {
 
 /* ================== 캐릭터/이동 ================== */
 const chars = {};
-let me = null, scene = campus, armed = true;
+let me = null, scene = SCENES.hub, armed = true;
 const SPEED = 3.6;
 function makeChar(id, o) {
-  return chars[id] = Object.assign({ id, name:'익명', g:'m', hair:HAIRS[0], shirt:SHIRTS[0], x:0, y:0, scene:'campus',
+  return chars[id] = Object.assign({ id, name:'익명', g:'m', hair:HAIRS[0], shirt:SHIRTS[0], x:0, y:0, scene:'hub',
     path: [], moving: false, pose: null, poseT: 0, bubble: null, reacts: [], net: null }, o);
 }
 const tileOf = c => ({ x: Math.floor(c.x), y: Math.floor(c.y) });
@@ -738,7 +901,7 @@ const net = { mode:'demo', send() {}, track() {} };
 let trackTimer = 0, lastPosSend = 0, wasMoving = false;
 function scheduleTrack() { clearTimeout(trackTimer); trackTimer = setTimeout(() => net.track(), 400); }
 const r2 = v => Math.round(v * 100) / 100;
-const myMeta = () => ({ id: me.id, name: me.name, g: me.g, hair: me.hair, shirt: me.shirt, x: r2(me.x), y: r2(me.y), s: me.scene, pose: me.pose, v: VIDEO, hat: me.hat, facc: me.facc, uid: me.uid, grade: me.grade });
+const myMeta = () => ({ id: me.id, name: me.name, g: me.g, hair: me.hair, shirt: me.shirt, x: r2(me.x), y: r2(me.y), s: me.scene, pose: me.pose, v: VIDEO, hat: me.hat, facc: me.facc, uid: me.uid, grade: me.grade, dept: me.dept });
 const sendPos = () => net.send('pos', { id: me.id, x: r2(me.x), y: r2(me.y), s: me.scene });
 function setStatus(txt, live) { const s = $('#status'); s.textContent = txt; s.classList.toggle('live', !!live); }
 function loadScript(src) { return new Promise((ok, no) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); }
@@ -746,113 +909,144 @@ const validScene = id => Object.prototype.hasOwnProperty.call(SCENES, id);
 
 async function initNet() {
   if (!CONFIG.SUPABASE_URL || !CONFIG.SUPABASE_ANON_KEY) { startDemo('데모 모드 · 서버 연결 전이라 봇이랑 노는 중'); return; }
-  setStatus('[v12] 서버 연결 중… (1/3 라이브러리)');
+  setStatus('[v13] 서버 연결 중… (1/3 라이브러리)');
   try { await loadScript('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'); }
-  catch (e) { startDemo('[v12] 라이브러리 로드 실패 · 데모 모드'); return; }
-  try { await connectSupabase(); } catch (e) { setStatus('[v12] 오류: ' + (e && e.message || e)); console.error(e); }
+  catch (e) { startDemo('[v13] 라이브러리 로드 실패 · 데모 모드'); return; }
+  try { await connectSupabase(); } catch (e) { setStatus('[v13] 오류: ' + (e && e.message || e)); console.error(e); }
 }
 async function connectSupabase() {
-  setStatus('[v12] 서버 연결 중… (2/3 채널)');
+  setStatus('[v13] 서버 연결 중…');
   const client = net.client = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY,
     { realtime: { params: { eventsPerSecond: 10 }, heartbeatIntervalMs: 15000, worker: true } });
-  let chn = null, subscribed = false, firstSync = true, retryT = 0, backoff = 1000, gen = 0, reconnects = 0;
-  const live = () => chn && subscribed;
-  function presenceSync() {
-    const state = chn.presenceState(), ids = new Set(Object.keys(state));
-    setStatus(`● 실시간 연결됨 · 서버 접속 ${ids.size}명` + (reconnects ? ` · 재연결 ${reconnects}회` : ''), true);
+  const LOBBY = net.lobby = new Map();
+  let zoneFirstSync = true;
+  function managed(getTopic, setup, onUp) {
+    const m = { chn: null, live: false, gen: 0, retry: 0, backoff: 1000, reconnects: 0 };
+    m.join = () => {
+      const my = ++m.gen; m.live = false;
+      m.chn = client.channel(getTopic(), { config: { presence: { key: me.id }, broadcast: { self: false } } });
+      setup(m.chn, () => my === m.gen);
+      m.chn.subscribe(async (st, err) => {
+        if (my !== m.gen) return;
+        if (st === 'SUBSCRIBED') { m.live = true; m.backoff = 1000; onUp(m.chn); refreshStatus(); }
+        else if (st === 'CLOSED' || st === 'CHANNEL_ERROR' || st === 'TIMED_OUT') {
+          m.live = false; m.reconnects++;
+          const msg = `재연결 중… (${m.reconnects}회 · ${st}${err ? ' · ' + (err.message || err) : ''})`;
+          setTimeout(() => { if (!m.live) setStatus(msg); }, 4000);
+          m.schedule(m.backoff === 1000 ? 300 : m.backoff); m.backoff = Math.min(m.backoff * 2, 15000);
+        }
+      });
+    };
+    m.schedule = d => {
+      if (m.retry) return;
+      m.retry = setTimeout(async () => { m.retry = 0; const old = m.chn; m.gen++; try { if (old) await client.removeChannel(old); } catch (e) {} m.join(); }, d);
+    };
+    m.rejoin = () => { clearTimeout(m.retry); m.retry = 0; m.live = false; m.schedule(0); };
+    return m;
+  }
+  function refreshStatus() {
+    if (lobby.live && zone.live) setStatus(`● 실시간 연결됨 · 전체 ${LOBBY.size + 1}명`, true);
+  }
+  const lobbyMeta = () => ({ id: me.id, uid: me.uid, name: me.name, dept: me.dept, grade: me.grade, zone: scene.zone, s: me.scene,
+    g: me.g, hair: me.hair, shirt: me.shirt, hat: me.hat, facc: me.facc });
+  const lobby = managed(() => CONFIG.ROOM + ':lobby', (ch, cur) => {
+    ch.on('presence', { event: 'sync' }, () => {
+      if (!cur()) return;
+      LOBBY.clear(); const st = ch.presenceState();
+      for (const k of Object.keys(st)) {
+        const m = st[k][0]; if (!m || k === me.id) continue;
+        LOBBY.set(k, { id: k, uid: typeof m.uid === 'string' ? m.uid.slice(0, 40) : k, name: clean(m.name || '익명').slice(0, 10),
+          dept: typeof m.dept === 'string' ? m.dept.slice(0, 8) : 'etc', grade: typeof m.grade === 'string' ? m.grade.slice(0, 4) : '',
+          zone: ZONE_LABEL[m.zone] ? m.zone : 'hub', s: validScene(m.s) ? m.s : 'hub' });
+      }
+      recountZones(); updateOnline(); refreshStatus();
+      if (!$('#dm').classList.contains('hidden') && !$('#dmList').classList.contains('hidden')) renderDMList();
+    });
+    ch.on('broadcast', { event: 'dm' }, ({ payload: p }) => receiveDM(p));
+  }, ch => { ch.track(lobbyMeta()).catch(() => {}); });
+  function zoneSync(ch) {
+    const state = ch.presenceState(), ids = new Set(Object.keys(state));
     for (const id of ids) {
       if (id === me.id) continue;
-      const m = state[id][0]; if (!m) continue;
-      const sc = validScene(m.s) ? m.s : 'campus';
+      const m = state[id][0]; if (!m || !validScene(m.s) || SCENES[m.s].zone !== scene.zone) continue;
       let c = chars[id];
       const info = { name: clean(m.name || '익명').slice(0, 10), g: m.g === 'f' ? 'f' : 'm', hair: m.hair, shirt: m.shirt,
         uid: typeof m.uid === 'string' ? m.uid.slice(0, 40) : id, grade: typeof m.grade === 'string' ? m.grade.slice(0, 4) : '',
+        dept: typeof m.dept === 'string' ? m.dept.slice(0, 8) : 'etc',
         hat: SHOP.some(i => i.id === m.hat && i.slot === 'hat') ? m.hat : null, facc: SHOP.some(i => i.id === m.facc && i.slot === 'facc') ? m.facc : null };
-      if (!c) { c = makeChar(id, { ...info, x: +m.x || 13.5, y: +m.y || 22.5, scene: sc }); if (!firstSync && sc === scene.id) sys(`${c.name}님이 들어왔어요`); }
+      if (!c) { c = makeChar(id, { ...info, x: +m.x || 11.5, y: +m.y || 20.5, scene: m.s }); if (!zoneFirstSync && m.s === scene.id) sys(`${c.name}님이 왔어요`); }
       else {
         Object.assign(c, info);
-        if (c.scene !== sc) { c.scene = sc; c.x = +m.x; c.y = +m.y; c.net = null; }
+        if (c.scene !== m.s) { c.scene = m.s; c.x = +m.x; c.y = +m.y; c.net = null; }
         else if (!c.net && Math.hypot(c.x - m.x, c.y - m.y) > 0.3) { c.x = +m.x; c.y = +m.y; }
       }
-      c.pose = POSE_SET.has(m.pose) ? m.pose : null;
+      c.pose = POSE_SET.has(m.pose) ? m.pose : null; c.missing = 0;
       if (m.v && typeof m.v === 'object') for (const k of Object.keys(m.v)) applyVideo(k, m.v[k], false);
     }
     const now = Date.now();
-    for (const id of ids) if (chars[id]) chars[id].missing = 0;
     for (const id of Object.keys(chars)) if (id !== me.id && !chars[id].bot && !ids.has(id) && !chars[id].missing) chars[id].missing = now;
-    firstSync = false; updateOnline();
+    zoneFirstSync = false; updateOnline();
   }
-  // 잠깐 끊겼다 붙는 사람은 바로 지우지 않고 10초 기다림
-  setInterval(() => {
-    const now = Date.now();
-    for (const id of Object.keys(chars)) {
-      const c = chars[id];
-      if (c.missing && now - c.missing > 10000 && live()) { if (c.scene === scene.id) sys(`${c.name}님이 나갔어요`); delete chars[id]; updateOnline(); }
-    }
-  }, 2000);
-  function join() {
-    const my = ++gen; subscribed = false;
-    chn = client.channel(CONFIG.ROOM, { config: { presence: { key: me.id }, broadcast: { self: false } } });
-    chn.on('presence', { event: 'sync' }, () => { if (my !== gen) return; try { presenceSync(); } catch (e) { console.error(e); } });
-    chn.on('broadcast', { event: 'pos' }, ({ payload: p }) => {
+  const zone = managed(() => CONFIG.ROOM + ':z:' + scene.zone, (ch, cur) => {
+    ch.on('presence', { event: 'sync' }, () => { if (cur()) try { zoneSync(ch); } catch (e) { console.error(e); } });
+    ch.on('broadcast', { event: 'pos' }, ({ payload: p }) => {
       const c = chars[p.id]; if (!c || !validScene(p.s)) return;
       const x = +p.x, y = +p.y; if (!isFinite(x) || !isFinite(y)) return;
       if (c.scene !== p.s) { c.scene = p.s; c.x = x; c.y = y; c.net = null; updateOnline(); return; }
       if (Math.hypot(c.x - x, c.y - y) > 3) { c.x = x; c.y = y; c.net = null; } else c.net = { x, y };
       c.pose = null;
     });
-    chn.on('broadcast', { event: 'chat' }, ({ payload: p }) => onChat(p));
-    chn.on('broadcast', { event: 'dm' }, ({ payload: p }) => receiveDM(p));
-    chn.on('broadcast', { event: 'react' }, ({ payload: p }) => { const c = chars[p.id]; if (c && REACT_SET.has(p.e)) addReact(c, p.e); });
-    chn.on('broadcast', { event: 'face' }, ({ payload: p }) => { const c = chars[p.id]; if (c && FACE_SET.has(p.f)) setFace(c, p.f); });
-    chn.on('broadcast', { event: 'video' }, ({ payload: p }) => applyVideo(p.s, p, true));
-    chn.on('broadcast', { event: 'score' }, ({ payload: p }) => {
+    ch.on('broadcast', { event: 'chat' }, ({ payload: p }) => onChat(p));
+    ch.on('broadcast', { event: 'react' }, ({ payload: p }) => { const c = chars[p.id]; if (c && REACT_SET.has(p.e)) addReact(c, p.e); });
+    ch.on('broadcast', { event: 'face' }, ({ payload: p }) => { const c = chars[p.id]; if (c && FACE_SET.has(p.f)) setFace(c, p.f); });
+    ch.on('broadcast', { event: 'video' }, ({ payload: p }) => applyVideo(p.s, p, true));
+    ch.on('broadcast', { event: 'score' }, ({ payload: p }) => {
       const c = chars[p.id], g = GAMES[p.game]; if (!c || !g || c.scene !== scene.id) return;
       const sc = Math.max(0, Math.min(999999, p.score | 0)); sys(`${c.name}님 ${g.name} ${g.fmt(sc)}!`); addReact(c, g.emoji);
     });
-    chn.on('broadcast', { event: 'pose' }, ({ payload: p }) => { const c = chars[p.id]; if (c && POSE_SET.has(p.pose)) setPose(c, p.pose); });
-    chn.subscribe(async (status, err) => {
-      if (my !== gen) return;
-      if (status === 'SUBSCRIBED') {
-        subscribed = true; backoff = 1000; setStatus('● 실시간 연결됨', true);
-        try { await chn.track(myMeta()); } catch (e) {}
-        sendPos();
-      } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-        subscribed = false; reconnects++;
-        const msg = `재연결 중… (${reconnects}회 · ${status}${err ? ' · ' + (err.message || err) : ''})`;
-        setTimeout(() => { if (!subscribed) setStatus(msg); }, 4000);
-        reconnect(backoff === 1000 ? 300 : backoff); backoff = Math.min(backoff * 2, 15000);
-      }
-    });
-  }
-  function reconnect(delay) {
-    if (retryT) return;
-    retryT = setTimeout(async () => {
-      retryT = 0; const old = chn; gen++;
-      try { if (old) await client.removeChannel(old); } catch (e) {}
-      join();
-    }, delay);
-  }
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState !== 'visible') return;
-    if (!live()) { clearTimeout(retryT); retryT = 0; reconnect(100); }
-    else { net.track(); sendPos(); }
-  });
-  window.addEventListener('online', () => { if (!live()) { clearTimeout(retryT); retryT = 0; reconnect(100); } });
-  setInterval(() => { if (!live() && !retryT) reconnect(500); }, 20000);
-  // 보내는 양 제한: 전체 초당 최대 6개, 위치는 최신 것 하나만, presence 갱신은 2초에 한 번
-  const out = { q: [], pos: null, lastPos: '', trackDue: false, lastTrack: 0 };
+    ch.on('broadcast', { event: 'pose' }, ({ payload: p }) => { const c = chars[p.id]; if (c && POSE_SET.has(p.pose)) setPose(c, p.pose); });
+  }, ch => { ch.track(myMeta()).catch(() => {}); sendPos(); });
   setInterval(() => {
-    if (!live()) return;
     const now = Date.now();
-    if (out.q.length) { const [event, payload] = out.q.shift(); chn.send({ type: 'broadcast', event, payload }).catch(() => {}); return; }
-    if (out.pos) { const k = JSON.stringify(out.pos); if (k !== out.lastPos) { out.lastPos = k; chn.send({ type: 'broadcast', event: 'pos', payload: out.pos }).catch(() => {}); out.pos = null; return; } out.pos = null; }
-    if (out.trackDue && now - out.lastTrack > 2000) { out.trackDue = false; out.lastTrack = now; chn.track(myMeta()).catch(() => {}); }
+    for (const id of Object.keys(chars)) {
+      const c = chars[id];
+      if (c.missing && now - c.missing > 10000 && zone.live) { if (c.scene === scene.id) sys(`${c.name}님이 나갔어요`); delete chars[id]; updateOnline(); }
+    }
+  }, 2000);
+  // 보내는 양 제한: 초당 최대 6개, 위치는 최신 것만, presence 갱신은 2~3초 간격
+  const out = { q: [], pos: null, lastPos: '', zT: false, lT: false, lastZT: 0, lastLT: 0 };
+  setInterval(() => {
+    const now = Date.now();
+    const qi = out.q.findIndex(([tg]) => (tg === 'l' ? lobby : zone).live);
+    if (qi >= 0) { const [tg, event, payload] = out.q.splice(qi, 1)[0]; (tg === 'l' ? lobby : zone).chn.send({ type: 'broadcast', event, payload }).catch(() => {}); return; }
+    if (zone.live && out.pos) { const k = JSON.stringify(out.pos); const p = out.pos; out.pos = null; if (k !== out.lastPos) { out.lastPos = k; zone.chn.send({ type: 'broadcast', event: 'pos', payload: p }).catch(() => {}); return; } }
+    if (zone.live && out.zT && now - out.lastZT > 2000) { out.zT = false; out.lastZT = now; zone.chn.track(myMeta()).catch(() => {}); return; }
+    if (lobby.live && out.lT && now - out.lastLT > 3000) { out.lT = false; out.lastLT = now; lobby.chn.track(lobbyMeta()).catch(() => {}); }
   }, 170);
   net.mode = 'live';
-  net.send = (event, payload) => { if (event === 'pos') out.pos = payload; else if (out.q.length < 15) out.q.push([event, payload]); };
-  net.track = () => { out.trackDue = true; };
-  join();
+  net.send = (event, payload) => { if (event === 'pos') out.pos = payload; else if (out.q.length < 20) out.q.push([event === 'dm' ? 'l' : 'z', event, payload]); };
+  net.track = () => { out.zT = true; out.lT = true; };
+  net.zoneChanged = () => {
+    for (const id of Object.keys(chars)) if (id !== me.id && !chars[id].bot) delete chars[id];
+    out.pos = null; out.q = out.q.filter(([tg]) => tg === 'l'); zoneFirstSync = true;
+    zone.rejoin(); out.lT = true; out.lastLT = 0; recountZones(); updateOnline();
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    for (const m of [lobby, zone]) if (!m.live) m.rejoin();
+    net.track(); sendPos();
+  });
+  window.addEventListener('online', () => { for (const m of [lobby, zone]) if (!m.live) m.rejoin(); });
+  setInterval(() => { for (const m of [lobby, zone]) if (!m.live && !m.retry) m.schedule(500); }, 20000);
+  lobby.join(); zone.join();
+}
+function recountZones() {
+  for (const k of Object.keys(ZONE_COUNT)) delete ZONE_COUNT[k];
+  if (!me) return;
+  const add = z => { ZONE_COUNT[z] = (ZONE_COUNT[z] || 0) + 1; };
+  add(scene.zone);
+  if (net.lobby && net.mode === 'live') for (const m of net.lobby.values()) add(m.zone);
+  else for (const c of Object.values(chars)) if (c !== me && SCENES[c.scene]) add(SCENES[c.scene].zone);
 }
 function onChat(p) {
   const c = chars[p.id]; if (!c || typeof p.text !== 'string' || isBlocked(c)) return;
@@ -862,20 +1056,26 @@ function onChat(p) {
 }
 
 /* ---- 데모 봇 ---- */
-const BOTS = [['선반장인','campus','m'],['CNC고수','campus','m'],['캐드폐인','campus','f'],['재수강러','campus','m'],['학식러버','food','f'],['밤샘공부','lib','f'],['실습조교','lab','m']];
+const BOTS = [['광장러','hub','m','etc'],['캐드폐인','hub','f','mech'],['선반장인','z_mech','m','mech'],['정비왕','z_auto','m','auto'],
+  ['클린룸요정','z_semi','f','semi'],['승무원지망','z_air','f','air'],['셰프지망','kitchen','m','cook'],['도면장인','z_arch','m','arch'],['학식러버','food','f','auto'],['밤샘공부','lib','f','semi']];
 const BOT_LINES = {
-  campus: ['CNC 실습 G코드 다 외웠음?','캐드 시험 축 그리는 거 어케함','시험 끝나면 롤 ㄱ?','과방에 누구 있음?','졸작 주제 정했어?','ㅋㅋㅋㅋ','기도실 가서 기도하고 옴'],
+  hub: ['다들 무슨 과야?','오락실 랭킹 우리 과가 1등 먹자','학식 뭐임 오늘','전광판에 노래 틀어줘','ㅋㅋㅋㅋ'],
+  z_mech: ['CNC 실습 G코드 다 외웠음?','캐드 시험 축 그리는 거 어케함','기도실 가서 기도하고 옴'],
+  z_auto: ['리프트 올리는 거 무서움','전기차 배터리 실습 재밌다','정비 공장 오일 냄새 ㄹㅇ'],
+  z_semi: ['방진복 입는 데 10분 걸림','노광 공정 너무 어렵다','클린룸 들어가면 노란 불 신기함'],
+  z_air: ['기내 방송 연습 중','호텔 프런트 실습 떨린다','비행기 앞에서 사진 찍자'],
+  kitchen: ['파스타 소스 망함 ㅋㅋ','칼질 연습 중','오늘 스테이크 굽는 날'],
+  z_arch: ['도면 마감 언제임','크레인 멋있다','모형 만들다가 손 베임'],
   food: ['오늘 돈까스 맛있음','밥 같이 먹을 사람','학식 줄 개김'],
-  lib: ['(조용히 공부 중)','공차 기호 외우는 중','자리 여기 비었어요'],
-  lab: ['보안경 쓰세요','선반 바이트 또 부러뜨림 ㅋㅋ','CNC 원점 잡는 거 알려줌'],
+  lib: ['(조용히 공부 중)','자리 여기 비었어요','시험 범위 어디까지?'],
 };
 let demo = false;
 function startDemo(msg) {
   demo = true; setStatus(msg);
-  BOTS.forEach(([n, sc, g], i) => {
+  BOTS.forEach(([n, sc, g, dept], i) => {
     const s = SCENES[sc];
-    const sp = sc === 'campus' ? nearestWalkable(s, 11 + i * 2, 13 + (i % 2)) : nearestWalkable(s, 3 + i % 4, 7);
-    makeChar('bot' + i, { uid: 'bot' + i, grade: ['2학년','1학년','2학년','3학년','1학년','1학년','기타'][i], name: n, g, hat: ['helmet', null, 'beanie', 'cap', null, 'headphones', 'helmet'][i], facc: [null, 'goggles', 'glasses', null, null, 'glasses', 'goggles'][i], hair: HAIRS[(i + 1) % HAIRS.length], shirt: SHIRTS[(i + 2) % SHIRTS.length], x: sp.x + 0.5, y: sp.y + 0.5, scene: sc, bot: true, next: 1 + i });
+    const sp = s.indoor ? nearestWalkable(s, 3 + i % 4, 7) : nearestWalkable(s, s.spawn.x + (i % 3) - 1, s.spawn.y - 3 - (i % 2));
+    makeChar('bot' + i, { uid: 'bot' + i, dept, grade: ['2학년','1학년','2학년','3학년','1학년','1학년','2학년','1학년','2학년','1학년'][i], name: n, g, hat: ['cap', 'beanie', 'helmet', 'helmet', null, 'ribbon', null, 'helmet', null, 'headphones'][i], facc: [null, 'glasses', 'goggles', null, 'mask', null, 'mask', null, null, 'glasses'][i], hair: HAIRS[(i + 1) % HAIRS.length], shirt: SHIRTS[(i + 2) % SHIRTS.length], x: sp.x + 0.5, y: sp.y + 0.5, scene: sc, bot: true, next: 1 + i });
   });
   updateOnline();
 }
@@ -903,7 +1103,7 @@ function updateBots(dt) {
     const pool = here.length && Math.random() < 0.8 ? here : Object.values(chars).filter(c => c.bot);
     const b = pool[Math.floor(Math.random() * pool.length)]; if (!b) return;
     if (Math.random() < 0.3) addReact(b, REACTS[Math.floor(Math.random() * REACTS.length)][0]);
-    else { const L = BOT_LINES[b.scene] || BOT_LINES.campus; onChat({ id: b.id, text: L[Math.floor(Math.random() * L.length)] }); }
+    else { const L = BOT_LINES[b.scene] || BOT_LINES[SCENES[b.scene].zone] || BOT_LINES.hub; onChat({ id: b.id, text: L[Math.floor(Math.random() * L.length)] }); }
   }
 }
 
@@ -924,8 +1124,10 @@ function pushLog(d) {
   setTimeout(() => { d.style.opacity = '0'; setTimeout(() => d.remove(), 900); }, 14000);
 }
 function updateOnline() {
-  const all = Object.values(chars), here = all.filter(c => c.scene === scene.id).length;
-  $('#online').textContent = scene.id === 'campus' && here === all.length ? `${here}명` : `여기 ${here}명 · 전체 ${all.length}명`;
+  const all = Object.values(chars), here = all.filter(c => c.scene === scene.id && !isBlocked(c)).length;
+  const total = net.mode === 'live' && net.lobby ? net.lobby.size + 1 : all.length;
+  $('#online').textContent = here === total ? `${here}명` : `여기 ${here}명 · 전체 ${total}명`;
+  recountZones();
 }
 const REACTS = [['🔥','열공'],['😂','ㅋㅋㅋ'],['👏','박수'],['❤️','하트'],['💯','A+'],['😭','재수강'],['🙏','제발'],['☕','커피'],['🍚','밥ㄱ'],['💤','졸려'],['🤯','멘붕'],['🎉','종강']];
 const POSES = [['💃','dance','춤'],['🕺','dance2','막춤'],['👋','wave','손흔들기'],['🪑','sit','앉기'],['🙏','pray','기도'],['🙌','hooray','만세'],['⬆️','jump','점프']];
@@ -1044,7 +1246,7 @@ function loadYT() {
 }
 function refreshPlayer() {
   const v = VIDEO[scene.id], box = $('#yt');
-  const on = !!(v && v.vid);
+  const on = !!(v && v.vid && scene.screen);
   box.classList.toggle('hidden', !on); ytRect = '';
   if (!on) { if (YTM.ready) YTM.player.stopVideo(); YTM.cur = null; }
   else if (!YTM.player) loadYT();
@@ -1067,7 +1269,7 @@ function refreshPlayer() {
 let ytRect = '';
 function placeYT() {
   const box = $('#yt'); if (box.classList.contains('hidden')) return;
-  const sc = scene.screen;
+  const sc = scene.screen; if (!sc) { box.classList.add('hidden'); return; }
   let l, tp, w, h;
   if (YTM.big) { w = Math.min(cw, 900); h = w * 9 / 16; l = (cw - w) / 2; tp = 0; }
   else { l = (sc.cx - sc.w / 2 - camX) * Z + cw / 2; tp = (sc.by - sc.h - camY) * Z + ch / 2; w = sc.w * Z; h = sc.h * Z; }
@@ -1108,16 +1310,20 @@ function goScene(id, tx, ty, silent) {
   if (switching) return; switching = true;
   const fade = $('#fade'); fade.classList.add('on');
   setTimeout(() => {
+    const prevZone = scene.zone;
     scene = SCENES[id]; ensureGround(scene);
     me.scene = id; me.x = tx + 0.5; me.y = ty + 0.5; me.path = []; me.pose = null;
     armed = !scene.trig.has(scene.I(tx, ty));
     const p = camTarget(); camX = p.x; camY = p.y;
     $('#sceneName').textContent = scene.name; $('#sceneSub').textContent = scene.sub;
-    $('#exitBtn').classList.toggle('hidden', !scene.indoor);
+    $('#exitBtn').classList.toggle('hidden', !scene.exitTo);
+    $('#exitBtn').textContent = scene.indoor ? '← 나가기' : '← 중앙 광장';
+    $('#vidBtn').classList.toggle('hidden', !scene.screen);
     $('#gameBtn').classList.toggle('hidden', scene.id !== 'arcade' && scene.id !== 'main');
     $('#gameBtn').textContent = scene.id === 'main' ? '📝 전공 퀴즈 · 랭킹' : '🎮 게임 · 랭킹';
     $('#log').textContent = '';
-    if (!silent) sys(scene.indoor ? `${scene.name}에 들어왔어요` : '광장으로 나왔어요');
+    if (prevZone !== scene.zone) net.zoneChanged && net.zoneChanged();
+    if (!silent) sys(`${scene.name}${scene.indoor ? '에 들어왔어요' : (scene.id === 'hub' ? '으로 나왔어요' : '에 왔어요')}`);
     Music.play(scene.track); updateOnline(); refreshPlayer();
     sendPos(); scheduleTrack();
     fade.classList.remove('on'); switching = false;
@@ -1128,23 +1334,33 @@ function checkTrigger() {
   if (!tr) { armed = true; return; }
   if (!armed || switching) return;
   armed = false;
-  if (tr.to === 'campus') goScene('campus', tr.tx, tr.ty);
+  if (tr.tx != null) goScene(tr.to, tr.tx, tr.ty);
   else { const r = SCENES[tr.to]; goScene(tr.to, r.spawn.x, r.spawn.y); }
 }
-$('#exitBtn').onclick = () => { const tr = scene.trig.get(scene.I(scene.exit.x, scene.exit.y)); if (tr) goScene('campus', tr.tx, tr.ty); };
+$('#exitBtn').onclick = () => { const e = scene.exitTo; if (e) goScene(e.to, e.tx, e.ty); };
 
 /* ================== 그리기 ================== */
 function poly(pts, fillC, strokeC) { dpoly(ctx, pts, fillC, strokeC); }
 const lerp = (A, B, u) => ({ x: A.x + (B.x - A.x) * u, y: A.y + (B.y - A.y) * u });
 function fq(A, B, u0, u1, v0, v1) { const a = lerp(A, B, u0), b = lerp(A, B, u1); return [upP(a, v0), upP(b, v0), upP(b, v1), upP(a, v1)]; }
 const STY = {
-  glass: { L:'#4f80d9', R:'#3a63b5', T:'#b9cff7', win:'#a6c6ff', win2:'#7aa3ec' },
+  glass: { L:'#4f80d9', R:'#3a63b5', T:'#b9cff7', win:'#a6c6ff', win2:'#7aa3ec', look:'grid', roof:'antenna' },
   brick: { L:'#c4622f', R:'#9e4a22', T:'#d8d1c3', win:'#ffe7a3', win2:'#ffd77a' },
   house: { L:'#7cc26b', R:'#5c9e4e', T:'#efe8d6', win:'#fff3c4', win2:'#ffe9a0' },
-  pagoda:{ L:'#efe3c8', R:'#d3c29f', T:'#3b3f4f', win:'#b8322c', win2:'#9c2a25' },
-  cafe:  { L:'#f4c552', R:'#d4a031', T:'#f6efe0', win:'#fff8e1', win2:'#ffeeb8' },
-  lib:   { L:'#e2dcd0', R:'#bfb7a8', T:'#8796a8', win:'#5a6c86', win2:'#4a5a72' },
+  pagoda:{ L:'#efe3c8', R:'#d3c29f', T:'#3b3f4f', win:'#b8322c', win2:'#9c2a25', look:'pagoda', roof:'pyramid' },
+  cafe:  { L:'#f4c552', R:'#d4a031', T:'#f6efe0', win:'#fff8e1', win2:'#ffeeb8', awning:true },
+  lib:   { L:'#e2dcd0', R:'#bfb7a8', T:'#8796a8', win:'#5a6c86', win2:'#4a5a72', look:'cols', roof:'gable' },
   arcade:{ L:'#3b2a6b', R:'#2b1f52', T:'#241b47', win:'#ff4fd8', win2:'#4fd8ff' },
+  garage:{ L:'#8a94a6', R:'#6c7688', T:'#c9ced6', win:'#ffd36b', win2:'#ffc23d', bigDoor:true, stripe:'#e2453c' },
+  ev:    { L:'#3fc1a5', R:'#2d9c84', T:'#d8f5ee', win:'#e9fffb', win2:'#bff3e7', look:'grid' },
+  showroom:{ L:'#2f3138', R:'#23252b', T:'#45484f', win:'#9fd8ff', win2:'#7cc4f2', look:'grid', roof:'antenna' },
+  clean: { L:'#eef3f7', R:'#cfd8e0', T:'#ffffff', win:'#7fd8e8', win2:'#5cc4d8', stripe:'#2bb3c9' },
+  equip: { L:'#5b6b84', R:'#46546b', T:'#9aa8bd', win:'#ffe88a', win2:'#ffd24a' },
+  hotel: { L:'#f3e6c8', R:'#d9c7a0', T:'#b9975b', win:'#fff3cf', win2:'#ffe39a', look:'grid', trim:'#c9a24a' },
+  hangar:{ L:'#c4ccd8', R:'#a2acba', T:'#8b95a5', win:'#e8f0ff', win2:'#cfdcf5', bigDoor:true, stripe:'#2f5fd0' },
+  kitchen:{ L:'#fafafa', R:'#e2e2e2', T:'#f0ece4', win:'#fff8e1', win2:'#ffeeb8', awning:true },
+  studio:{ L:'#e9e1d3', R:'#cfc4b0', T:'#7a8a7a', win:'#5a6c86', win2:'#4a5a72', look:'cols' },
+  gallery:{ L:'#2f3138', R:'#23252b', T:'#3c3f47', win:'#ffd36b', win2:'#ffc23d' },
 };
 function sign(cx, cy, face, text, scale = 1) {
   ctx.save(); ctx.translate(cx, cy); ctx.transform(1, face === 'L' ? 0.5 : -0.5, 0, 1, 0, 0);
@@ -1156,36 +1372,49 @@ function sign(cx, cy, face, text, scale = 1) {
   ctx.restore();
 }
 function drawBuilding(b, t) {
-  const s = STY[b.style], Hh = b.H;
+  const s = Object.assign({}, STY[b.style] || STY.house, b.colors || {}), Hh = b.H, look = s.look || 'rows';
   const N = iso(b.x, b.y), E = iso(b.x + b.w, b.y), S = iso(b.x + b.w, b.y + b.h), Wp = iso(b.x, b.y + b.h);
   poly([Wp, S, E, { x: E.x + 18, y: E.y + 9 }, { x: S.x + 18, y: S.y + 9 }, { x: Wp.x + 18, y: Wp.y + 9 }], 'rgba(0,0,0,.12)');
   poly([Wp, S, upP(S, Hh), upP(Wp, Hh)], s.L); poly([S, E, upP(E, Hh), upP(S, Hh)], s.R);
   poly([upP(N, Hh), upP(E, Hh), upP(S, Hh), upP(Wp, Hh)], s.T);
   for (const [A, B, len] of [[Wp, S, b.w], [S, E, b.h]]) {
-    if (b.style === 'glass') {
+    if (look === 'grid') {
       const cols = len * 2;
       for (let r = 14; r < Hh - 10; r += 16) for (let k = 0; k < cols; k++) poly(fq(A, B, (k + 0.15) / cols, (k + 0.85) / cols, r, r + 11), ((k + r) % 3) ? s.win : s.win2);
       poly(fq(A, B, 0, 1, Hh * 0.45, Hh * 0.45 + 3), 'rgba(255,255,255,.35)');
-    } else if (b.style === 'pagoda') {
+    } else if (look === 'pagoda') {
       for (let k = 0; k <= len; k++) { const u = k / len; poly(fq(A, B, Math.max(0, u - 0.04), Math.min(1, u + 0.04), 0, Hh), s.win); }
-    } else if (b.style === 'lib') {
+    } else if (look === 'cols') {
       const cols = len * 2;
       for (let k = 0; k < cols; k++) { const u = (k + 0.5) / cols; poly(fq(A, B, u - 0.05, u + 0.05, 4, Hh - 14), '#f7f4ee'); }
-      poly(fq(A, B, 0, 1, Hh - 12, Hh - 4), '#cfc7b8');
+      poly(fq(A, B, 0, 1, Hh - 12, Hh - 4), 'rgba(0,0,0,.12)');
     } else {
       const cols = Math.max(2, Math.round(len * 1.2)), rows = Math.max(1, Math.floor((Hh - 18) / 26));
       for (let r = 0; r < rows; r++) for (let k = 0; k < cols; k++) { const v = 14 + r * 26; poly(fq(A, B, (k + 0.25) / cols, (k + 0.75) / cols, v, v + 14), (k + r) % 2 ? s.win : s.win2, 'rgba(0,0,0,.15)'); }
     }
+    if (s.stripe) poly(fq(A, B, 0, 1, Hh - 14, Hh - 8), s.stripe);
+    if (s.trim) { poly(fq(A, B, 0, 1, Hh - 7, Hh), s.trim); poly(fq(A, B, 0, 1, 0, 5), s.trim); }
   }
-  const d = b.door, onL = d.face === 'L';
-  const A = onL ? Wp : S, B = onL ? S : E, len = onL ? b.w : b.h;
-  const u = onL ? (d.tx + 0.5 - b.x) / b.w : (b.y + b.h - (d.ty + 0.5)) / b.h, du = 0.38 / len;
-  poly(fq(A, B, u - du - 0.03 / len, u + du + 0.03 / len, 0, 30), '#f2f2f2');
-  poly(fq(A, B, u - du, u + du, 0, 27), b.style === 'glass' ? '#25385e' : '#3a2a22');
-  poly(fq(A, B, u - du * 0.8, u + du * 0.8, 0, 22), 'rgba(255,220,120,' + (0.25 + 0.15 * Math.sin(t * 3)) + ')');
-  if (b.style === 'cafe') for (let k = 0; k < 6; k++) poly(fq(A, B, u - 0.5 / len + k / len / 6, u - 0.5 / len + (k + 1) / len / 6, 33, 42), k % 2 ? '#fff' : '#e2453c');
+  const d = b.door;
+  let A = Wp, B = S, u = 0.5, len = b.w;
+  if (d) {
+    const onL = d.face === 'L'; A = onL ? Wp : S; B = onL ? S : E; len = onL ? b.w : b.h;
+    u = onL ? (d.tx + 0.5 - b.x) / b.w : (b.y + b.h - (d.ty + 0.5)) / b.h;
+    if (s.bigDoor) {
+      const du = Math.min(0.42, 1.2 / len);
+      poly(fq(A, B, u - du, u + du, 0, 40), '#5a6170');
+      for (let v = 4; v < 40; v += 6) poly(fq(A, B, u - du, u + du, v, v + 2), '#7e8591');
+      poly(fq(A, B, u - du * 0.5, u + du * 0.5, 0, 26), 'rgba(255,220,120,' + (0.18 + 0.1 * Math.sin(t * 3)) + ')');
+    } else {
+      const du = 0.38 / len;
+      poly(fq(A, B, u - du - 0.03 / len, u + du + 0.03 / len, 0, 30), '#f2f2f2');
+      poly(fq(A, B, u - du, u + du, 0, 27), look === 'grid' ? '#25385e' : '#3a2a22');
+      poly(fq(A, B, u - du * 0.8, u + du * 0.8, 0, 22), 'rgba(255,220,120,' + (0.25 + 0.15 * Math.sin(t * 3)) + ')');
+    }
+    if (s.awning) for (let k = 0; k < 6; k++) poly(fq(A, B, u - 0.5 / len + k / len / 6, u - 0.5 / len + (k + 1) / len / 6, 33, 42), k % 2 ? '#fff' : '#e2453c');
+  }
   const TN = upP(N, Hh), TE = upP(E, Hh), TS = upP(S, Hh), TW2 = upP(Wp, Hh), C = { x: (TN.x + TS.x) / 2, y: (TN.y + TS.y) / 2 };
-  if (b.style === 'pagoda') {
+  if (s.roof === 'pyramid') {
     const ex = p => ({ x: C.x + (p.x - C.x) * 1.3, y: C.y + (p.y - C.y) * 1.3 + 4 });
     const a = ex(TN), e2 = ex(TE), s2 = ex(TS), w2 = ex(TW2), ap = { x: C.x, y: C.y - 34 };
     poly([a, e2, ap], '#4a4f62'); poly([a, w2, ap], '#4a4f62'); poly([w2, s2, ap], '#3b3f4f'); poly([s2, e2, ap], '#2b2e3a');
@@ -1193,19 +1422,19 @@ function drawBuilding(b, t) {
   } else {
     const inset = p => ({ x: C.x + (p.x - C.x) * 0.84, y: C.y + (p.y - C.y) * 0.84 });
     poly([inset(TN), inset(TE), inset(TS), inset(TW2)], 'rgba(0,0,0,.08)');
-    if (b.style === 'glass') {
+    if (s.roof === 'antenna') {
       const k = p => ({ x: C.x + (p.x - C.x) * 0.5, y: C.y + (p.y - C.y) * 0.5 });
-      poly([k(TN), k(TE), k(TS), k(TW2)], '#dbe7fc');
+      poly([k(TN), k(TE), k(TS), k(TW2)], 'rgba(255,255,255,.35)');
       ctx.strokeStyle = '#8aa0c8'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(C.x, C.y); ctx.lineTo(C.x, C.y - 26); ctx.stroke();
       ctx.fillStyle = Math.floor(t * 2) % 2 ? '#ff4d4d' : '#7a2020'; ctx.fillRect(C.x - 2, C.y - 30, 4, 4);
     }
-    if (b.style === 'lib') poly([TN, TE, { x: C.x, y: C.y - 16 }], '#9aa8b8');
+    if (s.roof === 'gable') poly([TN, TE, { x: C.x, y: C.y - 16 }], 'rgba(255,255,255,.18)');
   }
   const sp = lerp(A, B, u);
-  sign(sp.x, sp.y - (b.style === 'glass' ? 46 : Math.min(Hh - 10, 44)), d.face, b.name);
+  sign(sp.x, sp.y - (look === 'grid' && Hh > 100 ? 46 : Math.min(Hh - 10, s.bigDoor ? 54 : 44)), d ? d.face : 'L', b.name);
 }
 function drawScreen(b, t) {
-  const c = iso(b.x + b.w / 2, b.y + 0.5), sc = campus.screen, w = sc.w, h = sc.h, base = sc.by;
+  const c = iso(b.x + b.w / 2, b.y + 0.5), sc = scene.screen, w = sc.w, h = sc.h, base = sc.by;
   ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.beginPath(); ctx.ellipse(c.x, c.y, 90, 18, 0, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#5a5f6e'; ctx.fillRect(c.x - 80, base, 6, 40); ctx.fillRect(c.x + 74, base, 6, 40);
   ctx.fillStyle = '#d4d7df'; ctx.fillRect(c.x - w / 2 - 4, base - h - 4, w + 8, h + 8);
@@ -1218,9 +1447,9 @@ function drawScreen(b, t) {
   ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2); ctx.fill(); ctx.fillStyle = '#0d1322'; ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
   ctx.fillStyle = '#ffcf4a'; ctx.font = 'bold 13px "Galmuri11", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-  ctx.fillText('MECH PLAZA', c.x - w / 2 + 8, base - h + 8);
+  ctx.fillText('CAMPUS PLAZA', c.x - w / 2 + 8, base - h + 8);
   ctx.fillStyle = '#fff'; ctx.font = '11px "Galmuri11", sans-serif';
-  ctx.fillText('기계공학과 광장', c.x - w / 2 + 8, base - h + 28); ctx.fillText('OPEN', c.x - w / 2 + 8, base - h + 43);
+  ctx.fillText('캠퍼스 광장', c.x - w / 2 + 8, base - h + 28); ctx.fillText('OPEN', c.x - w / 2 + 8, base - h + 43);
   const tick = CONFIG.NOTICES.concat(CHAMPS).join('   ·   ') + '   ·   ', tw = ctx.measureText(tick).width, off = (t * 40) % tw;
   ctx.fillStyle = '#e2453c'; ctx.fillRect(c.x - w / 2, base - 18, w, 18);
   ctx.fillStyle = '#fff'; ctx.textBaseline = 'middle';
@@ -1262,17 +1491,104 @@ function drawFountain(b, t) {
   ctx.fillStyle = 'rgba(180,220,255,.85)'; ctx.fillRect(c.x - 2, c.y - 48 + Math.sin(t * 6) * 2, 4, 16);
 }
 function drawGate(b) {
-  const p1 = iso(b.x + 0.5, b.y + 0.5), p2 = iso(b.x + b.w - 0.5, b.y + 0.5);
+  const alongX = b.w > 1;
+  const p1 = iso(b.x + 0.5, b.y + 0.5), p2 = alongX ? iso(b.x + b.w - 0.5, b.y + 0.5) : iso(b.x + 0.5, b.y + b.h - 0.5);
   for (const p of [p1, p2]) {
     poly([{ x: p.x - 10, y: p.y }, { x: p.x, y: p.y + 5 }, { x: p.x, y: p.y - 70 }, { x: p.x - 10, y: p.y - 75 }], '#8d94a3');
     poly([{ x: p.x, y: p.y + 5 }, { x: p.x + 10, y: p.y }, { x: p.x + 10, y: p.y - 75 }, { x: p.x, y: p.y - 70 }], '#6f7685');
   }
-  ctx.save(); ctx.translate((p1.x + p2.x) / 2, (p1.y + p2.y) / 2 - 78); ctx.transform(1, 0.5, 0, 1, 0, 0);
-  const len = (p2.x - p1.x) + 26;
-  ctx.fillStyle = '#1d2030'; ctx.fillRect(-len / 2, -13, len, 26); ctx.fillStyle = '#d9b45a'; ctx.fillRect(-len / 2, 10, len, 3);
+  const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2 - 78, slope = (p2.y - p1.y) / (p2.x - p1.x);
+  ctx.save(); ctx.translate(mx, my); ctx.transform(1, slope, 0, 1, 0, 0);
+  const len = Math.abs(p2.x - p1.x) + 26;
+  ctx.fillStyle = b.to ? '#2a2350' : '#1d2030'; ctx.fillRect(-len / 2, -13, len, 26);
+  ctx.fillStyle = '#d9b45a'; ctx.fillRect(-len / 2, 10, len, 3);
   ctx.fillStyle = '#fff'; ctx.font = 'bold 13px "Galmuri11", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('기계공학과 광장', 0, -1); ctx.restore();
+  ctx.fillText(b.label || '', 0, -1); ctx.restore();
+  if (b.to) {
+    const n = ZONE_COUNT[b.to] || 0, txt = n ? `● ${n}명` : '○ 0명';
+    ctx.font = 'bold 11px "Galmuri11", sans-serif'; const w = ctx.measureText(txt).width + 14;
+    ctx.fillStyle = n ? '#2fa860' : 'rgba(30,34,44,.75)';
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(mx - w / 2, my - 36, w, 18, 9) : ctx.rect(mx - w / 2, my - 36, w, 18); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(txt, mx, my - 27);
+  }
 }
+function isoBox(x, y, w, h, z, hh, T, L, R) {
+  const N = iso(x, y), E = iso(x + w, y), S = iso(x + w, y + h), Wp = iso(x, y + h);
+  const u = p => upP(p, z), uu = p => upP(p, z + hh);
+  poly([u(Wp), u(S), uu(S), uu(Wp)], L); poly([u(S), u(E), uu(E), uu(S)], R); poly([uu(N), uu(E), uu(S), uu(Wp)], T);
+}
+function drawCar(x, y, w, h, z, col) {
+  const c = iso(x + w / 2, y + h / 2);
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(c.x, c.y, w * 22, h * 12, 0, 0, Math.PI * 2); ctx.fill();
+  const wheel = (px, py) => { const p = upP(iso(px, py), z); ctx.fillStyle = '#1c1c24'; ctx.beginPath(); ctx.ellipse(p.x, p.y - 4, 5, 4, 0, 0, Math.PI * 2); ctx.fill(); };
+  wheel(x + 0.35, y + h - 0.08); wheel(x + w - 0.35, y + h - 0.08); wheel(x + w - 0.08, y + 0.35);
+  isoBox(x + 0.05, y + 0.12, w - 0.1, h - 0.24, z + 5, 12, col[0], col[1], col[2]);
+  isoBox(x + w * 0.28, y + 0.25, w * 0.46, h - 0.5, z + 17, 11, '#dfeefa', '#9fc9ec', '#7fb0d8');
+  const hl = upP(iso(x + w - 0.05, y + h * 0.5), z + 11); ctx.fillStyle = '#fff3b0'; ctx.fillRect(hl.x - 2, hl.y - 2, 4, 3);
+}
+function drawStatue(b, t) {
+  isoBox(b.x + 0.2, b.y + 0.2, b.w - 0.4, b.h - 0.4, 0, 18, '#e3e7ee', '#b5bcc9', '#9aa3b2');
+  const c = upP(iso(b.x + b.w / 2, b.y + b.h / 2), 18);
+  ctx.save(); ctx.translate(c.x, c.y - 42);
+  if (b.variant === 'gear') {
+    ctx.rotate(t * 0.5); ctx.fillStyle = '#f4c430';
+    for (let k = 0; k < 10; k++) { ctx.rotate(Math.PI / 5); ctx.fillRect(-6, -40, 12, 12); }
+    ctx.beginPath(); ctx.arc(0, 0, 32, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#d4a020'; ctx.beginPath(); ctx.arc(0, 0, 20, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#e3e7ee'; ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI * 2); ctx.fill();
+  } else {
+    ctx.fillStyle = '#c8cfda'; ctx.beginPath(); ctx.arc(0, 0, 36, 0, Math.PI * 2); ctx.fill();
+    ctx.save(); ctx.beginPath(); ctx.arc(0, 0, 32, 0, Math.PI * 2); ctx.clip();
+    for (let gx = -32; gx < 32; gx += 8) for (let gy = -32; gy < 32; gy += 8) {
+      ctx.fillStyle = `hsl(${(gx * 3 + gy * 2 + t * 40) % 360},70%,62%)`; ctx.fillRect(gx + 1, gy + 1, 6, 6);
+    }
+    ctx.restore(); ctx.fillStyle = '#c8cfda'; ctx.fillRect(-6, 30, 12, 6);
+  }
+  ctx.restore();
+}
+function drawPlane(b, t) {
+  const W = ['#f7f8fa', '#dfe3ea', '#c7ccd6'], G = ['#c3c8d0', '#9aa1ad', '#7e8591'];
+  const c = iso(b.x + b.w / 2, b.y + b.h / 2);
+  ctx.fillStyle = 'rgba(0,0,0,.16)'; ctx.beginPath(); ctx.ellipse(c.x, c.y, 110, 40, 0, 0, Math.PI * 2); ctx.fill();
+  for (const gx of [b.x + 1, b.x + b.w - 1]) { const p = iso(gx, b.y + 1); ctx.fillStyle = '#333'; ctx.fillRect(p.x - 2, p.y - 14, 4, 14); }
+  isoBox(b.x + 1.6, b.y - 0.9, 1.2, 3.8, 18, 3, G[0], G[1], G[2]);
+  isoBox(b.x + 1.9, b.y - 0.3, 0.6, 0.35, 10, 8, G[0], G[1], G[2]); isoBox(b.x + 1.9, b.y + 2.0, 0.6, 0.35, 10, 8, G[0], G[1], G[2]);
+  isoBox(b.x, b.y + 0.7, b.w, 0.6, 14, 18, W[0], W[1], W[2]);
+  const A = iso(b.x, b.y + 1.3), B = iso(b.x + b.w, b.y + 1.3);
+  poly(fq(A, B, 0, 1, 14 + 7, 14 + 10), '#2f5fd0');
+  for (let k = 0; k < 14; k++) { const u = 0.12 + k * 0.055; poly(fq(A, B, u, u + 0.025, 14 + 11, 14 + 15), '#3a4a6a'); }
+  isoBox(b.x + 0.1, b.y + 0.8, 0.5, 0.4, 32, 24, '#2f5fd0', '#2448a8', '#1c3a8a');
+  isoBox(b.x - 0.2, b.y + 0.3, 0.7, 1.4, 34, 3, G[0], G[1], G[2]);
+}
+function drawFrame(b) {
+  const lv = [0, 32, 64, 96], col = '#e2722b', corners = [[b.x, b.y], [b.x + b.w, b.y], [b.x + b.w, b.y + b.h], [b.x, b.y + b.h]];
+  isoBox(b.x, b.y, b.w, b.h, 0, 4, '#c9ced6', '#a2acba', '#8b95a5');
+  isoBox(b.x, b.y, b.w, b.h, 32, 3, 'rgba(201,206,214,.85)', '#a2acba', '#8b95a5');
+  ctx.strokeStyle = col; ctx.lineWidth = 3;
+  for (const h of lv.slice(1)) {
+    ctx.beginPath(); corners.forEach(([x, y], i) => { const p = upP(iso(x, y), h); i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y); }); ctx.closePath(); ctx.stroke();
+  }
+  for (const [x, y] of corners) { const a = iso(x, y), z = upP(a, 96); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(z.x, z.y); ctx.stroke(); }
+  const m1 = iso(b.x + b.w / 2, b.y + b.h), m2 = iso(b.x + b.w, b.y + b.h / 2);
+  for (const m of [m1, m2]) { const z = upP(m, 96); ctx.beginPath(); ctx.moveTo(m.x, m.y); ctx.lineTo(z.x, z.y); ctx.stroke(); }
+}
+function drawCrane(b, t) {
+  const base = iso(b.x + 0.5, b.y + 0.5), top = upP(base, 190);
+  isoBox(b.x + 0.15, b.y + 0.15, 0.7, 0.7, 0, 10, '#9aa1ad', '#7e8591', '#6f7685');
+  ctx.strokeStyle = '#f4c430'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(base.x - 6, base.y - 10); ctx.lineTo(top.x - 6, top.y); ctx.moveTo(base.x + 6, base.y - 10); ctx.lineTo(top.x + 6, top.y); ctx.stroke();
+  ctx.lineWidth = 1.5; ctx.beginPath();
+  for (let y = base.y - 10; y > top.y; y -= 14) { ctx.moveTo(base.x - 6, y); ctx.lineTo(base.x + 6, y - 7); ctx.lineTo(base.x - 6, y - 14); }
+  ctx.stroke();
+  const jibEnd = { x: top.x - 4 * 32, y: top.y - 4 * 16 }, cw = { x: top.x + 1.6 * 32, y: top.y + 1.6 * 16 };
+  ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(cw.x, cw.y); ctx.lineTo(jibEnd.x, jibEnd.y); ctx.stroke();
+  ctx.fillStyle = '#5a6170'; ctx.fillRect(cw.x - 10, cw.y - 6, 20, 14);
+  ctx.fillStyle = '#2a2d36'; ctx.fillRect(top.x - 9, top.y - 4, 18, 14);
+  const hx = top.x - 2.6 * 32, hy = top.y - 2.6 * 16, sw = Math.sin(t * 1.2) * 4, hookY = hy + 70;
+  ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx + sw, hookY); ctx.stroke();
+  ctx.fillStyle = '#e2722b'; ctx.fillRect(hx + sw - 22, hookY, 44, 6);
+}
+
 function drawTree(e) {
   const p = iso(e.x + 0.5, e.y + 0.5), s = e.s;
   ctx.fillStyle = 'rgba(0,0,0,.14)'; ctx.beginPath(); ctx.ellipse(p.x, p.y, 15 * s, 7 * s, 0, 0, Math.PI * 2); ctx.fill();
@@ -1294,6 +1610,11 @@ function drawPlant(e) {
 }
 function drawDecor(d, t) {
   const p = iso(d.x + 0.5, d.y + 0.5);
+  if (d.kind === 'cone') {
+    ctx.fillStyle = 'rgba(0,0,0,.15)'; ctx.beginPath(); ctx.ellipse(p.x, p.y, 9, 4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ff7a2f'; ctx.beginPath(); ctx.moveTo(p.x, p.y - 22); ctx.lineTo(p.x + 7, p.y); ctx.lineTo(p.x - 7, p.y); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.fillRect(p.x - 4, p.y - 12, 8, 3); return;
+  }
   if (d.kind === 'lamp') {
     ctx.fillStyle = '#4a4f5c'; ctx.fillRect(p.x - 2, p.y - 46, 4, 46);
     ctx.fillStyle = 'rgba(255,230,140,.25)'; ctx.beginPath(); ctx.arc(p.x, p.y - 48, 12, 0, Math.PI * 2); ctx.fill();
@@ -1313,6 +1634,14 @@ function drawDecor(d, t) {
 }
 const BOOKC = ['#e2453c','#3a7cf0','#f2a93b','#2fa860','#9a5cd6','#f4f4f2','#1f2a44'];
 function drawFurn(f, t) {
+  if (f.fk === 'car') {
+    if (f.lift) { ctx.fillStyle = '#5a6170'; for (const [px, py] of [[f.x + 0.1, f.y + f.h - 0.1], [f.x + f.w - 0.1, f.y + f.h - 0.1], [f.x + f.w - 0.1, f.y + 0.1]]) { const p = iso(px, py); ctx.fillRect(p.x - 2, p.y - f.lift, 4, f.lift); } isoBox(f.x, f.y + 0.05, f.w, f.h - 0.1, f.lift - 3, 3, '#f2c94c', '#d4a031', '#b5861f'); }
+    drawCar(f.x, f.y, f.w, f.h, f.lift || 0, f.c); return;
+  }
+  if (f.fk === 'seat') {
+    isoBox(f.x + 0.12, f.y + 0.12, 0.76, 0.76, 0, 14, f.c[0], f.c[1], f.c[2]);
+    isoBox(f.x + 0.12, f.y + 0.12, 0.76, 0.2, 14, 22, f.c[1], f.c[1], f.c[2]); return;
+  }
   const N = iso(f.x, f.y), E = iso(f.x + f.w, f.y), S = iso(f.x + f.w, f.y + f.h), Wp = iso(f.x, f.y + f.h), Hh = f.H, [cT, cL, cR] = f.c;
   poly([Wp, S, E, { x: E.x + 8, y: E.y + 4 }, { x: S.x + 8, y: S.y + 4 }, { x: Wp.x + 8, y: Wp.y + 4 }], 'rgba(0,0,0,.12)');
   poly([Wp, S, upP(S, Hh), upP(Wp, Hh)], cL); poly([S, E, upP(E, Hh), upP(S, Hh)], cR);
@@ -1359,6 +1688,29 @@ function drawFurn(f, t) {
   } else if (f.fk === 'counter') {
     const cols = ['#f2a93b', '#e2453c', '#2fa860', '#f4f4f2'];
     for (let k = 0; k < f.w; k++) { const c = iso(f.x + k + 0.5, f.y + 0.5); ctx.fillStyle = cols[k % 4]; ctx.fillRect(c.x - 7, c.y - Hh - 5, 14, 6); }
+  }
+  if (f.fk === 'stove') {
+    for (let k = 0; k < f.w; k++) {
+      const p = upP(iso(f.x + k + 0.5, f.y + 0.5), Hh);
+      ctx.fillStyle = '#2a2d36'; ctx.beginPath(); ctx.ellipse(p.x, p.y, 10, 5, 0, 0, Math.PI * 2); ctx.fill();
+      const fl = Math.sin(t * 10 + k) * 1.5; ctx.fillStyle = '#3fa0ff'; ctx.beginPath(); ctx.ellipse(p.x, p.y - 2, 7, 3 + fl * 0.3, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffb02e'; ctx.fillRect(p.x - 2, p.y - 6 - fl, 4, 4);
+    }
+  } else if (f.fk === 'drafting') {
+    const a = upP(iso(f.x + 0.15, f.y + 0.2), Hh + 2), b2 = upP(iso(f.x + f.w - 0.15, f.y + 0.2), Hh + 8), c2 = upP(iso(f.x + f.w - 0.15, f.y + f.h - 0.2), Hh + 8), d2 = upP(iso(f.x + 0.15, f.y + f.h - 0.2), Hh + 2);
+    poly([a, b2, c2, d2], '#ffffff', '#9aa1ad');
+    ctx.strokeStyle = '#3f66a8'; ctx.lineWidth = 1; ctx.beginPath(); const m1 = lerp(a, c2, 0.3), m2 = lerp(b2, d2, 0.7); ctx.moveTo(m1.x, m1.y); ctx.lineTo(m2.x, m2.y); ctx.stroke();
+  } else if (f.fk === 'pedestal') {
+    const hue = (f.x * 47 + f.y * 31) % 360;
+    isoBox(f.x + 0.25, f.y + 0.25, 0.5, 0.5, Hh, 14 + (f.x % 3) * 8, `hsl(${hue},40%,85%)`, `hsl(${hue},35%,65%)`, `hsl(${hue},35%,52%)`);
+    isoBox(f.x + 0.32, f.y + 0.32, 0.36, 0.36, Hh + 14 + (f.x % 3) * 8, 10, '#f7f7f4', '#dcdcd8', '#c1c1bd');
+  } else if (f.fk === 'wafer') {
+    for (let v = 8; v < Hh - 6; v += 9) { const p = upP(lerp(Wp, S, 0.5), v); ctx.fillStyle = `hsl(${(v * 9 + t * 30) % 360},60%,72%)`; ctx.beginPath(); ctx.ellipse(p.x, p.y, 10, 3, 0.45, 0, Math.PI * 2); ctx.fill(); }
+  } else if (f.fk === 'battery') {
+    for (let k = 0; k < 4; k++) poly(fq(Wp, S, 0.1 + k * 0.21, 0.27 + k * 0.21, 8, Hh - 8), k < 1 + Math.floor((t * 1.5) % 4) ? '#7ef0a8' : '#2a5a3a');
+  } else if (f.fk === 'charger') {
+    poly(fq(Wp, S, 0.15, 0.85, Hh * 0.5, Hh * 0.82), Math.floor(t * 2) % 2 ? '#4ff0a0' : '#2bb874');
+    const p = upP(lerp(Wp, S, 0.5), Hh * 0.3); ctx.font = '12px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('⚡', p.x, p.y);
   }
   if (f.label) { const sp = lerp(Wp, S, 0.5); sign(sp.x, sp.y - Math.min(Hh - 12, 30), 'L', f.label, 0.85); }
 }
@@ -1497,7 +1849,11 @@ function frame(ts) {
       case 'gate': drawGate(e); break;
       case 'furn': drawFurn(e, t); break;
       case 'plant': drawPlant(e); break;
-      case 'lamp': case 'bench': case 'notice': drawDecor(e, t); break;
+      case 'lamp': case 'bench': case 'notice': case 'cone': drawDecor(e, t); break;
+      case 'statue': drawStatue(e, t); break;
+      case 'plane': drawPlane(e, t); break;
+      case 'frame': drawFrame(e); break;
+      case 'crane': drawCrane(e, t); break;
       default: drawChar(e, t, now);
     }
   }
@@ -1528,11 +1884,11 @@ function onTap(sx, sy) {
     }
     return;
   }
-  const nb = campus.static.find(d => d.kind === 'notice'), np = iso(nb.x + 0.5, nb.y + 0.5);
-  if (w.x > np.x - 28 && w.x < np.x + 28 && w.y > np.y - 58 && w.y < np.y) { openNotice(); return; }
-  const list = campus.static.filter(b => b.kind === 'building' || b.kind === 'screen').sort((a, b) => (b.x + b.y) - (a.x + a.y));
+  const nb = scene.static.find(d => d.kind === 'notice');
+  if (nb) { const np = iso(nb.x + 0.5, nb.y + 0.5); if (w.x > np.x - 28 && w.x < np.x + 28 && w.y > np.y - 58 && w.y < np.y) { openNotice(); return; } }
+  const list = scene.static.filter(b => b.kind === 'building' || b.kind === 'screen').sort((a, b) => (b.x + b.y) - (a.x + a.y));
   for (const b of list) {
-    if (b.kind === 'screen') { const c = iso(b.x + b.w / 2, b.y + 0.5); const sc = campus.screen; if (w.x > sc.cx - sc.w / 2 - 8 && w.x < sc.cx + sc.w / 2 + 8 && w.y > sc.by - sc.h - 8 && w.y < sc.by) { openVideo(); return; } continue; }
+    if (b.kind === 'screen') { const c = iso(b.x + b.w / 2, b.y + 0.5); const sc = scene.screen; if (w.x > sc.cx - sc.w / 2 - 8 && w.x < sc.cx + sc.w / 2 + 8 && w.y > sc.by - sc.h - 8 && w.y < sc.by) { openVideo(); return; } continue; }
     const N = iso(b.x, b.y), E = iso(b.x + b.w, b.y), S = iso(b.x + b.w, b.y + b.h), Wp = iso(b.x, b.y + b.h);
     if (inPoly(w, [Wp, S, E, upP(E, b.H), upP(N, b.H), upP(Wp, b.H)])) { openCard(b); return; }
   }
@@ -1657,28 +2013,34 @@ $('#shopClose').onclick = () => $('#shop').classList.add('hidden');
    create policy "insert" on scores for insert with check (char_length(name) <= 10 and game in ('lathe','bolt','catch','quiz'));
 */
 const DEMO_SCORES = {
-  lathe: [['선반장인','2학년',2140],['CNC고수','1학년',1520],['캐드폐인','2학년',980],['재수강러','3학년',610],['실습조교','기타',1880]],
-  bolt: [['재수강러','3학년',92],['선반장인','2학년',78],['학식러버','1학년',71],['밤샘공부','1학년',64]],
-  catch: [['학식러버','1학년',640],['캐드폐인','2학년',455],['CNC고수','1학년',380],['실습조교','기타',520]],
-  quiz: [['밤샘공부','1학년',1630],['캐드폐인','2학년',1410],['재수강러','3학년',520],['실습조교','기타',1750]],
+  lathe: [['선반장인','mech',2140],['정비왕','auto',1520],['도면장인','arch',980],['클린룸요정','semi',1880],['승무원지망','air',760]],
+  bolt: [['셰프지망','cook',92],['정비왕','auto',78],['학식러버','auto',71],['밤샘공부','semi',64],['선반장인','mech',70]],
+  catch: [['학식러버','auto',640],['캐드폐인','mech',455],['승무원지망','air',520],['도면장인','arch',380]],
+  quiz: [['밤샘공부','semi',1630],['캐드폐인','mech',1410],['정비왕','auto',1210],['도면장인','arch',990]],
 };
 const Rank = {
   local() { const l = store.get('mech-plaza-scores', {}); if (l.week !== WEEK) return { week: WEEK, rows: [] }; return l; },
   myBest(game) { return Math.max(0, ...this.local().rows.filter(r => r.game === game).map(r => r.score)); },
   async submit(game, score) {
-    const l = this.local(); l.rows.push({ game, score, uid: me.uid, name: me.name, grade: me.grade });
+    const l = this.local(); l.rows.push({ game, score, uid: me.uid, name: me.name, grade: me.grade, dept: me.dept });
     l.rows = l.rows.sort((a, b) => b.score - a.score).slice(0, 100); store.set('mech-plaza-scores', l);
-    if (net.client) { try { await net.client.from('scores').insert({ game, score, uid: me.uid, name: me.name, grade: me.grade, week: WEEK }); } catch (e) {} }
+    if (net.client) {
+      try {
+        const r = await net.client.from('scores').insert({ game, score, uid: me.uid, name: me.name, grade: me.grade, dept: me.dept, week: WEEK });
+        if (r.error) await net.client.from('scores').insert({ game, score, uid: me.uid, name: me.name, grade: deptOf(me.dept).short, week: WEEK });
+      } catch (e) {}
+    }
   },
   async rows(game) {
     if (net.client) {
       try {
-        const { data, error } = await net.client.from('scores').select('uid,name,grade,score').eq('week', WEEK).eq('game', game).order('score', { ascending: false }).limit(300);
+        let { data, error } = await net.client.from('scores').select('uid,name,grade,dept,score').eq('week', WEEK).eq('game', game).order('score', { ascending: false }).limit(300);
+        if (error) ({ data, error } = await net.client.from('scores').select('uid,name,grade,score').eq('week', WEEK).eq('game', game).order('score', { ascending: false }).limit(300));
         if (!error && data) return data;
       } catch (e) {}
     }
     const rows = this.local().rows.filter(r => r.game === game);
-    if (demo) for (const [name, grade, score] of DEMO_SCORES[game]) rows.push({ uid: 'demo-' + name, name, grade, score });
+    if (demo) for (const [name, dept, score] of DEMO_SCORES[game]) rows.push({ uid: 'demo-' + name, name, dept, grade: '', score });
     return rows;
   },
   best(rows) {
@@ -1961,11 +2323,11 @@ async function renderRank(id) {
   });
   const myIdx = best.findIndex(r => r.uid === me.uid);
   if (myIdx >= 10) { const m = document.createElement('div'); m.className = 'muted'; m.style.marginTop = '6px'; m.textContent = `내 순위: ${myIdx + 1}위 (${g.fmt(best[myIdx].score)})`; list.appendChild(m); }
-  // 학년 대항: 학년별 상위 5명 점수 합
+  // 학과 대항: 학과별 상위 5명 점수 합
   const byG = {};
-  for (const r of best) { const k = ['1학년','2학년','3학년'].includes(r.grade) ? r.grade : '기타'; (byG[k] = byG[k] || []).push(r.score); }
+  for (const r of best) { const k = r.dept ? deptOf(r.dept).short : (DEPTS.find(d => d.short === r.grade) || {}).short || '미선택'; (byG[k] = byG[k] || []).push(r.score); }
   const teams = Object.entries(byG).map(([k, a]) => [k, a.slice(0, 5).reduce((x, y) => x + y, 0)]).sort((a, b) => b[1] - a[1]);
-  const h2 = document.createElement('div'); h2.className = 'sect'; h2.textContent = '학년 대항 (학년별 상위 5명 합산)'; list.appendChild(h2);
+  const h2 = document.createElement('div'); h2.className = 'sect'; h2.textContent = '학과 대항 (학과별 상위 5명 합산)'; list.appendChild(h2);
   const max = Math.max(1, ...teams.map(t => t[1]));
   for (const [k, v] of teams) {
     const row = document.createElement('div'); row.className = 'grow';
@@ -1983,7 +2345,11 @@ $('#hubClose').onclick = () => $('#hub').classList.add('hidden');
 const blocked = new Set(store.get('mech-plaza-blocked', []));
 const isBlocked = c => c && c.uid && blocked.has(c.uid);
 const DM = { convs: {}, open: null };
-const charByUid = uid => Object.values(chars).find(c => c !== me && c.uid === uid);
+const charByUid = uid => {
+  const c = Object.values(chars).find(c => c !== me && c.uid === uid); if (c) return c;
+  if (net.mode === 'live' && net.lobby) for (const m of net.lobby.values()) if (m.uid === uid) return m;
+  return null;
+};
 function dmConv(uid, name) { return DM.convs[uid] || (DM.convs[uid] = { uid, name, msgs: [], unread: 0, t: Date.now() }); }
 function dmBadge() {
   const n = Object.values(DM.convs).reduce((a, c) => a + c.unread, 0);
@@ -2007,7 +2373,7 @@ function openProfile(c) {
   pv.fillStyle = 'rgba(0,0,0,.15)'; pv.beginPath(); pv.ellipse(120, 182, 34, 10, 0, 0, Math.PI * 2); pv.fill();
   drawSprite(pv, 120, 182, 9, c.hair, c.shirt, { g: c.g, hat: c.hat, facc: c.facc });
   $('#pcName').textContent = c.name;
-  $('#pcInfo').textContent = [c.grade, SCENES[c.scene] ? SCENES[c.scene].name + '에 있어요' : ''].filter(Boolean).join(' · ');
+  $('#pcInfo').textContent = [deptOf(c.dept).name, c.grade, SCENES[c.scene] ? SCENES[c.scene].name + '에 있어요' : ''].filter(Boolean).join(' · ');
   $('#pcard').classList.remove('hidden');
 }
 $('#pcClose').onclick = () => $('#pcard').classList.add('hidden');
@@ -2042,7 +2408,8 @@ function renderDMList() {
     if (c.unread) { const u = document.createElement('span'); u.className = 'ub'; u.textContent = c.unread; row.appendChild(u); }
     row.onclick = () => openThread(c.uid, c.name); L.appendChild(row);
   }
-  const ons = Object.values(chars).filter(c => c !== me && c.uid && !blocked.has(c.uid) && !DM.convs[c.uid]);
+  const pool = net.mode === 'live' && net.lobby ? [...net.lobby.values()] : Object.values(chars).filter(c => c !== me);
+  const ons = pool.filter(c => c.uid && !blocked.has(c.uid) && !DM.convs[c.uid]);
   if (ons.length) {
     const h = document.createElement('div'); h.className = 'sect'; h.textContent = '지금 접속 중'; L.appendChild(h);
     for (const c of ons) {
@@ -2050,7 +2417,7 @@ function renderDMList() {
       const d = document.createElement('span'); d.className = 'dot on';
       const dn = document.createElement('div'); dn.className = 'dn';
       const b = document.createElement('b'); b.textContent = c.name;
-      const sm = document.createElement('small'); sm.textContent = [c.grade, SCENES[c.scene] && SCENES[c.scene].name].filter(Boolean).join(' · ');
+      const sm = document.createElement('small'); sm.textContent = [deptOf(c.dept).short, c.grade, SCENES[c.s || c.scene] && SCENES[c.s || c.scene].name].filter(Boolean).join(' · ');
       dn.append(b, sm); row.append(d, dn); row.onclick = () => openThread(c.uid, c.name); L.appendChild(row);
     }
   }
@@ -2123,11 +2490,15 @@ function offerInstallLater() {
 
 /* ================== 입장 ================== */
 const saved = store.get('mech-plaza-me', null);
-const pick = { hair: saved?.hair || HAIRS[0], shirt: saved?.shirt || SHIRTS[0], g: saved?.g === 'f' ? 'f' : 'm', grade: saved?.grade || '1학년' };
+const pick = { hair: saved?.hair || HAIRS[0], shirt: saved?.shirt || SHIRTS[0], g: saved?.g === 'f' ? 'f' : 'm', grade: saved?.grade || '1학년', dept: saved?.dept || 'mech' };
+for (const d of DEPTS) { const b = document.createElement('button'); b.dataset.v = d.id; b.textContent = d.name; $('#dept').appendChild(b); }
+function syncDept() { for (const b of document.querySelectorAll('#dept button')) b.classList.toggle('on', b.dataset.v === pick.dept); }
+for (const b of document.querySelectorAll('#dept button')) b.onclick = () => { pick.dept = b.dataset.v; syncDept(); };
+syncDept();
 function syncGrade() { for (const b of document.querySelectorAll('#grade button')) b.classList.toggle('on', b.dataset.v === pick.grade); }
 for (const b of document.querySelectorAll('#grade button')) b.onclick = () => { pick.grade = b.dataset.v; syncGrade(); };
 syncGrade();
-$('#nick').value = saved?.name || '기계과' + Math.floor(100 + Math.random() * 900);
+$('#nick').value = saved?.name || '학생' + Math.floor(100 + Math.random() * 900);
 function swatches(el, list, key) {
   el.textContent = '';
   for (const col of list) {
@@ -2149,9 +2520,10 @@ $('#enter').onclick = () => {
   const name = clean($('#nick').value).slice(0, 10) || '익명';
   const baseId = store.get('mech-plaza-id', null) || ('u' + Math.random().toString(36).slice(2, 10));
   const id = baseId + '-' + Math.random().toString(36).slice(2, 6);
-  store.set('mech-plaza-id', baseId); store.set('mech-plaza-me', { name, hair: pick.hair, shirt: pick.shirt, g: pick.g, grade: pick.grade });
-  const sp = nearestWalkable(campus, 13 + Math.floor(Math.random() * 2), 21 + Math.floor(Math.random() * 3));
-  me = makeChar(id, { uid: baseId, name, g: pick.g, hair: pick.hair, shirt: pick.shirt, grade: pick.grade, hat: Wallet.d.hat, facc: Wallet.d.facc, x: sp.x + 0.5, y: sp.y + 0.5, scene: 'campus' });
+  store.set('mech-plaza-id', baseId); store.set('mech-plaza-me', { name, hair: pick.hair, shirt: pick.shirt, g: pick.g, grade: pick.grade, dept: pick.dept });
+  const hub = SCENES.hub; scene = hub;
+  const sp = nearestWalkable(hub, hub.spawn.x + Math.floor(Math.random() * 2), hub.spawn.y - Math.floor(Math.random() * 3));
+  me = makeChar(id, { uid: baseId, name, g: pick.g, hair: pick.hair, shirt: pick.shirt, grade: pick.grade, dept: pick.dept, hat: Wallet.d.hat, facc: Wallet.d.facc, x: sp.x + 0.5, y: sp.y + 0.5, scene: 'hub' });
   const p = iso(me.x, me.y); camX = p.x; camY = p.y - 30;
   $('#join').classList.add('hidden');
   Music.start(); Music.play('campus'); syncMusicBtn();
@@ -2160,7 +2532,8 @@ $('#enter').onclick = () => {
   $('#dmBtn').classList.remove('hidden');
   offerInstallLater();
   setTimeout(refreshChamps, 1500);
-  sys('기계공학과 광장에 오신 걸 환영해요');
+  sys('캠퍼스 광장에 오신 걸 환영해요');
+  const dz = deptOf(pick.dept).zone; if (dz) sys(`${ZONE_LABEL[dz]} 구역은 광장 둘레 문으로 가면 돼요`);
   const h = $('#hint'); h.classList.remove('hidden'); hintTimer = setTimeout(hideHint, 6000);
   updateOnline(); initNet();
 };
