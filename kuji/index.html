@@ -3,154 +3,268 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0e111a">
+<meta name="theme-color" content="#0b0d14">
 <link rel="icon" type="image/png" href="../icon-192.png">
-<title>럭키슬랩 쿠지</title>
+<title>럭키슬랩 · PSA10 쿠지</title>
+<meta name="description" content="남은 표에서 한 장씩 뽑는 PSA10 쿠지. 결제하면 바로 개봉, 남은 수량 실시간 공개.">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css">
 <style>
-  :root{--bg:#0e111a;--card:#171b28;--card2:#1f2435;--bd:#323a54;--text:#f3edda;--sub:#9aa0b8;--gold:#d9a030;--gold2:#ffe08a;--ink:#14161f;
-    --S:#e2453c;--A:#d9a030;--B:#3a7cf0;--C:#6f7690;--LAST:#9a5cd6}
+  :root{--bg:#0b0d14;--bg2:#10131d;--card:#151926;--card2:#1c2131;--bd:#2a3047;--text:#f3edda;--sub:#959bb4;--gold:#d9a030;--gold2:#ffe08a;--ink:#14161f;--green:#7ef0a8;
+    --S:#e2453c;--A:#d9a030;--B:#3a7cf0;--C:#6f7690;--D:#59607a;--LAST:#9a5cd6}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 -apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
-  .px{font-family:"Galmuri11",sans-serif}
-  .wrap{max-width:520px;margin:0 auto;padding:0 16px}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 -apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif}
+  a{color:inherit}
   button{font:inherit;color:inherit;cursor:pointer}
-  .demo{background:#3a2a10;color:var(--gold2);text-align:center;font:12px "Galmuri11",sans-serif;padding:7px 10px;border-bottom:1px solid #6b4f12}
-  header{position:sticky;top:0;z-index:5;background:rgba(14,17,26,.93);backdrop-filter:blur(8px);border-bottom:1px solid var(--bd)}
-  header .wrap{display:flex;align-items:center;gap:10px;height:56px}
-  .logo{font:bold 19px "Galmuri11",sans-serif;flex:1;color:var(--text);text-decoration:none}
-  .logo i{font-style:normal;color:var(--gold2)}
-  .pill{font:bold 12px "Galmuri11",sans-serif;border:1px solid var(--bd);border-radius:99px;padding:6px 11px;background:var(--card);color:var(--text);text-decoration:none}
+  .px{font-family:"Galmuri11",sans-serif}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 18px}
+  .hidden{display:none!important}
 
-  h2{font:bold 19px "Galmuri11",sans-serif;margin:24px 0 4px}
-  .lead{color:var(--sub);font-size:13px;margin:0 0 12px}
+  /* 상단 */
+  .modebar{text-align:center;font:12px "Galmuri11",sans-serif;padding:6px 10px;background:#2a1f0c;color:var(--gold2)}
+  .modebar.live{background:#0f2a1b;color:#9ff0bf}
+  header{position:sticky;top:0;z-index:20;background:rgba(11,13,20,.92);backdrop-filter:blur(10px);border-bottom:1px solid #1d2233}
+  header .wrap{display:flex;align-items:center;gap:22px;height:64px}
+  .logo{font:bold 20px "Galmuri11",sans-serif;text-decoration:none;white-space:nowrap;letter-spacing:.5px}
+  .logo b{color:var(--gold2);font-weight:bold}
+  nav.main{display:flex;gap:4px;flex:1;overflow-x:auto;scrollbar-width:none}
+  nav.main::-webkit-scrollbar{display:none}
+  nav.main a{text-decoration:none;font-size:14px;color:#c8ccdc;padding:8px 11px;border-radius:10px;white-space:nowrap;display:flex;align-items:center;gap:6px}
+  nav.main a:hover{background:#171b28}
+  nav.main a.on{color:var(--gold2);background:#191d2b}
+  nav.main a .dot{width:7px;height:7px;border-radius:50%;background:#5d6278}
+  nav.main a .dot.on{background:#ff4d4d;box-shadow:0 0 0 3px rgba(255,77,77,.2);animation:bl 1.2s infinite}
+  @keyframes bl{50%{opacity:.35}}
+  .hbtn{border:1px solid var(--bd);background:var(--card);border-radius:12px;padding:8px 13px;font:bold 13px "Galmuri11",sans-serif;text-decoration:none;white-space:nowrap;color:var(--gold2)}
+  @media (max-width:760px){
+    header .wrap{flex-wrap:wrap;height:auto;padding-top:10px;gap:6px 12px}
+    .logo{flex:1}
+    nav.main{order:3;flex-basis:100%;margin:0 -8px;padding-bottom:6px}
+    nav.main a{font-size:13px;padding:7px 9px}
+  }
 
-  /* 판 목록 */
-  .bcard{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:0;margin-bottom:14px;overflow:hidden}
-  .bcard .art{height:150px;position:relative;background:radial-gradient(120% 90% at 50% 0%,#2b3150 0%,#151826 70%);display:flex;align-items:flex-end;justify-content:center;gap:0;padding-bottom:12px}
-  .mini{width:62px;height:90px;border-radius:7px;background:#f2ead6;border:2px solid #04050a;padding:4px;margin:0 -6px;box-shadow:0 6px 0 rgba(0,0,0,.35)}
-  .mini b{display:block;height:11px;border-radius:3px;font:bold 7px/11px "Galmuri11",sans-serif;color:#fff;text-align:center}
-  .mini span{display:block;height:65px;margin-top:4px;border-radius:4px;background:linear-gradient(135deg,#ff9a5c,#ffd760 30%,#7be0a8 55%,#6aa8ff 78%,#c58bff);background-size:220% 220%;animation:holo 5s ease-in-out infinite alternate}
-  @keyframes holo{to{background-position:100% 100%}}
-  .bcard .badge{position:absolute;left:12px;top:12px;font:bold 11px "Galmuri11",sans-serif;background:var(--S);color:#fff;border-radius:7px;padding:4px 8px}
-  .bcard .badge.live{background:#b8322c}
-  .bcard .body{padding:14px 16px 16px}
-  .bcard h3{margin:0 0 6px;font:bold 16px/1.35 "Galmuri11",sans-serif}
-  .row2{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-  .price{font:bold 20px "Galmuri11",sans-serif;color:var(--gold2)}
-  .price small{font-size:12px;color:var(--sub);font-weight:normal;margin-left:3px}
-  .bar{height:9px;border-radius:99px;background:#252b3e;overflow:hidden;margin:10px 0 5px}
-  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--S))}
-  .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--sub)}
-  .meta b{color:var(--text)}
+  /* 공통 */
+  h2.sec{font:bold 22px "Galmuri11",sans-serif;margin:46px 0 4px;display:flex;align-items:center;gap:10px}
+  h2.sec small{font:13px -apple-system,sans-serif;color:var(--sub);margin-left:auto}
+  h2.sec small a{color:var(--sub)}
+  .lead{color:var(--sub);font-size:13.5px;margin:0 0 18px}
+  .g{display:inline-block;min-width:34px;height:24px;padding:0 7px;border-radius:7px;color:#fff;font:bold 12px/24px "Galmuri11",sans-serif;text-align:center;flex:none}
+  .empty{color:var(--sub);font-size:13.5px;text-align:center;padding:26px;border:1px dashed var(--bd);border-radius:16px}
+  .err{background:#3a1717;color:#ffb3b3;border-radius:12px;padding:12px 14px;font-size:13.5px;margin-top:16px}
+  .pill{display:inline-block;font:bold 12px "Galmuri11",sans-serif;border:1px solid var(--bd);border-radius:99px;padding:7px 12px;background:var(--card);color:var(--text);text-decoration:none}
 
-  /* 판 상세 */
-  .back{background:none;border:0;color:var(--sub);padding:14px 0 0;font-size:13px}
-  .hero{background:radial-gradient(120% 100% at 50% 0%,#2b3150 0%,#171b28 75%);border:1px solid var(--bd);border-radius:22px;padding:18px;margin-top:10px}
-  .hero h1{font:bold 21px/1.3 "Galmuri11",sans-serif;margin:0 0 8px}
-  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
-  .stats div{background:rgba(0,0,0,.25);border-radius:12px;padding:9px 6px;text-align:center}
-  .stats b{display:block;font:bold 17px "Galmuri11",sans-serif;color:var(--gold2)}
-  .stats small{font-size:11px;color:var(--sub)}
+  /* 히어로 */
+  .hero{position:relative;margin-top:22px;border-radius:26px;overflow:hidden;border:1px solid #232a40;min-height:330px}
+  .slide{position:absolute;inset:0;display:flex;align-items:center;padding:34px 40px;opacity:0;transition:opacity .7s;background:radial-gradient(120% 140% at 85% 30%,var(--c1),transparent 60%),linear-gradient(120deg,#0f1220,var(--c2))}
+  .slide.on{opacity:1;z-index:1}
+  .slide .tx{position:relative;z-index:2;max-width:52%}
+  .slide .k{font:12px "Galmuri11",sans-serif;color:var(--gold2);letter-spacing:3px}
+  .slide h1{font:bold 34px/1.25 "Galmuri11",sans-serif;margin:10px 0 10px}
+  .slide h1 em{font-style:normal;color:var(--gold2)}
+  .slide p{color:#cfd3e4;margin:0 0 20px;font-size:15px}
+  .cta{display:inline-block;background:linear-gradient(180deg,#ffe08a,#d9a030);color:var(--ink);font:bold 15px "Galmuri11",sans-serif;padding:13px 20px;border-radius:14px;text-decoration:none;box-shadow:0 4px 0 #8a5a12;border:0}
+  .cta.ghost{background:transparent;color:var(--text);box-shadow:none;border:1px solid #3a4260;margin-left:6px}
+  .fan{position:absolute;right:46px;bottom:-10px;top:30px;width:46%;display:flex;justify-content:center;align-items:flex-end}
+  .fan img,.fan .ph{width:34%;max-width:170px;aspect-ratio:275/450;object-fit:cover;object-position:top;border-radius:12px;border:2px solid #05060a;box-shadow:0 18px 40px rgba(0,0,0,.55);margin:0 -4%}
+  .fan > :nth-child(1){transform:rotate(-10deg) translateY(28px)}
+  .fan > :nth-child(2){transform:translateY(-6px);z-index:1}
+  .fan > :nth-child(3){transform:rotate(10deg) translateY(28px)}
+  .dots{position:absolute;left:40px;bottom:18px;z-index:3;display:flex;gap:7px}
+  .dots button{width:9px;height:9px;border-radius:99px;border:0;background:#3c4360;padding:0}
+  .dots button.on{width:26px;background:var(--gold2)}
+  @media (max-width:760px){
+    .hero{min-height:470px}
+    .slide{flex-direction:column;align-items:flex-start;padding:24px 20px}
+    .slide .tx{max-width:100%}
+    .slide h1{font-size:25px}
+    .fan{position:relative;right:auto;top:auto;bottom:auto;width:100%;height:210px;margin-top:8px}
+    .dots{left:20px;bottom:14px}
+  }
+
+  /* 실시간 오픈 */
+  .feed{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:thin}
+  .fd{flex:none;display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:10px 14px 10px 10px;min-width:250px;text-decoration:none}
+  .fd img,.fd .ph{width:38px;height:54px;object-fit:cover;object-position:top;border-radius:6px;border:1px solid #2f3650;flex:none}
+  .fd b{display:block;font-size:13.5px;max-width:190px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fd small{color:var(--sub);font-size:12px}
+  .fd.new{animation:pop .6s}
+  @keyframes pop{0%{transform:scale(.85);border-color:var(--gold2)}100%{transform:scale(1)}}
+  .fd.hit{border-color:#6b4f12;background:linear-gradient(90deg,#2a2010,var(--card))}
+
+  /* 판 카드 */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media (max-width:980px){.grid{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:600px){.grid{grid-template-columns:1fr}}
+  .pack{display:block;text-decoration:none;background:var(--card);border:1px solid var(--bd);border-radius:20px;overflow:hidden;transition:transform .15s,border-color .15s}
+  .pack:hover{transform:translateY(-3px);border-color:#4a5274}
+  .pack .info{padding:14px 16px 16px}
+  .pack .cat{font-size:11.5px;color:var(--sub)}
+  .pack h3{font:bold 16px/1.4 "Galmuri11",sans-serif;margin:3px 0 10px}
+  .rem{display:flex;justify-content:space-between;font-size:12.5px;color:var(--sub)}
+  .rem b{color:var(--text)}
+  .bar{height:6px;border-radius:99px;background:#232839;overflow:hidden;margin:6px 0 10px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#ff7a4a)}
+  .price{font:bold 17px "Galmuri11",sans-serif;color:var(--gold2)}
+  .price small{font:12px -apple-system,sans-serif;color:var(--sub);margin-left:4px}
+  .pack .peek{border-top:1px solid #222740;text-align:center;font-size:12.5px;color:var(--sub);padding:10px}
+
+  /* 커버 */
+  .cover{position:relative;aspect-ratio:1/1;overflow:hidden;background:radial-gradient(110% 90% at 50% 15%,var(--c1),transparent 70%),linear-gradient(160deg,var(--c2),#0b0d16 80%);display:flex;flex-direction:column;align-items:center}
+  .cover .no{position:absolute;left:12px;top:12px;z-index:3;font:bold 14px "Galmuri11",sans-serif;background:rgba(10,12,20,.75);border:1px solid #3a4260;border-radius:10px;padding:4px 9px}
+  .cover .badge{position:absolute;right:12px;top:12px;z-index:3;width:74px;height:74px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:conic-gradient(var(--gold2) 0 50%,#ff7a4a 50% 100%);color:var(--ink);font:bold 11px/1.15 "Galmuri11",sans-serif;text-align:center;border:3px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.45);transform:rotate(8deg)}
+  .cover .badge b{font-size:19px}
+  .cover .ttl{position:relative;z-index:2;margin-top:7%;text-align:center;padding:0 25%}
+  .cover .ttl small{display:block;font:11px "Galmuri11",sans-serif;letter-spacing:3px;color:var(--gold2);opacity:.9}
+  .cover .ttl b{display:block;font:bold clamp(15px,2.2vw,21px)/1.3 "Galmuri11",sans-serif;margin-top:6px;text-shadow:0 2px 0 rgba(0,0,0,.5)}
+  .cover .cfan{flex:1;width:100%;display:flex;justify-content:center;align-items:center;padding:4% 6% 0}
+  .cover .cfan img,.cover .cfan .ph{width:31%;aspect-ratio:275/450;object-fit:cover;object-position:top;border-radius:9px;border:2px solid #05060a;box-shadow:0 12px 26px rgba(0,0,0,.55);margin:0 -3%}
+  .cover .cfan > :nth-child(1){transform:rotate(-9deg) translateY(10%)}
+  .cover .cfan > :nth-child(2){transform:scale(1.08);z-index:1}
+  .cover .cfan > :nth-child(3){transform:rotate(9deg) translateY(10%)}
+  .cover .foot{position:relative;z-index:2;width:100%;text-align:center;padding:10px 0 14px;background:linear-gradient(transparent,rgba(5,6,10,.85) 45%)}
+  .cover .foot small{font:10px "Galmuri11",sans-serif;letter-spacing:4px;color:#cfd3e4}
+  .cover .foot b{display:block;padding:0 14px;font:bold clamp(17px,2.4vw,24px)/1.25 "Galmuri11",sans-serif;word-break:keep-all;color:var(--gold2);text-shadow:0 2px 0 #4a3008}
+  .ph{background:linear-gradient(135deg,#ff9a5c,#ffd760 30%,#7be0a8 55%,#6aa8ff 78%,#c58bff);display:block}
+  .cover.closed::after{content:'마감';position:absolute;inset:0;z-index:4;background:rgba(5,6,10,.6);display:flex;align-items:center;justify-content:center;font:bold 30px "Galmuri11",sans-serif;color:#fff}
+
+  /* 상세 */
+  .crumb{font-size:13px;color:var(--sub);margin:22px 0 14px}
+  .crumb a{color:var(--sub);text-decoration:none}
+  .detail{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:start}
+  .detail .cover{border-radius:24px;border:1px solid var(--bd)}
+  @media (max-width:820px){.detail{grid-template-columns:1fr;gap:20px}}
+  .chips{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+  .chip{font:bold 11.5px "Galmuri11",sans-serif;border:1px solid var(--bd);border-radius:8px;padding:4px 9px;background:var(--card)}
+  .chip.on{color:var(--green);border-color:#1f4d33}.chip.end{color:#9aa0b8}.chip.test{color:var(--gold2);border-color:#5a4416}.chip.live{color:#ff9a9a;border-color:#5a2020}
+  .detail h1{font:bold 30px/1.25 "Galmuri11",sans-serif;margin:0 0 14px}
+  .bigprice{font:bold 34px "Galmuri11",sans-serif}
+  .bigprice small{font:14px -apple-system,sans-serif;color:var(--sub);margin-left:6px}
+  .remline{display:flex;justify-content:space-between;align-items:baseline;margin-top:22px;color:var(--sub);font-size:13.5px}
+  .remline b{font:bold 21px "Galmuri11",sans-serif;color:var(--text)}
+  .detail .bar{height:8px;margin:8px 0 14px}
+  .tags{display:flex;gap:6px;flex-wrap:wrap}
+  .tags span{font-size:12px;border:1px solid var(--bd);border-radius:8px;padding:4px 9px;color:#c8ccdc}
+  .ship{display:flex;gap:10px;align-items:flex-start;border-top:1px solid #1f2436;margin-top:18px;padding-top:16px;font-size:13.5px}
+  .ship small{display:block;color:var(--sub);font-size:12.5px}
+  .qtyrow{display:flex;gap:8px;margin-top:18px}
+  .qtyrow button{flex:1;border:1px solid var(--bd);background:var(--card);border-radius:12px;padding:10px;font:bold 13px "Galmuri11",sans-serif;color:var(--sub)}
+  .qtyrow button.on{border-color:var(--gold);color:var(--gold2);background:#211c10}
+  .buybtn{display:block;width:100%;margin-top:12px;text-align:center;text-decoration:none;border:0;border-radius:16px;background:linear-gradient(180deg,#ffe08a,#d9a030);color:var(--ink);font:bold 17px "Galmuri11",sans-serif;padding:17px;box-shadow:0 4px 0 #8a5a12}
+  .buybtn:disabled,.buybtn.off{background:#232839;color:#6d7390;box-shadow:none;pointer-events:none}
+  .note{text-align:center;color:var(--sub);font-size:12px;margin-top:8px}
+  .trybtn{display:block;width:100%;margin-top:12px;border:1px solid var(--bd);border-radius:16px;background:var(--card);padding:14px;font:bold 14px "Galmuri11",sans-serif}
+  .trybtn small{font:12px -apple-system,sans-serif;color:var(--sub);margin-left:6px}
+  .who{display:flex;gap:8px;align-items:center;margin-top:14px;font-size:12.5px;color:var(--sub)}
+  .who input,.codebox input{flex:1;min-width:0;background:#090b11;border:1px solid var(--bd);border-radius:10px;color:var(--text);font:14px "Galmuri11",sans-serif;padding:9px 10px;outline:0}
+  .codebox{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px 14px;margin-top:14px;font-size:13px;color:var(--sub)}
+  .codebox .r{display:flex;gap:8px;margin-top:8px}
+  .codebox button{border:0;border-radius:10px;background:var(--card2);color:var(--gold2);font:bold 13px "Galmuri11",sans-serif;padding:0 14px}
+
+  .tabs{display:flex;gap:26px;border-bottom:1px solid #1f2436;margin-top:54px}
+  .tabs button{background:none;border:0;padding:12px 0;font:bold 15px "Galmuri11",sans-serif;color:var(--sub);border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tabs button.on{color:var(--text);border-color:var(--gold2)}
+  .tabbody{padding:24px 0 10px}
+  .hits{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+  .hit{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:10px;text-align:center;position:relative}
+  .hit img,.hit .ph{width:100%;aspect-ratio:275/450;object-fit:cover;object-position:top;border-radius:10px;display:block;margin-bottom:8px}
+  .hit .g{position:absolute;left:16px;top:16px}
+  .hit b{display:block;font-size:13px;line-height:1.35}
+  .hit small{color:var(--sub);font-size:12px}
+  .hit.gone{opacity:.4}.hit.gone img{filter:grayscale(1)}
   .tier{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:12px 14px;margin-bottom:10px}
   .tier .th{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-  .g{flex:none;min-width:30px;height:24px;padding:0 6px;border-radius:7px;color:#fff;font:bold 12px/24px "Galmuri11",sans-serif;text-align:center}
-  .tier .th b{flex:1;font-size:14px}
-  .tier .th span{font-size:12px;color:var(--sub)}
-  .item{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;padding:4px 0}
-  .item.gone{color:#59607a;text-decoration:line-through}
-  .item{align-items:center}
+  .tier .th b{flex:1;font-size:14px}.tier .th span{font-size:12px;color:var(--sub)}
+  .item{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13.5px;padding:5px 0}
   .item .nm{display:flex;align-items:center;gap:9px;min-width:0}
-  .item img{width:40px;height:56px;object-fit:cover;object-position:top;border-radius:5px;flex:none;border:1px solid var(--bd)}
-  .item.gone img{opacity:.3;filter:grayscale(1)}
-  .tk .b img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;border-radius:8px}
-  .tk .b .g{position:relative;z-index:1}
-  .tk .b.ph{justify-content:flex-end;padding-bottom:8px}
-  .tk .b.ph small{position:relative;z-index:1;background:rgba(10,12,20,.82);border-radius:6px;padding:2px 4px}
-  .tk.big{width:104px;height:150px}
+  .item img{width:36px;height:50px;object-fit:cover;object-position:top;border-radius:5px;flex:none;border:1px solid var(--bd)}
   .item .q{color:var(--sub);white-space:nowrap}
-  .fair{background:var(--card);border:1px dashed var(--bd);border-radius:16px;padding:12px 14px;font-size:12.5px;color:var(--sub);line-height:1.6}
-  .fair code{display:block;word-break:break-all;color:var(--gold2);font:11px/1.5 ui-monospace,Menlo,monospace;background:#0b0d14;border-radius:8px;padding:8px;margin:6px 0}
+  .item.gone{color:#59607a;text-decoration:line-through}.item.gone img{opacity:.3;filter:grayscale(1)}
   .log{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:6px 14px}
-  .log div{display:flex;gap:8px;align-items:center;font-size:13px;padding:7px 0;border-bottom:1px solid #232839}
+  .log div{display:flex;gap:8px;align-items:center;font-size:13px;padding:8px 0;border-bottom:1px solid #20253a}
   .log div:last-child{border-bottom:0}
-  .log .n{color:var(--sub);font-size:12px;width:62px;flex:none}
-  .empty{color:var(--sub);font-size:13px;text-align:center;padding:14px}
+  .log .n{color:var(--sub);font-size:12px;width:56px;flex:none}
+  .guide{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px 18px;font-size:14px;line-height:1.75;color:#d3d6e4}
+  .guide ol{margin:0;padding-left:20px}
+  .fair{background:var(--card);border:1px dashed var(--bd);border-radius:16px;padding:14px 16px;font-size:13px;color:var(--sub);line-height:1.65;margin-top:14px}
+  .fair code{display:block;word-break:break-all;color:var(--gold2);font:11.5px/1.5 ui-monospace,Menlo,monospace;background:#07080d;border-radius:8px;padding:9px;margin:8px 0}
 
-  /* 하단 구매바 */
-  .buy{position:fixed;left:0;right:0;bottom:0;z-index:6;background:rgba(14,17,26,.96);border-top:1px solid var(--bd);padding:10px 0 calc(10px + env(safe-area-inset-bottom))}
-  .buy .wrap{display:flex;gap:8px}
-  .qty{display:flex;background:var(--card);border:1px solid var(--bd);border-radius:14px;overflow:hidden;flex:none}
-  .qty button{border:0;background:none;padding:0 13px;font:bold 13px "Galmuri11",sans-serif;color:var(--sub)}
-  .qty button.on{background:var(--card2);color:var(--gold2)}
-  .go{flex:1;border:0;border-radius:14px;background:linear-gradient(180deg,#ffe08a,#d9a030);color:var(--ink);font:bold 15px "Galmuri11",sans-serif;padding:14px 10px;box-shadow:0 4px 0 #8a5a12}
-  .go:disabled{background:#2a3048;color:#6d7390;box-shadow:none}
+  /* FAQ */
+  .faq details{background:var(--card);border:1px solid var(--bd);border-radius:14px;margin-bottom:10px;padding:0 16px}
+  .faq summary{cursor:pointer;font:bold 14.5px "Galmuri11",sans-serif;padding:15px 0;list-style:none}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq p{margin:0 0 14px;color:#c8ccdc;font-size:14px;line-height:1.7}
+  .orders a{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px 16px;text-decoration:none;margin-bottom:10px}
+  .orders a span{color:var(--gold2);font:bold 13px "Galmuri11",sans-serif}
+
+  footer{border-top:1px solid #1d2233;margin-top:70px;padding:26px 0 40px;color:#6f7590;font-size:12.5px;line-height:1.8}
+  footer b{color:#a9aec4}
+
+  /* 모바일 하단 구매바 */
+  .mbuy{position:fixed;left:0;right:0;bottom:0;z-index:15;background:rgba(11,13,20,.96);border-top:1px solid var(--bd);padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:none}
+  @media (max-width:820px){ .mbuy.show{display:block} body.hasbuy{padding-bottom:84px} }
+  .mbuy .buybtn{margin:0;padding:15px}
 
   /* 결과 연출 */
-  .ov{position:fixed;inset:0;z-index:10;background:rgba(5,7,12,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
-  .ov h3{font:bold 18px "Galmuri11",sans-serif;margin:0 0 4px}
-  .ov p{color:var(--sub);font-size:13px;margin:0 0 16px}
-  .grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:460px}
-  .tk{width:84px;height:120px;perspective:600px}
+  .ov{position:fixed;inset:0;z-index:40;background:rgba(4,5,9,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow:auto}
+  .ov h3{font:bold 20px "Galmuri11",sans-serif;margin:0 0 4px;text-align:center}
+  .ov p{color:var(--sub);font-size:13px;margin:0 0 18px;text-align:center}
+  .ov .tag{font:bold 11px "Galmuri11",sans-serif;color:var(--gold2);border:1px solid #5a4416;border-radius:99px;padding:3px 10px;margin-bottom:10px}
+  .tks{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:620px}
+  .tk{width:88px;height:126px;perspective:600px}
+  .tk.big{width:110px;height:158px}
   .tk .in{position:relative;width:100%;height:100%;transition:transform .55s cubic-bezier(.2,.8,.3,1.2);transform-style:preserve-3d}
   .tk.open .in{transform:rotateY(180deg)}
   .tk .f,.tk .b{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6px}
-  .tk .f{background:repeating-linear-gradient(45deg,#2a2f45,#2a2f45 8px,#232838 8px,#232838 16px);border:2px solid var(--gold);font:bold 26px "Galmuri11",sans-serif;color:var(--gold2)}
+  .tk .f{background:repeating-linear-gradient(45deg,#262b40,#262b40 8px,#1f2334 8px,#1f2334 16px);border:2px solid var(--gold);font:bold 26px "Galmuri11",sans-serif;color:var(--gold2)}
   .tk .b{transform:rotateY(180deg);background:var(--card2);border:2px solid var(--bd)}
-  .tk .b .g{margin-bottom:6px}
-  .tk .b small{font-size:10.5px;line-height:1.3;color:var(--text)}
-  .tk.hit .b{border-color:var(--gold2);box-shadow:0 0 0 3px rgba(255,224,138,.25),0 0 28px rgba(255,200,90,.55);background:radial-gradient(circle at 50% 30%,#4a3a14,#1f2435 70%)}
+  .tk .b img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;border-radius:8px}
+  .tk .b .g{position:relative;z-index:1;margin-bottom:6px}
+  .tk .b small{position:relative;z-index:1;font-size:10.5px;line-height:1.3}
+  .tk .b.ph2{justify-content:flex-end;padding-bottom:8px}
+  .tk .b.ph2 small{background:rgba(10,12,20,.85);border-radius:6px;padding:2px 4px}
+  .tk.hit .b{border-color:var(--gold2);box-shadow:0 0 0 3px rgba(255,224,138,.25),0 0 30px rgba(255,200,90,.6)}
   .tk.wait .in{animation:wob .5s ease-in-out infinite}
   @keyframes wob{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
-  .ov .act{display:flex;gap:8px;margin-top:20px;width:100%;max-width:340px}
-  .ov .act button{flex:1;border:0;border-radius:14px;padding:13px;font:bold 14px "Galmuri11",sans-serif}
+  .ov .act{display:flex;gap:8px;margin-top:22px;width:100%;max-width:360px}
+  .ov .act button{flex:1;border:0;border-radius:14px;padding:14px;font:bold 14px "Galmuri11",sans-serif}
   .ov .act .p{background:var(--gold2);color:var(--ink)}
   .ov .act .s{background:var(--card2);color:var(--text)}
-  canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:11}
-  .hidden{display:none!important}
-  body.embed header{display:none}
-  body.embed{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
-  @media (prefers-reduced-motion:reduce){.mini span{animation:none}.tk .in{transition:none}.tk.wait .in{animation:none}}
-  .demo.live{background:#12321f;color:#9ff0bf;border-bottom-color:#1f6b3a}
-  .who{display:flex;gap:8px;align-items:center;margin-top:12px;font-size:12.5px;color:var(--sub)}
-  .who input,.codebox input{flex:1;min-width:0;background:#0b0d14;border:1px solid var(--bd);border-radius:10px;color:var(--text);font:14px "Galmuri11",sans-serif;padding:9px 10px;outline:0}
-  .who input:focus,.codebox input:focus{border-color:var(--gold)}
-  .codebox{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:12px 14px;margin-top:12px;font-size:13px;color:var(--sub)}
-  .codebox .r{display:flex;gap:8px;margin-top:8px}
-  .codebox button{border:0;border-radius:10px;background:var(--card2);color:var(--gold2);font:bold 13px "Galmuri11",sans-serif;padding:0 14px}
-  .codebox b{color:var(--gold2)}
-  .tag{display:inline-block;font:bold 11px "Galmuri11",sans-serif;border-radius:7px;padding:3px 8px;margin:0 0 8px;background:#2a3048;color:var(--sub)}
-  .tag.test{background:#3a2a10;color:var(--gold2)}.tag.live{background:#4a1d1d;color:#ff9a9a}.tag.end{background:#2a2e3d;color:#9aa0b8}
-  .bcard .art img{width:62px;height:90px;object-fit:cover;object-position:top;border-radius:7px;border:2px solid #04050a;margin:0 -6px;box-shadow:0 6px 0 rgba(0,0,0,.35)}
-  .toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translateX(-50%);z-index:12;background:linear-gradient(90deg,#b8322c,#d9a030);color:#fff;font:bold 13px "Galmuri11",sans-serif;padding:10px 14px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.4);max-width:calc(100% - 24px);text-align:center}
-  .buylink{flex:1;display:block;text-align:center;text-decoration:none;border-radius:14px;background:linear-gradient(180deg,#ffe08a,#d9a030);color:var(--ink);font:bold 15px "Galmuri11",sans-serif;padding:14px 10px;box-shadow:0 4px 0 #8a5a12}
-  .orders{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:6px 14px;margin-top:8px}
-  .orders a{display:flex;justify-content:space-between;color:var(--text);text-decoration:none;font-size:13px;padding:9px 0;border-bottom:1px solid #232839}
-  .orders a:last-child{border-bottom:0}.orders a span{color:var(--gold2)}
-  .wait{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:22px 18px;margin-top:18px;text-align:center}
-  .wait h3{font:bold 18px "Galmuri11",sans-serif;margin:0 0 8px}.wait p{color:var(--sub);font-size:13.5px;margin:0 0 14px}
-  .err{background:#4a1d1d;color:#ffb3b3;border-radius:12px;padding:10px 12px;font-size:13px;margin-top:10px}
+  .toast{position:fixed;left:50%;top:calc(76px + env(safe-area-inset-top));transform:translateX(-50%);z-index:45;background:linear-gradient(90deg,#b8322c,#d9a030);color:#fff;font:bold 13px "Galmuri11",sans-serif;padding:11px 16px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.45);max-width:calc(100% - 24px);text-align:center}
+  .wait{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:30px 20px;margin:40px auto 0;text-align:center;max-width:520px}
+  .wait h3{font:bold 19px "Galmuri11",sans-serif;margin:0 0 8px}.wait p{color:var(--sub);font-size:13.5px;margin:0 0 16px}
+  canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:50}
+
+  /* 광장 안에 열렸을 때 */
+  body.embed header,body.embed footer,body.embed .modebar{display:none}
+  body.embed .hero{display:none}
+  @media (prefers-reduced-motion:reduce){.slide{transition:none}.tk .in{transition:none}.tk.wait .in{animation:none}.pack{transition:none}}
 </style>
 </head>
 <body>
-<div class="demo" id="modeBar">연결 확인 중…</div>
+<div class="modebar" id="modeBar">연결 확인 중…</div>
 <header><div class="wrap">
-  <a class="logo" href="#">🍀 LUCKY<i>SLAB</i></a>
-  <a class="pill" href="../">🌙 광장</a>
-  <a class="pill" id="shopLink" href="../shop/">상점</a>
+  <a class="logo" href="#/">🍀 LUCKY<b>SLAB</b></a>
+  <nav class="main" id="nav">
+    <a href="#/" data-r="home">홈</a>
+    <a href="#/live" data-r="live"><span class="dot" id="liveDot"></span>LIVE</a>
+    <a href="#/packs" data-r="packs">🎴 쿠지</a>
+    <a href="../" data-r="plaza">🌙 광장</a>
+    <a href="#/faq" data-r="faq">FAQ</a>
+    <a href="#/me" data-r="me">내 결과</a>
+  </nav>
+  <a class="hbtn" id="shopLink" href="../shop/">상점</a>
 </div></header>
 
 <main class="wrap" id="view"></main>
-<div class="buy hidden" id="buy"><div class="wrap">
-  <div class="qty" id="qty"><button data-n="1" class="on">1회</button><button data-n="5">5회</button><button data-n="10">10회</button></div>
-  <button class="go" id="go">뽑기</button>
-  <a class="buylink hidden" id="buyLink" target="_blank" rel="noopener">결제하고 바로 뽑기 →</a>
-</div></div>
+
+<footer><div class="wrap" id="foot"></div></footer>
+<div class="mbuy" id="mbuy"></div>
 
 <div class="ov hidden" id="ov">
+  <span class="tag hidden" id="ovTag">체험 모드 · 실제 결과 아님</span>
   <h3 id="ovT">두근두근…</h3>
   <p id="ovS">카드를 눌러서 열어보세요</p>
-  <div class="grid" id="ovG"></div>
+  <div class="tks" id="ovG"></div>
   <div class="act hidden" id="ovA"><button class="s" id="ovAll">전부 열기</button><button class="p" id="ovOk">확인</button></div>
 </div>
 <div class="toast hidden" id="toast"></div>
@@ -167,7 +281,8 @@ if (EMBED) document.body.classList.add('embed');
 const tellPlaza = msg => { if (EMBED) try { window.parent.postMessage(msg, location.origin); } catch (e) {} };
 const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
 const won = n => (+n || 0).toLocaleString('ko-KR') + '원';
-const COL = g => `var(--${['S', 'A', 'B', 'C', 'LAST'].includes(g) ? g : 'C'})`;
+const num = n => (+n || 0).toLocaleString('ko-KR');
+const COL = g => `var(--${['S', 'A', 'B', 'C', 'D', 'LAST'].includes(g) ? g : 'C'})`;
 const HIT = g => g === 'S' || g === 'A' || g === 'B' || g === 'LAST';
 const GN = g => g === 'LAST' ? '라스트' : g + '상';
 const imgUrl = u => !u ? '' : /^https?:/.test(u) ? u : '../' + u;
@@ -176,7 +291,10 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
 };
 const sha256 = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))].map(x => x.toString(16).padStart(2, '0')).join('');
+const ago = t => { if (!t) return ''; const s = (Date.now() - new Date(t).getTime()) / 1000; return s < 60 ? '방금' : s < 3600 ? Math.floor(s / 60) + '분 전' : s < 86400 ? Math.floor(s / 3600) + '시간 전' : Math.floor(s / 86400) + '일 전'; };
+const img = (u, cls) => { if (!u) { const p = el('span', 'ph ' + (cls || '')); return p; } const i = el('img', cls); i.src = imgUrl(u); i.alt = ''; i.loading = 'lazy'; return i; };
 if (D.SHOP_URL) $('#shopLink').href = D.SHOP_URL;
+if (D.LIVE && D.LIVE.youtube) $('#liveDot').classList.add('on');
 let myName = (store.get('luckyslab-me', null) || {}).name || store.get('luckyslab-kuji-name', '') || '';
 
 /* =====================================================================
@@ -201,22 +319,21 @@ const Server = {
   reveal(slug) { return this.call('kuji_reveal', { p_slug: slug }); },
   codeInfo(code) { return this.call('kuji_code_info', { p_code: code }); },
   async order(id) {
-    const r = await fetch(D.SUPABASE_URL + '/functions/v1/kuji-order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order_id: id }) });
-    let j = {}; try { j = await r.json(); } catch (e) {}
+    const r = await fetch(D.SUPABASE_URL + '/functions/v1/kuji-order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order_id: id }) }).catch(() => null);
+    let j = {}; try { j = r ? await r.json() : {}; } catch (e) {}
     if (!j.status) j = { status: 'error', message: '주문 확인 서버에 연결하지 못했어요' };
     return j;
   },
-  watch(boardId, cb) {
-    if (this.ch) this.sb.removeChannel(this.ch);
-    this.ch = this.sb.channel('kuji-' + boardId).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'kuji_draws', filter: 'board_id=eq.' + boardId }, p => cb(p.new)).subscribe();
+  watchAll(cb) {
+    if (this.chAll) return;
+    this.chAll = this.sb.channel('kuji-all').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'kuji_draws' }, p => cb(p.new)).subscribe();
   },
 };
 
-// ---- 데모: data.js 판을 이 브라우저에서 섞고 뽑음 ----
 const Local = {
   boards: (D.BOARDS || []).map((b, i) => {
     const prizes = []; for (const t of b.tiers || []) for (const it of t.items) prizes.push({ grade: t.g, name: it[0], img: it[3] || null, qty: +it[2] });
-    return { slug: 'b' + i, title: b.title, price: b.price, total: prizes.reduce((a, p) => a + p.qty, 0), prizes };
+    return { id: 'b' + i, slug: 'b' + i, title: b.title, price: b.price, total: prizes.reduce((a, p) => a + p.qty, 0), prizes };
   }),
   async deck(b) {
     const key = 'luckyslab-kujidemo-' + b.slug + '-' + b.total;
@@ -235,7 +352,7 @@ const Local = {
     const out = [];
     for (const b of this.boards) {
       const d = await this.deck(b), rest = d.t.slice(d.next).map(i => b.prizes[i].grade);
-      out.push({ slug: b.slug, title: b.title, price: b.price, total: b.total, mode: 'auto', test: true, status: rest.length ? 'open' : 'closed',
+      out.push({ id: b.id, slug: b.slug, title: b.title, price: b.price, total: b.total, mode: 'auto', test: true, status: rest.length ? 'open' : 'closed',
         left: rest.length, hits_left: rest.filter(HIT).length, s_left: rest.filter(g => g === 'S').length, imgs: b.prizes.filter(p => p.img).slice(0, 3).map(p => p.img) });
     }
     return out;
@@ -251,190 +368,305 @@ const Local = {
     const b = this.boards.find(x => x.slug === slug), d = await this.deck(b), res = [];
     n = Math.min(n, 10, d.t.length - d.next);
     for (let i = 0; i < n; i++) { const p = b.prizes[d.t[d.next]]; res.push({ no: d.next + 1, grade: p.grade, name: p.name, img: p.img }); d.next++; }
-    d.log = res.slice().reverse().map(r => ({ ...r, who })).concat(d.log).slice(0, 100); this.save(b, d);
+    const at = new Date().toISOString();
+    d.log = res.slice().reverse().map(r => ({ ...r, who, at })).concat(d.log).slice(0, 100); this.save(b, d);
     return { results: res, left: d.t.length - d.next, closed: d.next === d.t.length };
   },
   async reveal(slug) { const b = this.boards.find(x => x.slug === slug), d = await this.deck(b); return { salt: d.salt, hash: d.hash, order: this.order(b, d) }; },
   async codeInfo() { return null; },
-  watch() {},
+  watchAll() {},
 };
-
 let API = Local, LIVE = false;
 
-/* ====================== 화면 ====================== */
-const V = $('#view');
-let cur = null, qty = 1, code = (QS.get('code') || store.get('luckyslab-kuji-code', '') || '').toUpperCase(), codeLeft = null;
+/* ====================== 공통 조각 ====================== */
+const PALETTES = [['#5a3b10', '#24170a'], ['#1d3b6b', '#0d1830'], ['#5a1d2a', '#22090f'], ['#164a3a', '#08201a'], ['#3e2366', '#160b29']];
+const palette = s => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return PALETTES[h % PALETTES.length]; };
+function hitImgs(b) { return (b.imgs || (b.prizes || []).filter(p => p.img && HIT(p.grade)).map(p => p.img)).filter(Boolean).slice(0, 3); }
+function cover(b, no) {
+  const [c1, c2] = palette(b.slug), c = el('div', 'cover' + (b.status === 'closed' ? ' closed' : ''));
+  c.style.setProperty('--c1', c1); c.style.setProperty('--c2', c2);
+  if (no) c.appendChild(el('span', 'no', String(no).padStart(2, '0')));
+  const hits = b.hits_total ?? b.hits_left;
+  if (b.mode === 'live') { const bd = el('div', 'badge'); bd.append(el('b', '', 'LIVE'), el('span', '', '방송 개봉')); c.appendChild(bd); }
+  else if (b.s_left) { const bd = el('div', 'badge'); bd.append(el('span', '', 'S상'), el('b', '', b.s_left + '장')); c.appendChild(bd); }
+  const t = el('div', 'ttl'); t.append(el('small', '', 'PSA 10 · LUCKY KUJI'), el('b', '', hits ? `힛 카드 ${hits}장` : '한 장씩 개봉')); c.appendChild(t);
+  const f = el('div', 'cfan'); const ims = hitImgs(b); for (let i = 0; i < 3; i++) f.appendChild(img(ims[i])); c.appendChild(f);
+  const ft = el('div', 'foot'); ft.append(el('small', '', 'LUCKY SLAB'), el('b', '', b.title.length > 24 ? b.title.slice(0, 23) + '…' : b.title)); c.appendChild(ft);
+  return c;
+}
+function packCard(b, no) {
+  const a = el('a', 'pack'); a.href = '#/p/' + encodeURIComponent(b.slug);
+  a.appendChild(cover(b, no));
+  const i = el('div', 'info');
+  i.appendChild(el('div', 'cat', b.mode === 'live' ? '🔴 라이브 판' : b.test && LIVE ? '테스트 판 · 무료' : 'PSA10 쿠지'));
+  i.appendChild(el('h3', '', b.title));
+  const r = el('div', 'rem'); const l = el('span'); l.textContent = '남은 수량 / 총 수량'; const v = el('span'); v.append(el('b', '', num(b.left)), ' / ' + num(b.total)); r.append(l, v); i.appendChild(r);
+  const bar = el('div', 'bar'), f = el('i'); f.style.width = (b.total ? b.left / b.total * 100 : 0) + '%'; bar.appendChild(f); i.appendChild(bar);
+  const p = el('div', 'price'); p.textContent = won(b.price); p.appendChild(el('small', '', '1회')); i.appendChild(p);
+  a.appendChild(i); a.appendChild(el('div', 'peek', '👁 경품 미리보기'));
+  return a;
+}
 function toast(t) { const e = $('#toast'); e.textContent = t; e.classList.remove('hidden'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.add('hidden'), 4500); }
+function setNav(r) { for (const a of document.querySelectorAll('#nav a')) a.classList.toggle('on', a.dataset.r === r); }
+function setBuyBar(node) { const m = $('#mbuy'); m.textContent = ''; if (node) { m.appendChild(node); m.classList.add('show'); document.body.classList.add('hasbuy'); } else { m.classList.remove('show'); document.body.classList.remove('hasbuy'); } }
 
+/* ====================== 라우터 ====================== */
+const V = $('#view');
+let cur = null, st = null, qty = 1, busy = false, myBatch = new Set(), listCache = [];
+let code = (QS.get('code') || store.get('luckyslab-kuji-code', '') || '').toUpperCase(), codeLeft = null;
 async function route() {
-  const slug = decodeURIComponent(location.hash.replace(/^#\/?/, ''));
-  window.scrollTo(0, 0);
-  if (slug) return showBoard(slug);
-  cur = null; $('#buy').classList.add('hidden'); showList();
+  const h = decodeURIComponent(location.hash.replace(/^#\/?/, ''));
+  window.scrollTo(0, 0); cur = null; st = null; setBuyBar(null); stopHero();
+  if (!h) return EMBED ? showPacks() : showHome();
+  if (h === 'packs') return showPacks();
+  if (h === 'faq') return showFaq();
+  if (h === 'me') return showMe();
+  if (h === 'live') return showLive();
+  return showBoard(h.startsWith('p/') ? h.slice(2) : h);
 }
 window.addEventListener('hashchange', route);
 
-const myOrders = () => store.get('luckyslab-kuji-orders', []);
-async function showList() {
-  V.textContent = '';
-  const mo = myOrders();
-  if (LIVE && mo.length) {
-    V.appendChild(el('h2', '', '🧾 내 뽑기 결과'));
-    const box = el('div', 'orders');
-    for (const o of mo.slice(0, 5)) { const a = el('a'); a.href = '?order=' + encodeURIComponent(o.id); a.append(el('b', '', `주문 ${o.id}`), el('span', '', o.hits ? `🎉 힛 ${o.hits}장` : `${o.n}장`)); box.appendChild(a); }
-    V.appendChild(box);
-  }
-  V.appendChild(el('h2', '', '🎴 지금 열린 판'));
-  V.appendChild(el('p', 'lead', '남은 표에서 한 장씩 뽑는 쿠지 방식이에요. 마지막 표까지 다 팔리면 모든 상품이 반드시 나가요.'));
-  let list;
-  try { list = await API.list(); } catch (e) { V.appendChild(el('div', 'err', '판 목록을 불러오지 못했어요: ' + e.message)); return; }
-  if (!list.length) { V.appendChild(el('div', 'empty', '지금 열린 판이 없어요. 곧 새 판이 열려요!')); return; }
-  for (const b of list) {
-    const c = el('button', 'bcard'); c.onclick = () => { location.hash = '#/' + b.slug; };
-    const art = el('div', 'art');
-    art.appendChild(el('span', 'badge', b.status === 'closed' ? '마감' : b.mode === 'live' ? '🔴 라이브 판' : b.s_left ? `S상 ${b.s_left}장 남음` : '진행 중'));
-    const imgs = (b.imgs || []).filter(Boolean);
-    if (imgs.length) imgs.forEach((u, i) => { const im = el('img'); im.src = imgUrl(u); im.alt = ''; im.style.transform = `rotate(${[-8, 0, 8][i]}deg) translateY(${[10, 0, 10][i]}px)`; art.appendChild(im); });
-    else [['S', -8, 10], ['A', 0, 0], ['B', 8, 10]].forEach(([g, r, y]) => { const m = el('div', 'mini'); m.style.transform = `rotate(${r}deg) translateY(${y}px)`; const t = el('b', '', g + '상'); t.style.background = COL(g); m.append(t, el('span')); art.appendChild(m); });
-    c.appendChild(art);
-    const body = el('div', 'body');
-    if (b.test && LIVE) body.appendChild(el('span', 'tag test', '테스트 판 · 무료'));
-    body.appendChild(el('h3', '', b.title));
-    const p = el('div', 'price'); p.textContent = won(b.price); p.appendChild(el('small', '', '/ 1회')); body.appendChild(p);
-    const bar = el('div', 'bar'), f = el('i'); f.style.width = (b.left / b.total * 100) + '%'; bar.appendChild(f); body.appendChild(bar);
-    const meta = el('div', 'meta'), m1 = el('span'); m1.append('남은 ', el('b', '', (+b.left).toLocaleString()), ' / ' + (+b.total).toLocaleString());
-    meta.append(m1, el('span', '', `힛 ${b.hits_left}장 남음`)); body.appendChild(meta); c.appendChild(body); V.appendChild(c);
-  }
+/* ---- 홈 ---- */
+let heroT = 0;
+function stopHero() { clearInterval(heroT); }
+async function showHome() {
+  setNav('home'); V.textContent = '';
+  let list; try { list = listCache = await API.list(); } catch (e) { V.appendChild(el('div', 'err', '판 목록을 불러오지 못했어요: ' + e.message)); return; }
+  const open = list.filter(b => b.status === 'open');
+  // 배너
+  const hero = el('section', 'hero'), dots = el('div', 'dots'), slides = [];
+  const mk = (k, h1, em, p, href, btn, ims, pal, ghost) => {
+    const s = el('div', 'slide'); s.style.setProperty('--c1', pal[0]); s.style.setProperty('--c2', pal[1]);
+    const tx = el('div', 'tx'), H = el('h1'); H.append(h1); if (em) { H.appendChild(el('br')); H.appendChild(el('em', '', em)); }
+    tx.append(el('div', 'k', k), H, el('p', '', p));
+    const a = el('a', 'cta', btn); a.href = href; tx.appendChild(a);
+    if (ghost) { const g = el('a', 'cta ghost', ghost[0]); g.href = ghost[1]; tx.appendChild(g); }
+    const f = el('div', 'fan'); for (let i = 0; i < 3; i++) f.appendChild(img(ims[i])); s.append(tx, f); hero.appendChild(s); slides.push(s);
+  };
+  const top = open[0];
+  if (top) mk('NOW OPEN · ' + (top.mode === 'live' ? 'LIVE' : 'PSA 10'), top.title, top.s_left ? `S상 ${top.s_left}장 남았어요` : `남은 ${num(top.left)}구`,
+    `1회 ${won(top.price)} · 결제하면 바로 개봉 · 남은 수량 실시간 공개`, '#/p/' + encodeURIComponent(top.slug), '지금 뽑으러 가기 →', hitImgs(top), palette(top.slug), ['전체 판 보기', '#/packs']);
+  mk('FAIR KUJI', '뭐가 남았는지', '다 보여주고 뽑아요', '판을 열 때 표 순서를 고정하고 지문을 먼저 공개해요. 끝나면 누구나 조작 여부를 검증할 수 있어요.', '#/faq', '어떻게 증명하나요?', hitImgs(open[1] || top || {}), ['#2a4a8a', '#0d1730']);
+  mk('LUCKY PLAZA', '안 사도 놀 수 있는', '럭키슬랩 광장', '캐릭터로 모여서 라이브 같이 보고, 누가 당첨되면 광장 전체에 폭죽이 터져요.', '../', '광장 놀러가기 →', hitImgs(open[2] || open[0] || {}), ['#4a2a6b', '#150b26']);
+  slides.forEach((s, i) => { const b = el('button'); b.setAttribute('aria-label', (i + 1) + '번 배너'); b.onclick = () => go(i); dots.appendChild(b); });
+  hero.appendChild(dots); V.appendChild(hero);
+  let cur = 0; const go = i => { cur = i; slides.forEach((s, k) => s.classList.toggle('on', k === i)); [...dots.children].forEach((d, k) => d.classList.toggle('on', k === i)); };
+  go(0); heroT = setInterval(() => go((cur + 1) % slides.length), 5500);
+
+  // 실시간 오픈
+  const fh = el('h2', 'sec'); fh.append('⚡ 실시간 오픈 현황'); V.appendChild(fh);
+  V.appendChild(el('p', 'lead', '방금 열린 결과예요. 힛이 나오면 금색으로 떠요.'));
+  const feed = el('div', 'feed'); feed.id = 'feed'; V.appendChild(feed); fillFeed(open);
+
+  // 인기 판
+  const ph = el('h2', 'sec'); ph.append('🔥 지금 인기'); const sm = el('small'); const sa = el('a', '', '전체 보기 →'); sa.href = '#/packs'; sm.appendChild(sa); ph.appendChild(sm); V.appendChild(ph);
+  V.appendChild(el('p', 'lead', '남은 표에서 한 장씩 뽑는 쿠지 방식. 마지막 표까지 다 팔리면 모든 상품이 반드시 나가요.'));
+  const g = el('div', 'grid');
+  if (!list.length) V.appendChild(el('div', 'empty', '지금 열린 판이 없어요. 곧 새 판이 열려요!'));
+  list.slice(0, 6).forEach((b, i) => g.appendChild(packCard(b, i + 1))); V.appendChild(g);
+
+  // 이용 방법
+  V.appendChild(el('h2', 'sec', '📦 이렇게 뽑아요'));
+  const how = el('div', 'grid');
+  [['① 판 고르기', '남은 수량이랑 힛 카드를 보고 마음에 드는 판을 골라요.'], ['② 결제하면 바로 개봉', '결제가 끝나는 순간 카드가 뒤집혀요. 기다릴 필요 없어요.'], ['③ 당첨 카드 배송', '주문할 때 적은 주소로 슬랩을 안전하게 포장해서 보내드려요.']]
+    .forEach(([t, d]) => { const c = el('div', 'guide'); c.append(el('b', 'px', t), el('div', '', d)); how.appendChild(c); });
+  V.appendChild(how);
+}
+async function fillFeed(open) {
+  const feed = $('#feed'); if (!feed) return;
+  const items = [];
+  for (const b of open.slice(0, 4)) { try { const s = await API.state(b.slug); for (const r of (s.recent || []).slice(0, 12)) items.push({ ...r, img: (s.prizes.find(p => p.name === r.name && p.grade === r.grade) || {}).img, board: b.title, slug: b.slug }); } catch (e) {} }
+  items.sort((a, b) => new Date(b.at || 0) - new Date(a.at || 0));
+  feed.textContent = '';
+  if (!items.length) { feed.appendChild(el('div', 'empty', '아직 열린 결과가 없어요. 첫 주인공이 되어보세요!')); return; }
+  for (const x of items.slice(0, 16)) feed.appendChild(feedItem(x));
+}
+function feedItem(x, isNew) {
+  const a = el('a', 'fd' + (HIT(x.grade) ? ' hit' : '') + (isNew ? ' new' : '')); a.href = '#/p/' + encodeURIComponent(x.slug || '');
+  a.appendChild(img(x.img));
+  const t = el('div'); const g = el('span', 'g', GN(x.grade)); g.style.background = COL(x.grade); g.style.marginRight = '6px';
+  const b = el('b'); b.append(g, x.name); t.append(b, el('small', '', `${x.who || '익명'} · ${x.board || ''} · ${ago(x.at)}`)); a.appendChild(t);
+  return a;
 }
 
-let st = null;
-async function showBoard(slug, keepScroll) {
-  let s;
-  try { s = await API.state(slug); } catch (e) { V.textContent = ''; V.appendChild(el('div', 'err', '판을 불러오지 못했어요: ' + e.message)); return; }
+/* ---- 판 목록 ---- */
+async function showPacks() {
+  setNav('packs'); V.textContent = '';
+  V.appendChild(el('h2', 'sec', '🎴 전체 쿠지'));
+  V.appendChild(el('p', 'lead', '남은 표에서 한 장씩 뽑는 쿠지 방식이에요. 마지막 표까지 다 팔리면 모든 상품이 반드시 나가요.'));
+  let list; try { list = listCache = await API.list(); } catch (e) { V.appendChild(el('div', 'err', '판 목록을 불러오지 못했어요: ' + e.message)); return; }
+  if (!list.length) { V.appendChild(el('div', 'empty', '지금 열린 판이 없어요. 곧 새 판이 열려요!')); return; }
+  const g = el('div', 'grid'); list.forEach((b, i) => g.appendChild(packCard(b, i + 1))); V.appendChild(g);
+}
+
+/* ---- 판 상세 ---- */
+const productUrl = no => (D.SHOP_URL || '').replace(/\/?$/, '/') + 'product/detail.html?product_no=' + no;
+let tab = 'hits';
+async function showBoard(slug, keep) {
+  setNav('packs');
+  let s; try { s = await API.state(slug); } catch (e) { V.textContent = ''; V.appendChild(el('div', 'err', '판을 불러오지 못했어요: ' + e.message)); return; }
   if (!s) { V.textContent = ''; V.appendChild(el('div', 'empty', '없는 판이에요.')); return; }
-  const y = window.scrollY;
-  st = s; cur = slug;
-  if (!keepScroll) API.watch(s.id, onRemoteDraw);
+  const y = window.scrollY; st = s; cur = slug;
+  const hitsLeft = s.prizes.filter(x => HIT(x.grade)).reduce((a, x) => a + x.left, 0), hitsTotal = s.prizes.filter(x => HIT(x.grade)).reduce((a, x) => a + x.qty, 0);
+  const sLeft = s.prizes.filter(x => x.grade === 'S').reduce((a, x) => a + x.left, 0);
+  const idx = Math.max(0, listCache.findIndex(b => b.slug === slug)) + 1;
   V.textContent = '';
-  const bk = el('button', 'back', '← 판 목록'); bk.onclick = () => { location.hash = ''; }; V.appendChild(bk);
-  const h = el('div', 'hero');
-  if (s.status === 'closed') h.appendChild(el('span', 'tag end', '마감된 판'));
-  else if (s.mode === 'live') h.appendChild(el('span', 'tag live', '🔴 라이브 판 · 방송에서 개봉'));
-  else if (s.test && LIVE) h.appendChild(el('span', 'tag test', '테스트 판 · 결제 없이 무료로 뽑아요'));
-  h.appendChild(el('h1', '', s.title));
-  const p = el('div', 'price'); p.textContent = won(s.price); p.appendChild(el('small', '', '/ 1회')); h.appendChild(p);
-  const bar = el('div', 'bar'), f = el('i'); f.style.width = (s.left / s.total * 100) + '%'; bar.appendChild(f); h.appendChild(bar);
-  const hitsLeft = s.prizes.filter(x => HIT(x.grade)).reduce((a, x) => a + x.left, 0);
-  const sts = el('div', 'stats');
-  for (const [v, l] of [[(+s.left).toLocaleString(), '남은 구수'], [hitsLeft + '장', '남은 힛'], [(s.total - s.left).toLocaleString(), '나간 구수']]) { const x = el('div'); x.append(el('b', '', v), el('small', '', l)); sts.appendChild(x); }
-  h.appendChild(sts);
-  if (s.status === 'open' && s.mode === 'auto') {
+  const cr = el('div', 'crumb'); const ca = el('a', '', '← 쿠지 목록'); ca.href = '#/packs'; cr.append(ca, '  /  ' + s.title); V.appendChild(cr);
+  const d = el('div', 'detail');
+  d.appendChild(cover({ ...s, hits_left: hitsLeft, hits_total: hitsTotal, s_left: sLeft, imgs: s.prizes.filter(p => p.img && HIT(p.grade)).map(p => p.img) }, idx));
+  const R = el('div');
+  const chips = el('div', 'chips');
+  chips.appendChild(el('span', 'chip', 'PSA10 쿠지'));
+  chips.appendChild(el('span', 'chip ' + (s.status === 'closed' ? 'end' : 'on'), s.status === 'closed' ? '● 마감' : '● 판매중'));
+  if (s.mode === 'live') chips.appendChild(el('span', 'chip live', '🔴 라이브 판'));
+  if (s.test && LIVE) chips.appendChild(el('span', 'chip test', '테스트 판 · 무료'));
+  R.appendChild(chips);
+  R.appendChild(el('h1', '', s.title));
+  const bp = el('div', 'bigprice'); bp.textContent = won(s.price); bp.appendChild(el('small', '', '1회')); R.appendChild(bp);
+  const rl = el('div', 'remline'); const rv = el('span'); rv.append(el('b', '', num(s.left)), ' / ' + num(s.total) + '개'); rl.append(el('span', '', '남은 수량'), rv); R.appendChild(rl);
+  const bar = el('div', 'bar'), f = el('i'); f.style.width = (s.total ? s.left / s.total * 100 : 0) + '%'; bar.appendChild(f); R.appendChild(bar);
+  const tags = el('div', 'tags'); tags.append(el('span', '', `힛 ${hitsLeft}/${hitsTotal}장 남음`), el('span', '', `S상 ${sLeft}장`), el('span', '', '조작 없음 증명'));
+  if (s.prizes.some(p => p.grade === 'LAST')) tags.appendChild(el('span', '', '라스트원'));
+  R.appendChild(tags);
+  const sh = el('div', 'ship'); const st2 = el('div'); st2.append(el('b', '', '결제하면 바로 개봉 · 당첨 카드는 주문 주소로 배송'), el('small', '', '슬랩은 에어캡 + 하드케이스로 안전 포장해서 보내드려요.')); sh.append(el('span', '', '🚚'), st2); R.appendChild(sh);
+
+  // 구매 영역
+  const buy = buyArea(s); R.appendChild(buy);
+  const tr = el('button', 'trybtn'); tr.append('▶ 개봉 연출 미리보기', el('small', '', '무료 체험 · 실제 결과 아님')); tr.onclick = () => tryOpen(s); R.appendChild(tr);
+  d.appendChild(R); V.appendChild(d);
+
+  // 탭
+  const tabs = el('div', 'tabs'), body = el('div', 'tabbody');
+  const T = [['hits', '힛 카드'], ['all', '상품 구성'], ['recent', '최근 결과'], ['guide', '이용 안내']];
+  const drawTab = () => { [...tabs.children].forEach(b => b.classList.toggle('on', b.dataset.t === tab)); body.textContent = ''; ({ hits: tabHits, all: tabAll, recent: tabRecent, guide: tabGuide })[tab](body, s); };
+  for (const [k, n] of T) { const b = el('button', '', n); b.dataset.t = k; b.onclick = () => { tab = k; drawTab(); }; tabs.appendChild(b); }
+  V.append(tabs, body); drawTab();
+  if (keep) window.scrollTo(0, y);
+}
+function buyArea(s) {
+  const box = el('div');
+  const realPay = LIVE && !s.test && s.mode === 'auto' && s.status === 'open' && s.left > 0 && !code;
+  const canSelf = s.status === 'open' && s.left > 0 && s.mode === 'auto' && (!LIVE || s.test || code);
+  if (canSelf) {
+    const q = el('div', 'qtyrow');
+    for (const n of [1, 5, 10]) { const b = el('button', n === qty ? 'on' : '', n + '회'); b.onclick = () => { qty = n; showBoard(cur, true); }; q.appendChild(b); }
+    box.appendChild(q);
     const w = el('div', 'who'); w.appendChild(el('span', '', '닉네임'));
     const inp = el('input'); inp.maxLength = 10; inp.placeholder = '당첨되면 광장에 표시돼요'; inp.value = myName;
-    inp.oninput = () => { myName = inp.value; store.set('luckyslab-kuji-name', myName); }; w.appendChild(inp); h.appendChild(w);
+    inp.oninput = () => { myName = inp.value; store.set('luckyslab-kuji-name', myName); }; w.appendChild(inp); box.appendChild(w);
   }
-  V.appendChild(h);
-
-  // 실제 판: 뽑기 코드
-  if (LIVE && s.status === 'open' && s.mode === 'auto' && !s.test && code) {
-    const cb = el('div', 'codebox');
-    cb.appendChild(document.createTextNode('결제하면 받는 '));
-    cb.appendChild(el('b', '', '뽑기 코드'));
-    cb.appendChild(document.createTextNode('를 넣어주세요.' + (codeLeft != null ? ` (남은 횟수 ${codeLeft}회)` : '')));
+  if (LIVE && code && s.status === 'open' && s.mode === 'auto' && !s.test) {
+    const cb = el('div', 'codebox'); cb.append('뽑기 코드' + (codeLeft != null ? ` · 남은 ${codeLeft}회` : ''));
     const r = el('div', 'r'), inp = el('input'), btn = el('button', '', '확인');
-    inp.placeholder = 'XXXX-XXXX-XXXX'; inp.value = code; inp.maxLength = 14; inp.autocapitalize = 'characters';
-    btn.onclick = async () => { code = inp.value.trim().toUpperCase(); store.set('luckyslab-kuji-code', code); await checkCode(); showBoard(slug, true); };
-    r.append(inp, btn); cb.appendChild(r);
-    if (D.SHOP_URL) { const a = el('a', '', '코드 말고 바로 결제하기 →'); a.href = s.product_no ? productUrl(s.product_no) : D.SHOP_URL; a.target = '_blank'; a.rel = 'noopener'; a.style.cssText = 'display:block;margin-top:8px;color:#ffe08a;font-size:12.5px'; cb.appendChild(a); }
-    V.appendChild(cb);
+    inp.value = code; inp.maxLength = 14; btn.onclick = async () => { code = inp.value.trim().toUpperCase(); store.set('luckyslab-kuji-code', code); await checkCode(); showBoard(cur, true); };
+    r.append(inp, btn); cb.appendChild(r); box.appendChild(cb);
   }
-
-  V.appendChild(el('h2', '', '🎁 상품 구성'));
-  V.appendChild(el('p', 'lead', '숫자는 남은 수량 / 전체 수량이에요. 뽑힐 때마다 바로 줄어들어요.'));
+  const mkBtn = () => {
+    let b;
+    if (realPay) {
+      b = el('a', 'buybtn'); b.target = '_top';
+      if (s.product_no && D.SHOP_URL) { b.href = productUrl(s.product_no); b.textContent = '🛒 구매하기 · 결제하면 바로 개봉'; }
+      else { b.classList.add('off'); b.textContent = '판매 준비 중이에요'; }
+    } else {
+      b = el('button', 'buybtn'); let txt, dis = false; const n = Math.min(qty, s.left);
+      if (s.status === 'closed' || s.left === 0) { txt = '마감된 판이에요'; dis = true; }
+      else if (s.mode === 'live') { txt = '🔴 라이브 방송에서 개봉해요'; dis = true; }
+      else if (code && codeLeft === 0) { txt = '이 코드는 다 썼어요'; dis = true; }
+      else txt = `${code && codeLeft != null ? Math.min(n, codeLeft) : n}회 뽑기` + (!LIVE ? ` · ${won(s.price * n)} (데모)` : s.test ? ' · 테스트(무료)' : ' · 코드 사용');
+      b.textContent = txt; b.disabled = dis || busy; b.onclick = doDraw;
+    }
+    return b;
+  };
+  box.appendChild(mkBtn());
+  box.appendChild(el('div', 'note', realPay ? '수량은 결제 화면에서 고를 수 있어요 · 결제가 끝나면 이 사이트로 돌아와 바로 개봉돼요' : LIVE ? '' : '데모 화면이라 실제 결제·배송은 없어요'));
+  setBuyBar(mkBtn());
+  return box;
+}
+function tabHits(body, s) {
+  const hs = s.prizes.filter(p => HIT(p.grade));
+  if (!hs.length) { body.appendChild(el('div', 'empty', '이 판엔 힛 카드가 없어요')); return; }
+  const g = el('div', 'hits');
+  for (const p of hs) { const c = el('div', 'hit' + (p.left === 0 ? ' gone' : '')), gb = el('span', 'g', GN(p.grade)); gb.style.background = COL(p.grade);
+    c.append(img(p.img), gb, el('b', '', p.name), el('small', '', p.left === 0 ? '이미 나갔어요' : `${p.left} / ${p.qty}장 남음`)); g.appendChild(c); }
+  body.appendChild(g);
+}
+function tabAll(body, s) {
   const groups = [];
   for (const pr of s.prizes) { let g = groups.find(x => x.g === pr.grade); if (!g) groups.push(g = { g: pr.grade, items: [] }); g.items.push(pr); }
   for (const g of groups) {
     const box = el('div', 'tier'), th = el('div', 'th'), gb = el('span', 'g', GN(g.g)); gb.style.background = COL(g.g);
-    const tl = g.items.reduce((a, x) => a + x.left, 0), tt = g.items.reduce((a, x) => a + x.qty, 0);
-    th.append(gb, el('b', '', g.g === 'C' ? '포인트상' : GN(g.g)), el('span', '', `${tl.toLocaleString()} / ${tt.toLocaleString()}`)); box.appendChild(th);
-    for (const it of g.items) {
-      const row = el('div', 'item' + (it.left === 0 ? ' gone' : '')), nm = el('span', 'nm');
-      if (it.img) { const im = el('img'); im.src = imgUrl(it.img); im.alt = ''; im.loading = 'lazy'; nm.appendChild(im); }
-      nm.appendChild(el('span', '', it.name)); row.append(nm, el('span', 'q', `${it.left.toLocaleString()} / ${it.qty.toLocaleString()}`)); box.appendChild(row);
-    }
-    V.appendChild(box);
+    th.append(gb, el('b', '', g.g === 'C' || g.g === 'D' ? '포인트상' : GN(g.g)), el('span', '', `${num(g.items.reduce((a, x) => a + x.left, 0))} / ${num(g.items.reduce((a, x) => a + x.qty, 0))}`)); box.appendChild(th);
+    for (const it of g.items) { const row = el('div', 'item' + (it.left === 0 ? ' gone' : '')), nm = el('span', 'nm'); if (it.img) nm.appendChild(img(it.img)); nm.appendChild(el('span', '', it.name)); row.append(nm, el('span', 'q', `${num(it.left)} / ${num(it.qty)}`)); box.appendChild(row); }
+    body.appendChild(box);
   }
-
-  V.appendChild(el('h2', '', '📜 최근 결과'));
+}
+function tabRecent(body, s) {
   const lg = el('div', 'log');
   if (!s.recent.length) lg.appendChild(el('div', 'empty', '아직 아무도 안 뽑았어요'));
-  for (const x of s.recent.slice(0, 20)) {
-    const r = el('div'), g = el('span', 'g', GN(x.grade)); g.style.background = COL(x.grade);
-    r.append(el('span', 'n', `#${x.no}`), g, el('span', '', `${x.name}${x.who ? ' · ' + x.who : ''}`)); lg.appendChild(r);
-  }
-  V.appendChild(lg);
-
-  V.appendChild(el('h2', '', '🔒 조작 없음 증명'));
+  for (const x of s.recent.slice(0, 30)) { const r = el('div'), g = el('span', 'g', GN(x.grade)); g.style.background = COL(x.grade); r.append(el('span', 'n', `#${x.no}`), g, el('span', '', `${x.name} · ${x.who || '익명'}`), el('span', 'n', ago(x.at))); r.lastChild.style.marginLeft = 'auto'; r.lastChild.style.textAlign = 'right'; lg.appendChild(r); }
+  body.appendChild(lg);
+}
+function tabGuide(body, s) {
+  const g = el('div', 'guide'), ol = el('ol');
+  ['판을 열 때 서버가 표 전체를 섞어서 순서를 고정해요. 뽑을 때마다 다음 표가 한 장씩 나가요.', '남은 수량과 상품별 남은 개수는 뽑힐 때마다 바로 반영돼요.', '결제가 끝나면 이 사이트로 돌아와 산 수량만큼 바로 카드가 열려요.', '당첨 카드는 주문할 때 적은 주소로 보내드려요. 포인트상은 상점 적립금으로 들어가요.', '개봉(추첨)이 끝난 주문은 교환·환불이 안 돼요. 표가 모자라 못 뽑은 회차는 전액 환불해드려요.', '만 19세 이상만 이용할 수 있어요.']
+    .forEach(t => ol.appendChild(el('li', '', t)));
+  g.appendChild(ol); body.appendChild(g);
   const fr = el('div', 'fair');
-  fr.appendChild(document.createTextNode('판을 열 때 서버가 표 순서를 전부 섞어서 고정하고, 그 순서의 지문(SHA-256)을 먼저 공개해요. 판이 끝나면 섞을 때 쓴 비밀값을 공개해서 누구나 지문이 맞는지 확인할 수 있어요.'));
-  fr.appendChild(el('code', '', s.hash));
+  fr.append('🔒 조작 없음 증명 · 판을 열 때 표 순서의 지문(SHA-256)을 먼저 공개해요. 판이 끝나면 섞을 때 쓴 비밀값을 공개해서 누구나 지문이 맞는지 확인할 수 있어요.', el('code', '', s.hash || ''));
   if (s.status === 'closed') {
-    const vb = el('button', 'pill', '원래 순서로 지문 확인하기'); vb.style.marginTop = '6px';
-    const out = el('div'); vb.onclick = async () => {
-      out.textContent = '확인 중…';
-      try { const r = await API.reveal(slug), hh = await sha256(r.salt + '|' + r.order);
-        out.textContent = hh === r.hash ? '✅ 지문 일치 · 판을 연 뒤로 순서가 바뀌지 않았어요' : '❌ 지문 불일치';
-        const hits = r.order.split('|').filter(x => HIT(x.split(':')[1])).slice(0, 30);
-        if (hits.length) out.appendChild(el('div', '', '힛 위치: ' + hits.map(x => { const [n, g] = x.split(':'); return `#${n} ${GN(g)}`; }).join(', ')));
-      } catch (e) { out.textContent = '불러오지 못했어요: ' + e.message; }
-    };
-    fr.append(el('br'), vb, out);
-  } else fr.appendChild(document.createTextNode('중간에 순서를 바꾸면 지문이 달라져서 바로 들통나요.'));
-  V.appendChild(fr);
+    const vb = el('button', 'pill', '원래 순서로 지문 확인하기'), out = el('div');
+    vb.onclick = async () => { out.textContent = '확인 중…'; try { const r = await API.reveal(s.slug), hh = await sha256(r.salt + '|' + r.order); out.textContent = hh === r.hash ? '✅ 지문 일치 · 판을 연 뒤로 순서가 바뀌지 않았어요' : '❌ 지문 불일치'; } catch (e) { out.textContent = '불러오지 못했어요: ' + e.message; } };
+    fr.append(vb, out);
+  } else fr.append('중간에 순서를 바꾸면 지문이 달라져서 바로 들통나요.');
+  body.appendChild(fr);
+  if (!LIVE) { const rs = el('button', 'pill', '↺ 데모 판 초기화'); rs.style.marginTop = '14px'; rs.onclick = () => { try { for (const k of Object.keys(localStorage)) if (k.startsWith('luckyslab-kujidemo-' + s.slug + '-')) localStorage.removeItem(k); } catch (e) {} showBoard(s.slug); }; body.appendChild(rs); }
+}
 
-  if (!LIVE) {
-    const rs = el('button', 'pill', '↺ 데모 판 초기화'); rs.style.margin = '18px 0 0';
-    rs.onclick = () => { try { for (const k of Object.keys(localStorage)) if (k.startsWith('luckyslab-kujidemo-' + slug + '-')) localStorage.removeItem(k); } catch (e) {} showBoard(slug, true); };
-    V.appendChild(rs);
-  }
-  syncBuy();
-  if (keepScroll) window.scrollTo(0, y);
+/* ---- FAQ / 내 결과 / LIVE ---- */
+function showFaq() {
+  setNav('faq'); V.textContent = '';
+  V.appendChild(el('h2', 'sec', '❓ 자주 묻는 질문'));
+  const box = el('div', 'faq');
+  [['쿠지는 어떤 방식이에요?', '판마다 정해진 수의 표가 있고, 서버가 판을 열 때 전부 섞어서 순서를 고정해요. 뽑을 때마다 다음 표가 한 장씩 나가고, 마지막 표까지 다 팔리면 모든 상품이 반드시 나가요.'],
+   ['조작 안 하는 거 어떻게 믿어요?', '판을 열 때 표 순서의 지문(SHA-256)을 먼저 공개해요. 판이 끝나면 섞을 때 쓴 비밀값을 공개하니까, 누구나 지문을 직접 계산해서 처음 순서와 같은지 확인할 수 있어요.'],
+   ['결제하면 언제 결과가 나와요?', '결제가 끝나는 순간이에요. 주문완료 화면에서 자동으로 뽑기 화면으로 넘어가서 바로 카드가 열려요. 가상계좌는 입금 확인 후 같은 링크에서 열 수 있어요.'],
+   ['당첨 카드는 어떻게 받아요?', '주문할 때 적은 주소로 보내드려요. 슬랩은 에어캡과 하드케이스로 포장해요.'],
+   ['환불되나요?', '개봉(추첨)이 끝난 주문은 교환·환불이 안 돼요. 판이 먼저 마감돼서 못 뽑은 회차가 있으면 그만큼 전액 환불해드려요.'],
+   ['미성년자도 할 수 있어요?', '아니요. 만 19세 이상만 이용할 수 있어요.']]
+    .forEach(([q, a]) => { const d = el('details'); d.append(el('summary', '', q), el('p', '', a)); box.appendChild(d); });
+  V.appendChild(box);
+  if (D.KAKAO_URL) { const a = el('a', 'cta', '💬 오픈카톡 문의'); a.href = D.KAKAO_URL; a.target = '_blank'; a.rel = 'noopener'; a.style.marginTop = '14px'; V.appendChild(a); }
 }
-const productUrl = no => (D.SHOP_URL || '').replace(/\/?$/, '/') + 'product/detail.html?product_no=' + no;
-function syncBuy() {
-  const s = st, go = $('#go'), buy = $('#buy'), link = $('#buyLink'), qtyBox = $('#qty');
-  if (!s) { buy.classList.add('hidden'); return; }
-  buy.classList.remove('hidden');
-  const realPay = LIVE && !s.test && s.mode === 'auto' && s.status === 'open' && s.left > 0 && !code;
-  link.classList.toggle('hidden', !realPay); go.classList.toggle('hidden', realPay); qtyBox.classList.toggle('hidden', realPay);
-  if (realPay) {
-    if (s.product_no && D.SHOP_URL) { link.href = productUrl(s.product_no); link.textContent = `결제하고 바로 뽑기 · 1회 ${won(s.price)} →`; link.style.pointerEvents = ''; link.style.opacity = ''; }
-    else { link.removeAttribute('href'); link.textContent = '판매 준비 중이에요'; link.style.pointerEvents = 'none'; link.style.opacity = '.5'; }
-    return;
-  }
-  const n = Math.min(qty, s.left);
-  let txt, dis = false;
-  if (s.status === 'closed' || s.left === 0) { txt = '마감된 판이에요'; dis = true; }
-  else if (s.mode === 'live') { txt = '🔴 라이브 방송에서 개봉해요'; dis = true; }
-  else if (!LIVE || s.test) txt = `${n}회 뽑기` + (LIVE ? ' · 테스트(무료)' : ` · ${won(s.price * n)}`);
-  else if (!code) { txt = '뽑기 코드를 넣어주세요'; dis = true; }
-  else if (codeLeft === 0) { txt = '이 코드는 다 썼어요'; dis = true; }
-  else txt = `${codeLeft != null ? Math.min(n, codeLeft) : n}회 뽑기 · 코드 사용`;
-  go.textContent = txt; go.disabled = dis || busy;
+const myOrders = () => store.get('luckyslab-kuji-orders', []);
+function showMe() {
+  setNav('me'); V.textContent = '';
+  V.appendChild(el('h2', 'sec', '🧾 내 뽑기 결과'));
+  V.appendChild(el('p', 'lead', '이 기기에서 연 주문 결과예요. 다른 기기에선 주문완료 문자·메일의 링크로 다시 볼 수 있어요.'));
+  const mo = myOrders();
+  if (!mo.length) { V.appendChild(el('div', 'empty', '아직 뽑은 기록이 없어요.')); return; }
+  const box = el('div', 'orders');
+  for (const o of mo) { const a = el('a'); a.href = '?order=' + encodeURIComponent(o.id); a.append(el('b', '', `주문 ${o.id}`), el('span', '', o.hits ? `🎉 힛 ${o.hits}장 · ${o.n}회` : `${o.n}회`)); box.appendChild(a); }
+  V.appendChild(box);
 }
-for (const bt of document.querySelectorAll('#qty button')) bt.onclick = () => {
-  qty = +bt.dataset.n; for (const x of document.querySelectorAll('#qty button')) x.classList.toggle('on', x === bt); syncBuy();
-};
+function showLive() {
+  setNav('live'); V.textContent = '';
+  V.appendChild(el('h2', 'sec', '🔴 LIVE'));
+  const w = el('div', 'wait');
+  const on = D.LIVE && D.LIVE.youtube;
+  w.append(el('h3', '', on ? '지금 방송 중이에요!' : '아직 방송 전이에요'), el('p', '', (D.LIVE && D.LIVE.schedule) || '방송 일정은 공지에서 알려드려요'));
+  const a = el('a', 'cta', '🌙 광장 무대에서 같이 보기'); a.href = '../'; w.appendChild(a);
+  if (on) { const y = el('a', 'cta ghost', '유튜브로 보기'); y.href = D.LIVE.youtube; y.target = '_blank'; y.rel = 'noopener'; w.appendChild(y); }
+  V.appendChild(w);
+}
+
+/* ====================== 뽑기 ====================== */
 async function checkCode() {
   codeLeft = null; if (!code || !LIVE) return null;
   try { const r = await API.codeInfo(code); if (r) { codeLeft = r.left; return r; } toast('없는 코드예요. 다시 확인해주세요'); } catch (e) { toast(e.message); }
   return null;
 }
-
-/* ---------- 뽑기 ---------- */
-let busy = false, myBatch = new Set();
-$('#go').onclick = async () => {
-  if (!st || busy) return; busy = true; syncBuy();
+async function doDraw() {
+  if (!st || busy) return; busy = true;
   const s = st;
   try {
     const r = await API.draw(s.slug, qty, (myName || '').trim() || '익명', code);
@@ -442,18 +674,25 @@ $('#go').onclick = async () => {
     if (r.code_left != null) codeLeft = r.code_left;
     if (!r.results.length) { toast('남은 표가 없어요'); busy = false; return showBoard(s.slug, true); }
     showResult(r.results, () => { busy = false; showBoard(s.slug, true); });
-  } catch (e) { busy = false; syncBuy(); toast(e.message); }
-};
-function showResult(got, done) {
+  } catch (e) { busy = false; toast(e.message); showBoard(s.slug, true); }
+}
+// 무료 체험: 남은 표 비율대로 아무거나 뽑아서 연출만 보여줌 (서버와 무관)
+function tryOpen(s) {
+  const pool = []; for (const p of s.prizes) for (let i = 0; i < p.left; i++) pool.push(p);
+  if (!pool.length) { toast('남은 표가 없어서 체험할 수 없어요'); return; }
+  const got = []; for (let i = 0; i < Math.min(5, pool.length); i++) { const k = Math.floor(Math.random() * pool.length); got.push(pool.splice(k, 1)[0]); }
+  showResult(got, () => {}, true);
+}
+function showResult(got, done, trial) {
   const G = $('#ovG'); G.textContent = '';
+  $('#ovTag').classList.toggle('hidden', !trial);
   $('#ovT').textContent = '두근두근…'; $('#ovS').textContent = '카드를 눌러서 열어보세요';
   $('#ovA').classList.add('hidden'); $('#ov').classList.remove('hidden');
   let opened = 0;
   const cards = got.map(t => {
     const c = el('div', 'tk wait' + (HIT(t.grade) ? ' big' : '')), inn = el('div', 'in'), f = el('div', 'f', '?'), bk = el('div', 'b'), g = el('span', 'g', GN(t.grade));
     g.style.background = COL(t.grade);
-    if (t.img) { const im = el('img'); im.src = imgUrl(t.img); im.alt = ''; bk.classList.add('ph'); bk.append(im, g, el('small', '', t.name.replace(' PSA10', ''))); }
-    else bk.append(g, el('small', '', t.name));
+    if (t.img) { bk.classList.add('ph2'); bk.append(img(t.img), g, el('small', '', t.name.replace(' PSA10', ''))); } else bk.append(g, el('small', '', t.name));
     inn.append(f, bk); c.appendChild(inn); c.onclick = () => open(c, t); G.appendChild(c); return [c, t];
   });
   function open(c, t) {
@@ -462,26 +701,19 @@ function showResult(got, done) {
     if (++opened === cards.length) {
       const hits = got.filter(x => HIT(x.grade));
       $('#ovT').textContent = hits.length ? `🎉 ${hits.map(x => GN(x.grade)).join(', ')} 당첨!` : '아쉽지만 포인트상';
-      $('#ovS').textContent = hits.length ? (LIVE ? '광장 전체에 폭죽이 터지고 명예의 전당에 올라가요' : '실제 운영에선 광장에 폭죽이 터지고 명예의 전당에 올라가요') : (LIVE ? '포인트는 상점에서 쓸 수 있어요' : '포인트는 다음 뽑기나 상점에서 쓸 수 있어요 (데모)');
+      $('#ovS').textContent = trial ? '체험이라 실제 결과는 아니에요. 진짜로 뽑으면 이렇게 열려요!' : hits.length ? '광장 전체에 폭죽이 터지고 명예의 전당에 올라가요' : '포인트는 상점 적립금으로 들어가요';
     }
   }
   setTimeout(() => $('#ovA').classList.remove('hidden'), 400);
   $('#ovAll').onclick = () => cards.forEach(([c, t], i) => setTimeout(() => open(c, t), i * 120));
   $('#ovOk').onclick = () => {
     cards.forEach(([c, t]) => open(c, t)); $('#ov').classList.add('hidden');
-    tellPlaza(LIVE ? { type: 'kuji-refresh' } : { type: 'kuji', got: got.map(t => ({ g: t.grade, n: t.name })) });
+    if (!trial) tellPlaza(LIVE ? { type: 'kuji-refresh' } : { type: 'kuji', got: got.map(t => ({ g: t.grade, n: t.name })) });
     done();
   };
 }
-// 다른 사람이 뽑으면 실시간 반영
-let refreshT = 0;
-function onRemoteDraw(d) {
-  if (myBatch.has(d.batch)) return;
-  if (HIT(d.grade)) toast(`🎉 ${d.who}님 ${GN(d.grade)} ${d.name} 당첨!`);
-  clearTimeout(refreshT); refreshT = setTimeout(() => { if (cur && !busy) showBoard(cur, true); }, 600);
-}
 
-/* ---------- 카페24 결제 후 도착: 주문 확인 → 바로 카드 공개 ---------- */
+/* ---- 결제 후 도착 ---- */
 async function landOrder(id, tries = 0) {
   V.textContent = '';
   const w = el('div', 'wait'); w.append(el('h3', '', '🎰 결제 확인 중…'), el('p', '', '주문 ' + id)); V.appendChild(w);
@@ -490,9 +722,9 @@ async function landOrder(id, tries = 0) {
     const all = [], boards = r.boards || [];
     for (const b of boards) for (const x of b.results || []) all.push(x);
     const prev = myOrders().filter(o => o.id !== id);
-    store.set('luckyslab-kuji-orders', [{ id, n: all.length, hits: all.filter(x => HIT(x.grade)).length }, ...prev].slice(0, 20));
+    store.set('luckyslab-kuji-orders', [{ id, n: all.length, hits: all.filter(x => HIT(x.grade)).length }, ...prev].slice(0, 30));
     const short = boards.reduce((a, b) => a + (b.shortage || 0), 0), pending = boards.filter(b => b.pending);
-    const goBoard = () => { history.replaceState(null, '', location.pathname + (EMBED ? '?embed=1' : '') + (boards[0] ? '#/' + boards[0].slug : '')); route(); };
+    const goBoard = () => { history.replaceState(null, '', location.pathname + (EMBED ? '?embed=1' : '') + (boards[0] ? '#/p/' + boards[0].slug : '#/')); route(); };
     if (!all.length) {
       w.textContent = '';
       w.append(el('h3', '', pending.length ? '🔴 라이브 판 주문이에요' : '결과가 없어요'),
@@ -500,7 +732,6 @@ async function landOrder(id, tries = 0) {
       const b = el('button', 'pill', '판 보러 가기'); b.onclick = goBoard; w.appendChild(b); return;
     }
     if (short) toast(`표가 모자라서 ${short}회분은 뽑지 못했어요. 그만큼 환불해드릴게요`);
-    myName = r.who || myName;
     showResult(all, goBoard);
     return;
   }
@@ -513,7 +744,18 @@ async function landOrder(id, tries = 0) {
   if (r.status === 'error' && tries < 2) setTimeout(() => landOrder(id, tries + 1), 2500);
 }
 
-/* ---------- 폭죽 ---------- */
+/* ---- 실시간 ---- */
+let refreshT = 0;
+function onRemoteDraw(d) {
+  const b = listCache.find(x => x.id === d.board_id) || {};
+  const feed = $('#feed');
+  if (feed) { const it = feedItem({ ...d, at: d.created_at, board: b.title, slug: b.slug }, true); const e = feed.querySelector('.empty'); if (e) e.remove(); feed.prepend(it); }
+  if (myBatch.has(d.batch)) return;
+  if (HIT(d.grade)) toast(`🎉 ${d.who}님 ${GN(d.grade)} ${d.name} 당첨!`);
+  clearTimeout(refreshT); refreshT = setTimeout(() => { if (cur && !busy && $('#ov').classList.contains('hidden')) showBoard(cur, true); }, 700);
+}
+
+/* ---- 폭죽 ---- */
 const fx = $('#fx'), cx = fx.getContext('2d'); let parts = [], raf = 0;
 function size() { fx.width = innerWidth * devicePixelRatio; fx.height = innerHeight * devicePixelRatio; }
 addEventListener('resize', size); size();
@@ -529,16 +771,25 @@ function burst(n) {
     raf = requestAnimationFrame(step); }
 }
 
-/* ---------- 시작 ---------- */
+/* ---- 푸터 ---- */
+(() => {
+  const B = D.BIZ || {}, F = $('#foot');
+  const line = (k, v) => { const d = el('div'); d.append(el('b', '', k + ' '), v || '등록 준비 중'); F.appendChild(d); };
+  line('상호', B.name); line('대표', B.ceo); line('사업자등록번호', B.bizno); line('통신판매업 신고', B.mailorder);
+  F.appendChild(el('div', '', '만 19세 이상만 이용할 수 있어요. 결제·배송은 럭키슬랩 상점(카페24)에서 처리돼요. 본 사이트는 카드 제조사·등급사와 제휴 관계가 없어요.'));
+})();
+
+/* ---- 시작 ---- */
 (async () => {
   LIVE = await Server.init();
   API = LIVE ? Server : Local;
   const bar = $('#modeBar');
-  if (LIVE) { bar.classList.add('live'); bar.textContent = '● 실시간 서버 연결됨 · 모든 손님이 같은 판을 함께 뽑아요'; }
+  if (LIVE) { bar.classList.add('live'); bar.textContent = '● 실시간 서버 연결됨 · 모든 손님이 같은 판을 함께 뽑아요'; Server.watchAll(onRemoteDraw); }
   else bar.textContent = '🧪 데모 화면 · 실제 결제·배송 없음 · 이 브라우저에서만 저장돼요';
+  try { listCache = await API.list(); } catch (e) {}
   const orderId = (QS.get('order') || '').trim();
   if (LIVE && orderId) return landOrder(orderId);
-  if (LIVE && code) { const r = await checkCode(); if (r && !location.hash) { location.hash = '#/' + r.slug; return; } }
+  if (LIVE && code) { const r = await checkCode(); if (r && !location.hash) { location.hash = '#/p/' + r.slug; return; } }
   route();
 })();
 })();
