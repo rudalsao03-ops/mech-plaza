@@ -1,0 +1,43 @@
+<!-- =====================================================================
+  럭키슬랩 쿠지 · 카페24 주문완료 페이지용 코드
+  카페24 관리자 → 디자인 → (HTML 직접 수정) → 주문완료 페이지(order/order_result.html) 맨 아래에 붙여넣기
+  · 쿠지 상품을 결제한 주문이면 "지금 바로 뽑기" 창이 뜨고 2초 뒤 자동으로 뽑기 화면으로 이동
+  · 쿠지가 아닌 일반 주문이면 아무 일도 안 일어남
+  · 가상계좌(무통장) 주문은 입금 확인 후 뽑을 수 있다고 안내
+===================================================================== -->
+<script>
+(function () {
+  var FN = 'https://jxkicwyioopekmsajowh.supabase.co/functions/v1/kuji-order';
+  var KUJI = 'https://plaza.luckyslab.shop/kuji/';
+  function orderId() {
+    try { var d = window.EC_FRONT_EXTERNAL_SCRIPT_VARIABLE_DATA; if (d && d.order_id) return String(d.order_id); } catch (e) {}
+    var m = (document.body.innerText || '').match(/\b\d{8}-\d{7}\b/);
+    return m ? m[0] : null;
+  }
+  function box(html) {
+    var w = document.createElement('div');
+    w.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(5,7,12,.82);display:flex;align-items:center;justify-content:center;padding:20px;font-family:sans-serif';
+    w.innerHTML = '<div style="background:#171b28;color:#f3edda;border:2px solid #d9a030;border-radius:22px;padding:26px 22px;max-width:360px;width:100%;text-align:center">' + html + '</div>';
+    document.body.appendChild(w); return w;
+  }
+  function run() {
+    var id = orderId(); if (!id) return;
+    fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order_id: id, check: true }) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (!j || !j.kuji) return;
+        var url = KUJI + '?order=' + encodeURIComponent(id);
+        if (j.status === 'ok') {
+          box('<div style="font-size:44px">🎰</div><h2 style="margin:8px 0;color:#ffe08a">결제 완료!</h2><p style="color:#9aa0b8;margin:0 0 18px">지금 바로 카드를 뒤집으러 가요</p>' +
+              '<a href="' + url + '" style="display:block;background:#ffe08a;color:#14161f;font-weight:bold;text-decoration:none;border-radius:14px;padding:15px">지금 바로 뽑기 →</a>');
+          setTimeout(function () { location.href = url; }, 2000);
+        } else if (j.status === 'unpaid') {
+          box('<div style="font-size:40px">💳</div><h2 style="margin:8px 0;color:#ffe08a">입금 확인 후 뽑을 수 있어요</h2><p style="color:#9aa0b8;margin:0 0 18px">입금이 확인되면 아래 링크에서 바로 뽑기가 돼요. 링크를 저장해두세요.</p>' +
+              '<a href="' + url + '" style="display:block;background:#2a3048;color:#ffe08a;text-decoration:none;border-radius:14px;padding:13px;word-break:break-all">' + url + '</a>');
+        }
+      })
+      .catch(function () {});
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
+})();
+</script>

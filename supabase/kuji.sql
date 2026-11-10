@@ -78,6 +78,35 @@ create table if not exists kuji_codes (            -- 뽑기 코드 (결제 1건
   created_at timestamptz not null default now()
 );
 
+-- 카페24 결제 연동
+alter table kuji_boards add column if not exists cafe24_product_no int unique;   -- 이 판과 연결된 카페24 상품번호
+alter table kuji_draws add column if not exists order_id text;
+do $$ begin
+  if to_regclass('public.kuji_orders') is not null then alter table kuji_orders add column if not exists short int not null default 0; end if;
+end $$;
+create index if not exists kuji_draws_order on kuji_draws (order_id) where order_id is not null;
+
+create table if not exists kuji_orders (           -- 카페24 주문 1줄 = 이 판 n회 (결제 확인된 것만 들어옴)
+  order_id text not null,
+  board_id bigint not null references kuji_boards on delete cascade,
+  qty int not null check (qty between 1 and 1000),
+  drawn int not null default 0,
+  short int not null default 0,                   -- 표가 모자라 못 뽑은 횟수 (환불 대상)
+  buyer text,
+  created_at timestamptz not null default now(),
+  primary key (order_id, board_id)
+);
+
+create table if not exists kuji_cafe24 (           -- 카페24 API 토큰 (서버 함수만 접근)
+  id int primary key default 1 check (id = 1),
+  access_token text,
+  refresh_token text,
+  expires_at timestamptz,
+  refresh_expires_at timestamptz,
+  oauth_state text,
+  updated_at timestamptz default now()
+);
+
 -- ---------- 접근 권한 (RLS) ----------
 alter table kuji_admin enable row level security;
 alter table kuji_boards enable row level security;
@@ -86,6 +115,8 @@ alter table kuji_prizes enable row level security;
 alter table kuji_tickets enable row level security;
 alter table kuji_draws enable row level security;
 alter table kuji_codes enable row level security;
+alter table kuji_orders enable row level security;
+alter table kuji_cafe24 enable row level security;
 
 drop policy if exists "kuji boards read" on kuji_boards;
 create policy "kuji boards read" on kuji_boards for select using (true);
@@ -93,7 +124,7 @@ drop policy if exists "kuji prizes read" on kuji_prizes;
 create policy "kuji prizes read" on kuji_prizes for select using (true);
 drop policy if exists "kuji draws read" on kuji_draws;
 create policy "kuji draws read" on kuji_draws for select using (true);
--- kuji_admin, kuji_board_secrets, kuji_tickets, kuji_codes 는 정책 없음 = 외부에서 읽기·쓰기 전부 불가
+-- kuji_admin, kuji_board_secrets, kuji_tickets, kuji_codes, kuji_orders, kuji_cafe24 는 정책 없음 = 외부에서 읽기·쓰기 전부 불가
 -- 모든 쓰기는 아래 함수(security definer)를 통해서만 가능
 
 -- ---------- 내부 함수 ----------
@@ -156,7 +187,7 @@ language sql stable security definer set search_path = public, extensions as $$
   select coalesce(jsonb_agg(x order by (x->>'status') = 'closed', (x->>'sort')::int, (x->>'id')::bigint desc), '[]'::jsonb) from (
     select jsonb_build_object(
       'id', b.id, 'slug', b.slug, 'title', b.title, 'price', b.price, 'total', b.total, 'mode', b.mode,
-      'test', b.test_mode, 'status', b.status, 'sort', b.sort,
+      'test', b.test_mode, 'status', b.status, 'sort', b.sort, 'product_no', b.cafe24_product_no,
       'left', (select count(*) from kuji_tickets t where t.board_id = b.id and t.draw_id is null),
       'hits_left', (select count(*) from kuji_tickets t where t.board_id = b.id and t.draw_id is null and t.grade in ('S','A','B','LAST')),
       's_left', (select count(*) from kuji_tickets t where t.board_id = b.id and t.draw_id is null and t.grade = 'S'),
@@ -172,7 +203,7 @@ create or replace function kuji_state(p_slug text) returns jsonb
 language sql stable security definer set search_path = public, extensions as $$
   select case when b.id is null then null else jsonb_build_object(
     'id', b.id, 'slug', b.slug, 'title', b.title, 'price', b.price, 'total', b.total, 'mode', b.mode,
-    'test', b.test_mode, 'status', b.status, 'hash', b.hash, 'salt', b.salt,
+    'test', b.test_mode, 'status', b.status, 'hash', b.hash, 'salt', b.salt, 'product_no', b.cafe24_product_no,
     'left', (select count(*) from kuji_tickets t where t.board_id = b.id and t.draw_id is null),
     'prizes', (select coalesce(jsonb_agg(jsonb_build_object('idx', p.idx, 'grade', p.grade, 'name', p.name, 'img', p.img, 'qty', p.qty,
                  'left', (select count(*) from kuji_tickets t where t.board_id = b.id and t.prize_idx = p.idx and t.draw_id is null)) order by p.idx), '[]'::jsonb)
@@ -336,15 +367,111 @@ begin
           from kuji_codes k join kuji_boards b on b.id = k.board_id where b.slug = p_slug);
 end $$;
 
+-- ---------- 카페24 주문 연동 ----------
+-- (서버 전용) 결제 확인된 주문 1줄을 받아서 남은 횟수만큼 즉시 뽑기. 같은 주문이 여러 번 와도 한 번만 뽑힘
+create or replace function kuji_order_draw(p_order text, p_product int, p_qty int, p_buyer text) returns jsonb
+language plpgsql security definer set search_path = public, extensions as $$
+declare
+  b kuji_boards%rowtype;
+  o kuji_orders%rowtype;
+  v_n int; v_left int; v_res jsonb; v_short int := 0;
+begin
+  select * into b from kuji_boards where cafe24_product_no = p_product for update;
+  if b.id is null then return null; end if;                       -- 쿠지 상품이 아님
+  insert into kuji_orders (order_id, board_id, qty, buyer) values (p_order, b.id, p_qty, _kuji_clean(p_buyer, 10))
+  on conflict (order_id, board_id) do nothing;
+  select * into o from kuji_orders where order_id = p_order and board_id = b.id for update;
+  v_n := o.qty - o.drawn - o.short;
+  if v_n > 0 and b.mode = 'auto' then
+    v_left := 0;
+    if b.status = 'open' then select count(*) into v_left from kuji_tickets where board_id = b.id and draw_id is null; end if;
+    if v_left < v_n then v_short := v_n - v_left; v_n := v_left; end if;
+    if v_n > 0 then
+      v_res := _kuji_take(b.id, v_n, coalesce(nullif(o.buyer, ''), '손님'));
+      update kuji_draws set order_id = p_order where batch = (v_res->>'batch')::uuid;
+    end if;
+    update kuji_orders set drawn = drawn + v_n, short = short + v_short where order_id = p_order and board_id = b.id;
+  end if;
+  return jsonb_build_object('slug', b.slug, 'title', b.title, 'mode', b.mode, 'qty', o.qty,
+    'shortage', (select short from kuji_orders where order_id = p_order and board_id = b.id),
+    'pending', b.mode = 'live',
+    'results', (select coalesce(jsonb_agg(jsonb_build_object('no', d.no, 'grade', d.grade, 'name', d.name,
+        'img', (select img from kuji_prizes p where p.board_id = b.id and p.idx = d.prize_idx)) order by d.no), '[]'::jsonb)
+      from kuji_draws d where d.order_id = p_order and d.board_id = b.id));
+end $$;
+
+-- 주문 결과 다시 보기 (주문번호로)
+create or replace function kuji_order_results(p_order text) returns jsonb
+language sql stable security definer set search_path = public, extensions as $$
+  select coalesce(jsonb_agg(jsonb_build_object('slug', b.slug, 'title', b.title, 'qty', o.qty, 'pending', b.mode = 'live',
+    'results', (select coalesce(jsonb_agg(jsonb_build_object('no', d.no, 'grade', d.grade, 'name', d.name,
+        'img', (select img from kuji_prizes p where p.board_id = b.id and p.idx = d.prize_idx)) order by d.no), '[]'::jsonb)
+      from kuji_draws d where d.order_id = o.order_id and d.board_id = b.id))), '[]'::jsonb)
+  from kuji_orders o join kuji_boards b on b.id = o.board_id where o.order_id = p_order
+$$;
+
+-- (서버 전용) 카페24 토큰 저장소 접근 — 주문 확인 함수(Edge Function)만 사용
+create or replace function kuji_svc_token_get() returns jsonb
+language sql stable security definer set search_path = public, extensions as $$
+  select to_jsonb(c) - 'id' from kuji_cafe24 c where id = 1
+$$;
+create or replace function kuji_svc_token_save(p_access text, p_refresh text, p_expires timestamptz, p_refresh_expires timestamptz) returns void
+language sql security definer set search_path = public, extensions as $$
+  insert into kuji_cafe24 (id, access_token, refresh_token, expires_at, refresh_expires_at, oauth_state, updated_at)
+  values (1, p_access, p_refresh, p_expires, p_refresh_expires, null, now())
+  on conflict (id) do update set access_token = excluded.access_token, refresh_token = excluded.refresh_token,
+    expires_at = excluded.expires_at, refresh_expires_at = excluded.refresh_expires_at, oauth_state = null, updated_at = now()
+$$;
+create or replace function kuji_svc_state_set(p_state text) returns void
+language sql security definer set search_path = public, extensions as $$
+  insert into kuji_cafe24 (id, oauth_state) values (1, p_state) on conflict (id) do update set oauth_state = excluded.oauth_state
+$$;
+create or replace function kuji_svc_products() returns jsonb
+language sql stable security definer set search_path = public, extensions as $$
+  select coalesce(jsonb_agg(cafe24_product_no), '[]'::jsonb) from kuji_boards where cafe24_product_no is not null
+$$;
+
+-- 판 ↔ 카페24 상품번호 연결 (관리자)
+create or replace function kuji_link_product(p_key text, p_slug text, p_product int) returns void
+language plpgsql security definer set search_path = public, extensions as $$
+begin
+  if not _kuji_is_admin(p_key) then raise exception '관리자 비밀번호가 틀렸어요'; end if;
+  update kuji_boards set cafe24_product_no = null where cafe24_product_no = p_product and slug <> p_slug;
+  update kuji_boards set cafe24_product_no = p_product where slug = p_slug;
+end $$;
+
+-- 주문 목록 (관리자) — 표 부족으로 못 뽑은 주문(short > 0)은 환불 대상
+create or replace function kuji_orders_list(p_key text, p_slug text) returns jsonb
+language plpgsql security definer set search_path = public, extensions as $$
+begin
+  if not _kuji_is_admin(p_key) then raise exception '관리자 비밀번호가 틀렸어요'; end if;
+  return (select coalesce(jsonb_agg(jsonb_build_object('order_id', o.order_id, 'qty', o.qty, 'drawn', o.drawn, 'short', o.short, 'buyer', o.buyer, 'at', o.created_at,
+            'hits', (select coalesce(jsonb_agg(d.grade || ' ' || d.name), '[]'::jsonb) from kuji_draws d where d.order_id = o.order_id and d.board_id = b.id and d.grade in ('S','A','B','LAST'))) order by o.created_at desc), '[]'::jsonb)
+          from kuji_orders o join kuji_boards b on b.id = o.board_id where b.slug = p_slug);
+end $$;
+
+-- 카페24 연결 상태 (관리자)
+create or replace function kuji_cafe24_status(p_key text) returns jsonb
+language plpgsql security definer set search_path = public, extensions as $$
+begin
+  if not _kuji_is_admin(p_key) then raise exception '관리자 비밀번호가 틀렸어요'; end if;
+  return (select jsonb_build_object('connected', refresh_token is not null and refresh_expires_at > now(), 'refresh_expires_at', refresh_expires_at, 'updated_at', updated_at)
+          from kuji_cafe24 where id = 1);
+end $$;
+
 -- ---------- 함수 실행 권한 ----------
-revoke all on function _kuji_is_admin(text), _kuji_take(bigint, int, text) from public;
+revoke all on function _kuji_is_admin(text), _kuji_take(bigint, int, text), kuji_order_draw(text, int, int, text), kuji_svc_token_get(), kuji_svc_token_save(text, text, timestamptz, timestamptz), kuji_svc_state_set(text), kuji_svc_products() from public;
 do $$ begin
   if exists (select 1 from pg_roles where rolname = 'anon') then
-    revoke all on function _kuji_is_admin(text), _kuji_take(bigint, int, text) from anon, authenticated;
+    revoke all on function _kuji_is_admin(text), _kuji_take(bigint, int, text), kuji_order_draw(text, int, int, text), kuji_svc_token_get(), kuji_svc_token_save(text, text, timestamptz, timestamptz), kuji_svc_state_set(text), kuji_svc_products() from anon, authenticated;
     grant execute on function kuji_list(), kuji_state(text), kuji_draw(text, int, text, text), kuji_code_info(text), kuji_reveal(text),
       kuji_admin_check(text), kuji_open(text, text, text, int, jsonb, text, boolean, int), kuji_issue_code(text, text, int, text),
       kuji_live_draw(text, text, int, text), kuji_update(text, text, boolean, text, int), kuji_close(text, text),
-      kuji_delete(text, text), kuji_codes_list(text, text) to anon, authenticated;
+      kuji_delete(text, text), kuji_codes_list(text, text), kuji_order_results(text), kuji_link_product(text, text, int),
+      kuji_cafe24_status(text), kuji_orders_list(text, text) to anon, authenticated;
+  end if;
+  if exists (select 1 from pg_roles where rolname = 'service_role') then
+    grant execute on function kuji_order_draw(text, int, int, text), kuji_svc_token_get(), kuji_svc_token_save(text, text, timestamptz, timestamptz), kuji_svc_state_set(text), kuji_svc_products() to service_role;
   end if;
 end $$;
 
@@ -358,6 +485,19 @@ end $$;
 
 -- ---------- 관리자 비밀번호 설정 ----------
 -- ⚠️ 아래 '여기에-비밀번호' 를 남들이 못 맞힐 긴 비밀번호로 바꾸고 실행하세요 (12자 이상 추천)
--- 나중에 비밀번호를 바꾸고 싶으면 이 줄만 다시 실행하면 됨
-insert into kuji_admin (id, secret_hash) values (1, extensions.crypt('여기에-비밀번호', extensions.gen_salt('bf')))
-on conflict (id) do update set secret_hash = excluded.secret_hash;
+-- · 처음 설치할 때 안 바꾸면 에러가 나면서 설치가 멈춰요 (기본값으로 열리는 사고 방지)
+-- · 이미 설치한 뒤 다시 실행할 땐 그대로 두면 기존 비밀번호 유지, 새로 적으면 그 비밀번호로 바뀜
+do $$
+declare v text := '여기에-비밀번호';
+begin
+  if md5(v) = '326feacbc0a6c323f67d341273a1d97f' then        -- 기본값 그대로인지 확인
+    if not exists (select 1 from kuji_admin where id = 1) then
+      raise exception '맨 아래 관리자 비밀번호를 바꾼 다음 다시 실행해주세요';
+    end if;
+  elsif char_length(v) < 8 then
+    raise exception '관리자 비밀번호는 8자 이상으로 해주세요';
+  else
+    insert into kuji_admin (id, secret_hash) values (1, extensions.crypt(v, extensions.gen_salt('bf')))
+    on conflict (id) do update set secret_hash = excluded.secret_hash;
+  end if;
+end $$;

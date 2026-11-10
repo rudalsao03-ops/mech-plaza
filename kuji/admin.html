@@ -50,6 +50,8 @@
   </div>
 
   <div id="app" class="hidden">
+    <h2>🔌 카페24 결제 연동</h2>
+    <div class="card" id="c24">확인 중…</div>
     <h2>📋 판 목록</h2>
     <div class="card" id="boards"></div>
 
@@ -95,7 +97,7 @@ async function login(k) {
   try {
     if (!await call('kuji_admin_check', { p_key: k })) { msg($('#loginMsg'), '비밀번호가 틀렸어요'); return; }
     KEY = k; try { sessionStorage.setItem('luckyslab-kuji-admin', k); } catch (e) {}
-    $('#login').classList.add('hidden'); $('#app').classList.remove('hidden'); loadBoards();
+    $('#login').classList.add('hidden'); $('#app').classList.remove('hidden'); loadBoards(); loadC24();
   } catch (e) {
     msg($('#loginMsg'), /kuji_admin_check/.test(e.message) ? '서버에 쿠지 SQL이 아직 설치 안 됐어요. supabase/kuji.sql 을 먼저 실행하세요.' : '오류: ' + e.message);
   }
@@ -104,6 +106,18 @@ $('#loginBtn').onclick = () => login($('#pw').value);
 $('#pw').addEventListener('keydown', e => { if (e.key === 'Enter') login($('#pw').value); });
 if (KEY) login(KEY);
 
+const FN = D.SUPABASE_URL + '/functions/v1/kuji-order';
+async function loadC24() {
+  const C = $('#c24'); C.textContent = '';
+  let st = null; try { st = await call('kuji_cafe24_status', { p_key: KEY }); } catch (e) { C.textContent = '오류: ' + e.message; return; }
+  if (st && st.connected) {
+    C.appendChild(el('div', 'msg s', `✅ 연결됨 · ${new Date(st.refresh_expires_at).toLocaleDateString('ko-KR')}까지 유효 (손님 주문이 들어오면 자동 연장)`));
+  } else {
+    C.appendChild(el('div', 'msg e', st ? '⚠️ 연결이 만료됐어요. 다시 연결해주세요.' : '아직 연결 안 됐어요. Edge Function과 카페24 앱을 만든 뒤 아래 버튼을 눌러요.'));
+  }
+  const b = el('button', 'p', '카페24 연결하기'); b.onclick = () => window.open(FN + '/connect', '_blank'); C.appendChild(b);
+  const r = el('button', '', '상태 새로고침'); r.style.marginLeft = '6px'; r.onclick = loadC24; C.appendChild(r);
+}
 async function loadBoards() {
   const B = $('#boards'); B.textContent = '불러오는 중…';
   let list; try { list = await call('kuji_list'); } catch (e) { B.textContent = '오류: ' + e.message; return; }
@@ -115,7 +129,7 @@ async function loadBoards() {
     l.appendChild(el('span', 'tag ' + (b.status === 'open' ? 'o' : ''), b.status === 'open' ? '진행 중' : '마감'));
     l.appendChild(el('span', 'tag ' + (b.mode === 'live' ? 'l' : ''), b.mode === 'live' ? '라이브' : '자동'));
     if (b.test) l.appendChild(el('span', 'tag t', '테스트'));
-    l.appendChild(el('small', '', ` ${b.slug} · ${won(b.price)} · 남은 ${b.left}/${b.total} · 힛 ${b.hits_left}`));
+    l.appendChild(el('small', '', ` ${b.slug} · ${won(b.price)} · 남은 ${b.left}/${b.total} · 힛 ${b.hits_left}` + (b.product_no ? ` · 카페24 상품 #${b.product_no}` : ' · 카페24 미연결')));
     const a = el('a', '', '열기'); a.href = SITE + '#/' + b.slug; a.target = '_blank';
     h.append(l, a); w.appendChild(h);
     const acts = el('div', 'acts'), out = el('div', 'out hidden');
@@ -139,6 +153,16 @@ async function loadBoards() {
         out.classList.remove('hidden');
         out.textContent = `${who}님 결과\n` + r.results.map(x => `#${x.no}  ${x.grade}상  ${x.name}`).join('\n') + `\n\n남은 ${r.left}장${r.closed ? ' · 완판 마감!' : ''}`;
         loadBoards();
+      });
+      btn('🔗 카페24 상품 연결', b.product_no ? '' : 'p', async () => {
+        const v = prompt('카페24 상품번호 (상품 상세 주소의 product_no= 뒤 숫자)\n※ 그 상품 재고를 이 판 남은 구수(' + b.left + ')로 맞춰두세요', b.product_no || '');
+        const no = parseInt(v, 10); if (!(no > 0)) return;
+        await call('kuji_link_product', { p_key: KEY, p_slug: b.slug, p_product: no }); loadBoards();
+      });
+      btn('📦 주문 목록', '', async () => {
+        const L = await call('kuji_orders_list', { p_key: KEY, p_slug: b.slug });
+        out.classList.remove('hidden');
+        out.textContent = L.length ? L.map(o => `${o.order_id}  ${o.buyer || ''}  ${o.drawn}/${o.qty}회` + (o.short ? `  ⚠️ ${o.short}회 환불 필요` : '') + (o.hits.length ? `  🎉 ${o.hits.join(', ')}` : '')).join('\n') : '아직 주문이 없어요';
       });
       btn('📜 코드 목록', '', async () => {
         const L = await call('kuji_codes_list', { p_key: KEY, p_slug: b.slug });

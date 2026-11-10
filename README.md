@@ -62,3 +62,13 @@ create policy "guestbook write" on guestbook for insert with check (true);
 - 표는 판을 열 때 서버가 섞어서 고정, 지문(SHA-256) 공개 → 마감 후 salt 공개로 검증
 - 테스트 판: 누구나 무료로 뽑기 / 실제 판: 뽑기 코드 필요 (나중에 카페24 결제와 자동 연동 예정)
 - 당첨은 서버 기록(kuji_draws) 실시간 구독으로 광장 전체에 폭죽
+
+## 카페24 결제 → 바로 뽑기 (A 방식)
+흐름: 쿠지 판 "결제하고 바로 뽑기" → 카페24 상품 결제 → 주문완료 페이지가 자동으로 `kuji/?order=주문번호` 로 이동 → 서버가 카페24에 결제 확인 → 즉시 카드 공개
+1. `supabase/kuji.sql` 다시 실행 (비밀번호 줄은 그대로 두면 기존 비밀번호 유지)
+2. Supabase → Edge Functions → 새 함수 `kuji-order` 에 `supabase/functions/kuji-order/index.ts` 붙여넣고 배포, **Verify JWT 끄기**
+3. Edge Functions → Secrets: `CAFE24_MALL_ID`, `CAFE24_CLIENT_ID`, `CAFE24_CLIENT_SECRET`
+4. 카페24 개발자센터 앱: Redirect URI = `https://jxkicwyioopekmsajowh.supabase.co/functions/v1/kuji-order/callback`, 권한 = 주문(Order) 읽기
+5. 관리자 페이지 → "카페24 연결하기" → 카페24 로그인·승인
+6. 관리자 페이지 → 판마다 "카페24 상품 연결" (상품번호). 카페24 상품 재고 = 판 구수로 맞추기
+7. 카페24 주문완료 페이지 맨 아래에 `supabase/cafe24-order-complete.html` 붙여넣기

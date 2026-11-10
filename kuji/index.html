@@ -123,6 +123,12 @@
   .tag.test{background:#3a2a10;color:var(--gold2)}.tag.live{background:#4a1d1d;color:#ff9a9a}.tag.end{background:#2a2e3d;color:#9aa0b8}
   .bcard .art img{width:62px;height:90px;object-fit:cover;object-position:top;border-radius:7px;border:2px solid #04050a;margin:0 -6px;box-shadow:0 6px 0 rgba(0,0,0,.35)}
   .toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translateX(-50%);z-index:12;background:linear-gradient(90deg,#b8322c,#d9a030);color:#fff;font:bold 13px "Galmuri11",sans-serif;padding:10px 14px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.4);max-width:calc(100% - 24px);text-align:center}
+  .buylink{flex:1;display:block;text-align:center;text-decoration:none;border-radius:14px;background:linear-gradient(180deg,#ffe08a,#d9a030);color:var(--ink);font:bold 15px "Galmuri11",sans-serif;padding:14px 10px;box-shadow:0 4px 0 #8a5a12}
+  .orders{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:6px 14px;margin-top:8px}
+  .orders a{display:flex;justify-content:space-between;color:var(--text);text-decoration:none;font-size:13px;padding:9px 0;border-bottom:1px solid #232839}
+  .orders a:last-child{border-bottom:0}.orders a span{color:var(--gold2)}
+  .wait{background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:22px 18px;margin-top:18px;text-align:center}
+  .wait h3{font:bold 18px "Galmuri11",sans-serif;margin:0 0 8px}.wait p{color:var(--sub);font-size:13.5px;margin:0 0 14px}
   .err{background:#4a1d1d;color:#ffb3b3;border-radius:12px;padding:10px 12px;font-size:13px;margin-top:10px}
 </style>
 </head>
@@ -138,6 +144,7 @@
 <div class="buy hidden" id="buy"><div class="wrap">
   <div class="qty" id="qty"><button data-n="1" class="on">1회</button><button data-n="5">5회</button><button data-n="10">10회</button></div>
   <button class="go" id="go">뽑기</button>
+  <a class="buylink hidden" id="buyLink" target="_blank" rel="noopener">결제하고 바로 뽑기 →</a>
 </div></div>
 
 <div class="ov hidden" id="ov">
@@ -193,6 +200,12 @@ const Server = {
   draw(slug, n, who, code) { return this.call('kuji_draw', { p_slug: slug, p_count: n, p_who: who, p_code: code || null }); },
   reveal(slug) { return this.call('kuji_reveal', { p_slug: slug }); },
   codeInfo(code) { return this.call('kuji_code_info', { p_code: code }); },
+  async order(id) {
+    const r = await fetch(D.SUPABASE_URL + '/functions/v1/kuji-order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order_id: id }) });
+    let j = {}; try { j = await r.json(); } catch (e) {}
+    if (!j.status) j = { status: 'error', message: '주문 확인 서버에 연결하지 못했어요' };
+    return j;
+  },
   watch(boardId, cb) {
     if (this.ch) this.sb.removeChannel(this.ch);
     this.ch = this.sb.channel('kuji-' + boardId).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'kuji_draws', filter: 'board_id=eq.' + boardId }, p => cb(p.new)).subscribe();
@@ -261,8 +274,16 @@ async function route() {
 }
 window.addEventListener('hashchange', route);
 
+const myOrders = () => store.get('luckyslab-kuji-orders', []);
 async function showList() {
   V.textContent = '';
+  const mo = myOrders();
+  if (LIVE && mo.length) {
+    V.appendChild(el('h2', '', '🧾 내 뽑기 결과'));
+    const box = el('div', 'orders');
+    for (const o of mo.slice(0, 5)) { const a = el('a'); a.href = '?order=' + encodeURIComponent(o.id); a.append(el('b', '', `주문 ${o.id}`), el('span', '', o.hits ? `🎉 힛 ${o.hits}장` : `${o.n}장`)); box.appendChild(a); }
+    V.appendChild(box);
+  }
   V.appendChild(el('h2', '', '🎴 지금 열린 판'));
   V.appendChild(el('p', 'lead', '남은 표에서 한 장씩 뽑는 쿠지 방식이에요. 마지막 표까지 다 팔리면 모든 상품이 반드시 나가요.'));
   let list;
@@ -315,7 +336,7 @@ async function showBoard(slug, keepScroll) {
   V.appendChild(h);
 
   // 실제 판: 뽑기 코드
-  if (LIVE && s.status === 'open' && s.mode === 'auto' && !s.test) {
+  if (LIVE && s.status === 'open' && s.mode === 'auto' && !s.test && code) {
     const cb = el('div', 'codebox');
     cb.appendChild(document.createTextNode('결제하면 받는 '));
     cb.appendChild(el('b', '', '뽑기 코드'));
@@ -324,7 +345,7 @@ async function showBoard(slug, keepScroll) {
     inp.placeholder = 'XXXX-XXXX-XXXX'; inp.value = code; inp.maxLength = 14; inp.autocapitalize = 'characters';
     btn.onclick = async () => { code = inp.value.trim().toUpperCase(); store.set('luckyslab-kuji-code', code); await checkCode(); showBoard(slug, true); };
     r.append(inp, btn); cb.appendChild(r);
-    if (D.SHOP_URL) { const a = el('a', '', '코드가 없으면 → 상점에서 구매하기'); a.href = D.SHOP_URL; a.target = '_blank'; a.rel = 'noopener'; a.style.cssText = 'display:block;margin-top:8px;color:#ffe08a;font-size:12.5px'; cb.appendChild(a); }
+    if (D.SHOP_URL) { const a = el('a', '', '코드 말고 바로 결제하기 →'); a.href = s.product_no ? productUrl(s.product_no) : D.SHOP_URL; a.target = '_blank'; a.rel = 'noopener'; a.style.cssText = 'display:block;margin-top:8px;color:#ffe08a;font-size:12.5px'; cb.appendChild(a); }
     V.appendChild(cb);
   }
 
@@ -379,10 +400,18 @@ async function showBoard(slug, keepScroll) {
   syncBuy();
   if (keepScroll) window.scrollTo(0, y);
 }
+const productUrl = no => (D.SHOP_URL || '').replace(/\/?$/, '/') + 'product/detail.html?product_no=' + no;
 function syncBuy() {
-  const s = st, go = $('#go'), buy = $('#buy');
+  const s = st, go = $('#go'), buy = $('#buy'), link = $('#buyLink'), qtyBox = $('#qty');
   if (!s) { buy.classList.add('hidden'); return; }
   buy.classList.remove('hidden');
+  const realPay = LIVE && !s.test && s.mode === 'auto' && s.status === 'open' && s.left > 0 && !code;
+  link.classList.toggle('hidden', !realPay); go.classList.toggle('hidden', realPay); qtyBox.classList.toggle('hidden', realPay);
+  if (realPay) {
+    if (s.product_no && D.SHOP_URL) { link.href = productUrl(s.product_no); link.textContent = `결제하고 바로 뽑기 · 1회 ${won(s.price)} →`; link.style.pointerEvents = ''; link.style.opacity = ''; }
+    else { link.removeAttribute('href'); link.textContent = '판매 준비 중이에요'; link.style.pointerEvents = 'none'; link.style.opacity = '.5'; }
+    return;
+  }
   const n = Math.min(qty, s.left);
   let txt, dis = false;
   if (s.status === 'closed' || s.left === 0) { txt = '마감된 판이에요'; dis = true; }
@@ -452,6 +481,38 @@ function onRemoteDraw(d) {
   clearTimeout(refreshT); refreshT = setTimeout(() => { if (cur && !busy) showBoard(cur, true); }, 600);
 }
 
+/* ---------- 카페24 결제 후 도착: 주문 확인 → 바로 카드 공개 ---------- */
+async function landOrder(id, tries = 0) {
+  V.textContent = '';
+  const w = el('div', 'wait'); w.append(el('h3', '', '🎰 결제 확인 중…'), el('p', '', '주문 ' + id)); V.appendChild(w);
+  const r = await Server.order(id);
+  if (r.status === 'ok') {
+    const all = [], boards = r.boards || [];
+    for (const b of boards) for (const x of b.results || []) all.push(x);
+    const prev = myOrders().filter(o => o.id !== id);
+    store.set('luckyslab-kuji-orders', [{ id, n: all.length, hits: all.filter(x => HIT(x.grade)).length }, ...prev].slice(0, 20));
+    const short = boards.reduce((a, b) => a + (b.shortage || 0), 0), pending = boards.filter(b => b.pending);
+    const goBoard = () => { history.replaceState(null, '', location.pathname + (EMBED ? '?embed=1' : '') + (boards[0] ? '#/' + boards[0].slug : '')); route(); };
+    if (!all.length) {
+      w.textContent = '';
+      w.append(el('h3', '', pending.length ? '🔴 라이브 판 주문이에요' : '결과가 없어요'),
+        el('p', '', pending.length ? '방송에서 개봉해드려요. 결과는 방송이 끝나면 이 링크에서 다시 볼 수 있어요.' : short ? `표가 모자라서 ${short}회분은 뽑지 못했어요. 환불해드릴게요.` : '이 주문엔 뽑을 쿠지가 없어요.'));
+      const b = el('button', 'pill', '판 보러 가기'); b.onclick = goBoard; w.appendChild(b); return;
+    }
+    if (short) toast(`표가 모자라서 ${short}회분은 뽑지 못했어요. 그만큼 환불해드릴게요`);
+    myName = r.who || myName;
+    showResult(all, goBoard);
+    return;
+  }
+  w.textContent = '';
+  const msgs = { unpaid: ['💳 입금 확인 전이에요', r.message], canceled: ['취소된 주문이에요', ''], none: ['쿠지 상품이 없는 주문이에요', '일반 상품 주문은 상점에서 확인해주세요.'],
+    not_found: ['주문을 찾을 수 없어요', '주문번호를 다시 확인해주세요.'], bad_order: ['주문번호가 이상해요', ''] };
+  const [t, m] = msgs[r.status] || ['잠시 문제가 생겼어요', r.message || '조금 뒤에 다시 열어주세요.'];
+  w.append(el('h3', '', t), el('p', '', m || ''));
+  if (r.status === 'unpaid' || r.status === 'error') { const b = el('button', 'pill', '다시 확인'); b.onclick = () => landOrder(id, tries + 1); w.appendChild(b); }
+  if (r.status === 'error' && tries < 2) setTimeout(() => landOrder(id, tries + 1), 2500);
+}
+
 /* ---------- 폭죽 ---------- */
 const fx = $('#fx'), cx = fx.getContext('2d'); let parts = [], raf = 0;
 function size() { fx.width = innerWidth * devicePixelRatio; fx.height = innerHeight * devicePixelRatio; }
@@ -475,6 +536,8 @@ function burst(n) {
   const bar = $('#modeBar');
   if (LIVE) { bar.classList.add('live'); bar.textContent = '● 실시간 서버 연결됨 · 모든 손님이 같은 판을 함께 뽑아요'; }
   else bar.textContent = '🧪 데모 화면 · 실제 결제·배송 없음 · 이 브라우저에서만 저장돼요';
+  const orderId = (QS.get('order') || '').trim();
+  if (LIVE && orderId) return landOrder(orderId);
   if (LIVE && code) { const r = await checkCode(); if (r && !location.hash) { location.hash = '#/' + r.slug; return; } }
   route();
 })();
