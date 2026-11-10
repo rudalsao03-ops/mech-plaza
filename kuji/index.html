@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e111a">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<title>럭키슬랩 쿠지 (데모)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css">
+<style>
+  :root{--bg:#0e111a;--card:#171b28;--card2:#1f2435;--bd:#323a54;--text:#f3edda;--sub:#9aa0b8;--gold:#d9a030;--gold2:#ffe08a;--ink:#14161f;
+    --S:#e2453c;--A:#d9a030;--B:#3a7cf0;--C:#6f7690;--LAST:#9a5cd6}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 -apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+  .px{font-family:"Galmuri11",sans-serif}
+  .wrap{max-width:520px;margin:0 auto;padding:0 16px}
+  button{font:inherit;color:inherit;cursor:pointer}
+  .demo{background:#3a2a10;color:var(--gold2);text-align:center;font:12px "Galmuri11",sans-serif;padding:7px 10px;border-bottom:1px solid #6b4f12}
+  header{position:sticky;top:0;z-index:5;background:rgba(14,17,26,.93);backdrop-filter:blur(8px);border-bottom:1px solid var(--bd)}
+  header .wrap{display:flex;align-items:center;gap:10px;height:56px}
+  .logo{font:bold 19px "Galmuri11",sans-serif;flex:1;color:var(--text);text-decoration:none}
+  .logo i{font-style:normal;color:var(--gold2)}
+  .pill{font:bold 12px "Galmuri11",sans-serif;border:1px solid var(--bd);border-radius:99px;padding:6px 11px;background:var(--card);color:var(--text);text-decoration:none}
+
+  h2{font:bold 19px "Galmuri11",sans-serif;margin:24px 0 4px}
+  .lead{color:var(--sub);font-size:13px;margin:0 0 12px}
+
+  /* 판 목록 */
+  .bcard{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--bd);border-radius:20px;padding:0;margin-bottom:14px;overflow:hidden}
+  .bcard .art{height:150px;position:relative;background:radial-gradient(120% 90% at 50% 0%,#2b3150 0%,#151826 70%);display:flex;align-items:flex-end;justify-content:center;gap:0;padding-bottom:12px}
+  .mini{width:62px;height:90px;border-radius:7px;background:#f2ead6;border:2px solid #04050a;padding:4px;margin:0 -6px;box-shadow:0 6px 0 rgba(0,0,0,.35)}
+  .mini b{display:block;height:11px;border-radius:3px;font:bold 7px/11px "Galmuri11",sans-serif;color:#fff;text-align:center}
+  .mini span{display:block;height:65px;margin-top:4px;border-radius:4px;background:linear-gradient(135deg,#ff9a5c,#ffd760 30%,#7be0a8 55%,#6aa8ff 78%,#c58bff);background-size:220% 220%;animation:holo 5s ease-in-out infinite alternate}
+  @keyframes holo{to{background-position:100% 100%}}
+  .bcard .badge{position:absolute;left:12px;top:12px;font:bold 11px "Galmuri11",sans-serif;background:var(--S);color:#fff;border-radius:7px;padding:4px 8px}
+  .bcard .badge.live{background:#b8322c}
+  .bcard .body{padding:14px 16px 16px}
+  .bcard h3{margin:0 0 6px;font:bold 16px/1.35 "Galmuri11",sans-serif}
+  .row2{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .price{font:bold 20px "Galmuri11",sans-serif;color:var(--gold2)}
+  .price small{font-size:12px;color:var(--sub);font-weight:normal;margin-left:3px}
+  .bar{height:9px;border-radius:99px;background:#252b3e;overflow:hidden;margin:10px 0 5px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--S))}
+  .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--sub)}
+  .meta b{color:var(--text)}
+
+  /* 판 상세 */
+  .back{background:none;border:0;color:var(--sub);padding:14px 0 0;font-size:13px}
+  .hero{background:radial-gradient(120% 100% at 50% 0%,#2b3150 0%,#171b28 75%);border:1px solid var(--bd);border-radius:22px;padding:18px;margin-top:10px}
+  .hero h1{font:bold 21px/1.3 "Galmuri11",sans-serif;margin:0 0 8px}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+  .stats div{background:rgba(0,0,0,.25);border-radius:12px;padding:9px 6px;text-align:center}
+  .stats b{display:block;font:bold 17px "Galmuri11",sans-serif;color:var(--gold2)}
+  .stats small{font-size:11px;color:var(--sub)}
+  .tier{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:12px 14px;margin-bottom:10px}
+  .tier .th{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .g{flex:none;min-width:30px;height:24px;padding:0 6px;border-radius:7px;color:#fff;font:bold 12px/24px "Galmuri11",sans-serif;text-align:center}
+  .tier .th b{flex:1;font-size:14px}
+  .tier .th span{font-size:12px;color:var(--sub)}
+  .item{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;padding:4px 0}
+  .item.gone{color:#59607a;text-decoration:line-through}
+  .item .q{color:var(--sub);white-space:nowrap}
+  .fair{background:var(--card);border:1px dashed var(--bd);border-radius:16px;padding:12px 14px;font-size:12.5px;color:var(--sub);line-height:1.6}
+  .fair code{display:block;word-break:break-all;color:var(--gold2);font:11px/1.5 ui-monospace,Menlo,monospace;background:#0b0d14;border-radius:8px;padding:8px;margin:6px 0}
+  .log{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:6px 14px}
+  .log div{display:flex;gap:8px;align-items:center;font-size:13px;padding:7px 0;border-bottom:1px solid #232839}
+  .log div:last-child{border-bottom:0}
+  .log .n{color:var(--sub);font-size:12px;width:62px;flex:none}
+  .empty{color:var(--sub);font-size:13px;text-align:center;padding:14px}
+
+  /* 하단 구매바 */
+  .buy{position:fixed;left:0;right:0;bottom:0;z-index:6;background:rgba(14,17,26,.96);border-top:1px solid var(--bd);padding:10px 0 calc(10px + env(safe-area-inset-bottom))}
+  .buy .wrap{display:flex;gap:8px}
+  .qty{display:flex;background:var(--card);border:1px solid var(--bd);border-radius:14px;overflow:hidden;flex:none}
+  .qty button{border:0;background:none;padding:0 13px;font:bold 13px "Galmuri11",sans-serif;color:var(--sub)}
+  .qty button.on{background:var(--card2);color:var(--gold2)}
+  .go{flex:1;border:0;border-radius:14px;background:linear-gradient(180deg,#ffe08a,#d9a030);color:var(--ink);font:bold 15px "Galmuri11",sans-serif;padding:14px 10px;box-shadow:0 4px 0 #8a5a12}
+  .go:disabled{background:#2a3048;color:#6d7390;box-shadow:none}
+
+  /* 결과 연출 */
+  .ov{position:fixed;inset:0;z-index:10;background:rgba(5,7,12,.93);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+  .ov h3{font:bold 18px "Galmuri11",sans-serif;margin:0 0 4px}
+  .ov p{color:var(--sub);font-size:13px;margin:0 0 16px}
+  .grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:460px}
+  .tk{width:84px;height:120px;perspective:600px}
+  .tk .in{position:relative;width:100%;height:100%;transition:transform .55s cubic-bezier(.2,.8,.3,1.2);transform-style:preserve-3d}
+  .tk.open .in{transform:rotateY(180deg)}
+  .tk .f,.tk .b{position:absolute;inset:0;border-radius:10px;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6px}
+  .tk .f{background:repeating-linear-gradient(45deg,#2a2f45,#2a2f45 8px,#232838 8px,#232838 16px);border:2px solid var(--gold);font:bold 26px "Galmuri11",sans-serif;color:var(--gold2)}
+  .tk .b{transform:rotateY(180deg);background:var(--card2);border:2px solid var(--bd)}
+  .tk .b .g{margin-bottom:6px}
+  .tk .b small{font-size:10.5px;line-height:1.3;color:var(--text)}
+  .tk.hit .b{border-color:var(--gold2);box-shadow:0 0 0 3px rgba(255,224,138,.25),0 0 28px rgba(255,200,90,.55);background:radial-gradient(circle at 50% 30%,#4a3a14,#1f2435 70%)}
+  .tk.wait .in{animation:wob .5s ease-in-out infinite}
+  @keyframes wob{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+  .ov .act{display:flex;gap:8px;margin-top:20px;width:100%;max-width:340px}
+  .ov .act button{flex:1;border:0;border-radius:14px;padding:13px;font:bold 14px "Galmuri11",sans-serif}
+  .ov .act .p{background:var(--gold2);color:var(--ink)}
+  .ov .act .s{background:var(--card2);color:var(--text)}
+  canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:11}
+  .hidden{display:none!important}
+  @media (prefers-reduced-motion:reduce){.mini span{animation:none}.tk .in{transition:none}.tk.wait .in{animation:none}}
+</style>
+</head>
+<body>
+<div class="demo">🧪 데모 화면 · 실제 결제·배송 없음 · 이 브라우저에서만 저장돼요</div>
+<header><div class="wrap">
+  <a class="logo" href="#">🍀 LUCKY<i>SLAB</i></a>
+  <a class="pill" href="../">🌙 광장</a>
+  <a class="pill" href="../shop/">상점 홈</a>
+</div></header>
+
+<main class="wrap" id="view"></main>
+<div class="buy hidden" id="buy"><div class="wrap">
+  <div class="qty" id="qty"><button data-n="1" class="on">1회</button><button data-n="5">5회</button><button data-n="10">10회</button></div>
+  <button class="go" id="go">뽑기</button>
+</div></div>
+
+<div class="ov hidden" id="ov">
+  <h3 id="ovT">두근두근…</h3>
+  <p id="ovS">카드를 눌러서 열어보세요</p>
+  <div class="grid" id="ovG"></div>
+  <div class="act hidden" id="ovA"><button class="s" id="ovAll">전부 열기</button><button class="p" id="ovOk">확인</button></div>
+</div>
+<canvas id="fx"></canvas>
+
+<script src="../data.js"></script>
+<script>
+(() => {
+'use strict';
+const D = window.LUCKY || {}, $ = s => document.querySelector(s);
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const won = n => (+n || 0).toLocaleString('ko-KR') + '원';
+const COL = g => `var(--${['S', 'A', 'B', 'C', 'LAST'].includes(g) ? g : 'C'})`;
+const HIT = g => g === 'S' || g === 'A' || g === 'B' || g === 'LAST';
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+
+/* ---------- 판 → 표 뭉치 ----------
+   실제 운영에선 이 부분이 서버(Supabase)에서 돌아가고, 손님 브라우저엔 결과만 옴.
+   데모에선 브라우저에서 같은 방식으로 흉내냄. */
+const boards = (D.BOARDS || []).map((b, i) => ({ ...b, id: 'b' + i }));
+const sha256 = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))].map(x => x.toString(16).padStart(2, '0')).join('');
+function rndInt(n) { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; }
+async function deckOf(b) {
+  const key = 'luckyslab-kuji-' + b.id + '-' + b.total;
+  let d = store.get(key, null);
+  if (d && d.tickets && d.tickets.length === b.total) return d;
+  const tickets = [];
+  for (const t of b.tiers || []) for (const [name, , tot] of t.items) for (let k = 0; k < +tot; k++) tickets.push({ g: t.g, n: name });
+  while (tickets.length < b.total) tickets.push({ g: 'C', n: '포인트' });
+  tickets.length = b.total;
+  for (let i = tickets.length - 1; i > 0; i--) { const j = rndInt(i + 1); [tickets[i], tickets[j]] = [tickets[j], tickets[i]]; }
+  const salt = [...crypto.getRandomValues(new Uint8Array(16))].map(x => x.toString(16).padStart(2, '0')).join('');
+  const order = tickets.map((t, i) => `${i + 1}:${t.g}:${t.n}`).join('|');
+  d = { tickets, next: 0, salt, hash: await sha256(salt + '|' + order), log: [] };
+  store.set(key, d); d._key = key; return d;
+}
+const saveDeck = (b, d) => store.set('luckyslab-kuji-' + b.id + '-' + b.total, d);
+function remaining(d) {
+  const m = {};
+  for (let i = d.next; i < d.tickets.length; i++) { const t = d.tickets[i]; const k = t.g + '|' + t.n; m[k] = (m[k] || 0) + 1; }
+  return m;
+}
+
+/* ---------- 화면 ---------- */
+const V = $('#view');
+let cur = null, qty = 1;
+async function route() {
+  const id = location.hash.replace(/^#\/?/, '');
+  const b = boards.find(x => x.id === id);
+  window.scrollTo(0, 0);
+  if (b) return showBoard(b);
+  cur = null; $('#buy').classList.add('hidden'); showList();
+}
+window.addEventListener('hashchange', route);
+
+async function showList() {
+  V.textContent = '';
+  V.appendChild(el('h2', '', '🎴 지금 열린 판'));
+  V.appendChild(el('p', 'lead', '남은 표에서 한 장씩 뽑는 쿠지 방식이에요. 마지막 표까지 다 팔리면 모든 상품이 반드시 나가요.'));
+  if (!boards.length) { V.appendChild(el('div', 'empty', '지금 열린 판이 없어요.')); return; }
+  for (const b of boards) {
+    const d = await deckOf(b), left = d.tickets.length - d.next;
+    const sLeft = d.tickets.slice(d.next).filter(t => t.g === 'S').length;
+    const c = el('button', 'bcard'); c.onclick = () => { location.hash = '#/' + b.id; };
+    const art = el('div', 'art');
+    const bd = el('span', 'badge', left === 0 ? '완판' : sLeft ? `S상 ${sLeft}장 남음` : '진행 중'); art.appendChild(bd);
+    [['S', -8, 10], ['A', 0, 0], ['B', 8, 10]].forEach(([g, r, y]) => {
+      const m = el('div', 'mini'); m.style.transform = `rotate(${r}deg) translateY(${y}px)`;
+      const t = el('b', '', g + '상'); t.style.background = COL(g); m.appendChild(t); m.appendChild(el('span')); art.appendChild(m);
+    });
+    c.appendChild(art);
+    const body = el('div', 'body'); body.appendChild(el('h3', '', b.title));
+    const r = el('div', 'row2'), p = el('div', 'price'); p.textContent = won(b.price); p.appendChild(el('small', '', '/ 1회')); r.appendChild(p); body.appendChild(r);
+    const bar = el('div', 'bar'), f = el('i'); f.style.width = (left / d.tickets.length * 100) + '%'; bar.appendChild(f); body.appendChild(bar);
+    const meta = el('div', 'meta'); const m1 = el('span'); m1.appendChild(document.createTextNode('남은 ')); m1.appendChild(el('b', '', left.toLocaleString()));
+    m1.appendChild(document.createTextNode(' / ' + d.tickets.length.toLocaleString())); meta.appendChild(m1); meta.appendChild(el('span', '', `힛 ${d.tickets.slice(d.next).filter(t => HIT(t.g)).length}장 남음`));
+    body.appendChild(meta); c.appendChild(body); V.appendChild(c);
+  }
+}
+
+async function showBoard(b) {
+  cur = b; const d = await deckOf(b), left = d.tickets.length - d.next, rem = remaining(d);
+  V.textContent = '';
+  const bk = el('button', 'back', '← 판 목록'); bk.onclick = () => { location.hash = ''; }; V.appendChild(bk);
+  const h = el('div', 'hero'); h.appendChild(el('h1', '', b.title));
+  const p = el('div', 'price'); p.textContent = won(b.price); p.appendChild(el('small', '', '/ 1회')); h.appendChild(p);
+  const bar = el('div', 'bar'), f = el('i'); f.style.width = (left / d.tickets.length * 100) + '%'; bar.appendChild(f); h.appendChild(bar);
+  const st = el('div', 'stats');
+  for (const [v, l] of [[left.toLocaleString(), '남은 구수'], [d.tickets.slice(d.next).filter(t => HIT(t.g)).length + '장', '남은 힛'], [d.next.toLocaleString(), '나간 구수']]) {
+    const x = el('div'); x.appendChild(el('b', '', v)); x.appendChild(el('small', '', l)); st.appendChild(x);
+  }
+  h.appendChild(st); V.appendChild(h);
+
+  V.appendChild(el('h2', '', '🎁 상품 구성'));
+  V.appendChild(el('p', 'lead', '숫자는 남은 수량 / 전체 수량이에요. 뽑힐 때마다 바로 줄어들어요.'));
+  for (const t of b.tiers || []) {
+    const box = el('div', 'tier'), th = el('div', 'th'), g = el('span', 'g', t.g + '상'); g.style.background = COL(t.g);
+    const tl = t.items.reduce((a, [n, , tot]) => a + (rem[t.g + '|' + n] || 0), 0), tt = t.items.reduce((a, i) => a + +i[2], 0);
+    th.append(g, el('b', '', t.g === 'C' ? '포인트상' : `${t.g}상`), el('span', '', `${tl.toLocaleString()} / ${tt.toLocaleString()}`)); box.appendChild(th);
+    for (const [n, , tot] of t.items) {
+      const l = rem[t.g + '|' + n] || 0, it = el('div', 'item' + (l === 0 ? ' gone' : ''));
+      it.append(el('span', '', n), el('span', 'q', `${l.toLocaleString()} / ${(+tot).toLocaleString()}`)); box.appendChild(it);
+    }
+    V.appendChild(box);
+  }
+
+  V.appendChild(el('h2', '', '📜 최근 결과'));
+  const lg = el('div', 'log');
+  if (!d.log.length) lg.appendChild(el('div', 'empty', '아직 아무도 안 뽑았어요'));
+  for (const x of d.log.slice(0, 15)) {
+    const r = el('div'), g = el('span', 'g', x.g); g.style.background = COL(x.g);
+    r.append(el('span', 'n', `#${x.no}`), g, el('span', '', x.n)); lg.appendChild(r);
+  }
+  V.appendChild(lg);
+
+  V.appendChild(el('h2', '', '🔒 조작 없음 증명'));
+  const fr = el('div', 'fair');
+  fr.appendChild(document.createTextNode('판을 열 때 표 순서를 전부 섞어서 고정하고, 그 순서의 지문(SHA-256)을 먼저 공개해요. 판이 끝나면 원래 순서를 공개해서 누구나 지문이 맞는지 확인할 수 있어요.'));
+  fr.appendChild(el('code', '', d.hash));
+  fr.appendChild(document.createTextNode(left === 0 ? '완판! 아래 버튼으로 원래 순서를 확인할 수 있어요.' : '중간에 순서를 바꾸면 지문이 달라져서 바로 들통나요.'));
+  if (left === 0) { const vb = el('button', 'pill', '원래 순서 보기'); vb.style.marginTop = '8px'; vb.onclick = () => reveal(b, d); fr.appendChild(el('br')); fr.appendChild(vb); }
+  V.appendChild(fr);
+
+  const rs = el('button', 'pill', '↺ 데모 판 초기화'); rs.style.margin = '18px 0 0';
+  rs.onclick = () => { try { localStorage.removeItem('luckyslab-kuji-' + b.id + '-' + b.total); } catch (e) {} showBoard(b); };
+  V.appendChild(rs);
+
+  $('#buy').classList.remove('hidden'); syncBuy(left);
+}
+function syncBuy(left) {
+  const n = Math.min(qty, left), go = $('#go');
+  go.disabled = left === 0; go.textContent = left === 0 ? '완판됐어요' : `${n}회 뽑기 · ${won(cur.price * n)}`;
+}
+for (const bt of document.querySelectorAll('#qty button')) bt.onclick = async () => {
+  qty = +bt.dataset.n; for (const x of document.querySelectorAll('#qty button')) x.classList.toggle('on', x === bt);
+  if (cur) { const d = await deckOf(cur); syncBuy(d.tickets.length - d.next); }
+};
+
+async function reveal(b, d) {
+  const order = d.tickets.map((t, i) => `${i + 1}:${t.g}:${t.n}`).join('|'), h = await sha256(d.salt + '|' + order);
+  const lines = d.tickets.filter(t => HIT(t.g)).map(t => `${d.tickets.indexOf(t) + 1}번째: ${t.g}상 ${t.n}`).join('\n');
+  alert(`지문 일치: ${h === d.hash ? 'O ✅' : 'X ❌'}\n\n힛 위치\n${lines}`);
+}
+
+/* ---------- 뽑기 ---------- */
+let busy = false;
+$('#go').onclick = async () => {
+  if (!cur || busy) return; busy = true;
+  const b = cur, d = await deckOf(b), n = Math.min(qty, d.tickets.length - d.next);
+  if (n <= 0) { busy = false; return; }
+  const got = [];
+  for (let i = 0; i < n; i++) { const t = d.tickets[d.next]; got.push({ ...t, no: d.next + 1 }); d.next++; }
+  d.log = got.slice().reverse().concat(d.log).slice(0, 100); saveDeck(b, d);
+  showResult(got, () => { busy = false; showBoard(b); });
+};
+function showResult(got, done) {
+  const G = $('#ovG'); G.textContent = '';
+  $('#ovT').textContent = '두근두근…'; $('#ovS').textContent = '카드를 눌러서 열어보세요';
+  $('#ovA').classList.add('hidden'); $('#ov').classList.remove('hidden');
+  let opened = 0;
+  const cards = got.map(t => {
+    const c = el('div', 'tk wait'), inn = el('div', 'in'), f = el('div', 'f', '?'), bk = el('div', 'b'), g = el('span', 'g', t.g + '상');
+    g.style.background = COL(t.g); bk.append(g, el('small', '', t.n)); inn.append(f, bk); c.appendChild(inn);
+    c.onclick = () => open(c, t); G.appendChild(c); return [c, t];
+  });
+  function open(c, t) {
+    if (c.classList.contains('open')) return;
+    c.classList.remove('wait'); c.classList.add('open'); if (HIT(t.g)) { c.classList.add('hit'); setTimeout(() => burst(t.g === 'S' ? 180 : 90), 250); }
+    if (++opened === cards.length) {
+      const hits = got.filter(x => HIT(x.g));
+      $('#ovT').textContent = hits.length ? `🎉 ${hits.map(x => x.g + '상').join(', ')} 당첨!` : '아쉽지만 포인트상';
+      $('#ovS').textContent = hits.length ? '실제 운영에선 광장에 폭죽이 터지고 명예의 전당에 올라가요' : '포인트는 다음 뽑기나 상점에서 쓸 수 있어요 (데모)';
+    }
+  }
+  setTimeout(() => $('#ovA').classList.remove('hidden'), 400);
+  $('#ovAll').onclick = () => cards.forEach(([c, t], i) => setTimeout(() => open(c, t), i * 120));
+  $('#ovOk').onclick = () => { cards.forEach(([c, t]) => open(c, t)); $('#ov').classList.add('hidden'); done(); };
+}
+
+/* ---------- 폭죽 ---------- */
+const fx = $('#fx'), cx = fx.getContext('2d'); let parts = [], raf = 0;
+function size() { fx.width = innerWidth * devicePixelRatio; fx.height = innerHeight * devicePixelRatio; }
+addEventListener('resize', size); size();
+function burst(n) {
+  const cols = ['#ffe08a', '#e2453c', '#3a7cf0', '#2fa860', '#ff7ad8', '#fff'];
+  for (let i = 0; i < n; i++) parts.push({ x: innerWidth / 2, y: innerHeight * .4, vx: (Math.random() - .5) * 600, vy: -250 - Math.random() * 420, r: Math.random() * 6, vr: (Math.random() - .5) * 12, c: cols[i % 6], l: 2 + Math.random() });
+  if (!raf) { let last = performance.now(); const step = t => { const dt = Math.min(.05, (t - last) / 1000); last = t;
+    cx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0); cx.clearRect(0, 0, innerWidth, innerHeight);
+    for (const p of parts) { p.vy += 640 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.r += p.vr * dt; p.l -= dt;
+      cx.save(); cx.translate(p.x, p.y); cx.rotate(p.r); cx.globalAlpha = Math.max(0, Math.min(1, p.l)); cx.fillStyle = p.c; cx.fillRect(-4, -2, 8, 4); cx.restore(); }
+    parts = parts.filter(p => p.l > 0 && p.y < innerHeight + 40);
+    if (parts.length) raf = requestAnimationFrame(step); else { raf = 0; cx.clearRect(0, 0, innerWidth, innerHeight); } };
+    raf = requestAnimationFrame(step); }
+}
+
+route();
+})();
+</script>
+</body>
+</html>
