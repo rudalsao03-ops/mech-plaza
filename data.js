@@ -10,6 +10,8 @@
    · BIZ       : 사업자 정보 (상점 홈 맨 아래 표시 — 통신판매업 필수 표시사항)
    ====================================================================== */
 window.LUCKY = {
+  SUPABASE_URL: 'https://jxkicwyioopekmsajowh.supabase.co',   // 광장·쿠지 서버 (공개 키라 노출돼도 괜찮음)
+  SUPABASE_ANON_KEY: 'sb_publishable_HkZjK14uHrUpVgybOEhdkA_liVHEb71',
   SHOP_URL: 'https://luckyslab.shop/',
   KAKAO_URL: '',
   LIVE: { youtube: '', schedule: '매일 저녁 8시 LIVE' },

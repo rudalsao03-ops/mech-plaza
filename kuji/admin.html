@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e111a">
+<meta name="robots" content="noindex">
+<title>쿠지 관리자</title>
+<style>
+  :root{--bg:#0e111a;--card:#171b28;--card2:#1f2435;--bd:#323a54;--text:#f3edda;--sub:#9aa0b8;--gold:#d9a030;--gold2:#ffe08a;--ink:#14161f;--red:#e2453c;--green:#2fa860}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.55 -apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif}
+  .wrap{max-width:640px;margin:0 auto;padding:16px}
+  h1{font-size:20px;margin:6px 0 2px}h2{font-size:16px;margin:22px 0 8px}
+  .sub{color:var(--sub);font-size:12.5px;margin:0 0 12px}
+  .card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;margin-bottom:12px}
+  input,select,textarea{width:100%;background:#0b0d14;border:1px solid var(--bd);border-radius:10px;color:var(--text);font:14px/1.4 inherit;padding:9px 10px;outline:0}
+  textarea{font:12.5px/1.5 ui-monospace,Menlo,monospace;min-height:170px}
+  input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+  label{display:block;font-size:12px;color:var(--sub);margin:10px 0 4px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .row>*{flex:1;min-width:0}
+  button{border:0;border-radius:10px;background:var(--card2);color:var(--text);font:bold 13px inherit;padding:10px 12px;cursor:pointer;white-space:nowrap}
+  button.p{background:var(--gold2);color:var(--ink)}button.r{background:#4a1d1d;color:#ffb3b3}button.g{background:#12321f;color:#9ff0bf}
+  button:disabled{opacity:.5}
+  .b{border-top:1px solid var(--bd);padding-top:12px;margin-top:12px}
+  .bh{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+  .bh b{font-size:15px}.bh small{color:var(--sub)}
+  .tag{display:inline-block;font-size:11px;border-radius:6px;padding:2px 7px;margin-right:4px;background:#2a3048;color:var(--sub)}
+  .tag.t{background:#3a2a10;color:var(--gold2)}.tag.l{background:#4a1d1d;color:#ff9a9a}.tag.o{background:#12321f;color:#9ff0bf}
+  .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .acts button{flex:none;padding:8px 10px;font-size:12px}
+  .out{background:#0b0d14;border:1px solid var(--bd);border-radius:10px;padding:10px;margin-top:10px;font-size:13px;white-space:pre-wrap;word-break:break-all}
+  .code{font:bold 20px ui-monospace,Menlo,monospace;color:var(--gold2);letter-spacing:1px}
+  .msg{border-radius:10px;padding:9px 11px;margin:8px 0;font-size:13px}
+  .msg.e{background:#4a1d1d;color:#ffb3b3}.msg.s{background:#12321f;color:#9ff0bf}
+  .hidden{display:none!important}
+  a{color:var(--gold2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🎰 쿠지 관리자</h1>
+  <p class="sub">판 열기 · 뽑기 코드 발급 · 라이브 뽑기 · 마감. 비밀번호는 이 탭을 닫으면 지워져요.</p>
+
+  <div class="card" id="login">
+    <label>관리자 비밀번호 (SQL에서 정한 것)</label>
+    <div class="row"><input id="pw" type="password" autocomplete="current-password"><button class="p" id="loginBtn" style="flex:none">로그인</button></div>
+    <div id="loginMsg"></div>
+  </div>
+
+  <div id="app" class="hidden">
+    <h2>📋 판 목록</h2>
+    <div class="card" id="boards"></div>
+
+    <h2>➕ 새 판 열기</h2>
+    <div class="card">
+      <label>data.js에 있는 판 불러오기</label>
+      <select id="tpl"><option value="">직접 입력</option></select>
+      <div class="row">
+        <div><label>주소용 이름 (영문 소문자·숫자·-)</label><input id="slug" placeholder="psa10-pika-1"></div>
+        <div><label>1회 가격 (원)</label><input id="price" type="number" min="0" value="2500"></div>
+      </div>
+      <label>판 이름</label><input id="title" maxlength="60">
+      <label>상품 구성 — 한 줄에 하나: 등급 | 상품명 | 수량 | 사진(선택)</label>
+      <textarea id="prizes" placeholder="S | 리자몽 VMAX SSR PSA10 | 1 | cards/charizard_vmax.jpg&#10;C | 포인트 | 99"></textarea>
+      <div class="sub" id="sum" style="margin-top:6px"></div>
+      <div class="row">
+        <div><label>방식</label><select id="mode"><option value="auto">자동 (손님이 직접 뽑기)</option><option value="live">라이브 (방송에서 운영자가 뽑기)</option></select></div>
+        <div><label>테스트 판?</label><select id="test"><option value="1">테스트 (결제 없이 누구나 무료로 뽑기)</option><option value="0">실제 (뽑기 코드 필요)</option></select></div>
+      </div>
+      <div class="msg e" style="margin-top:12px">판을 여는 순간 표 순서가 섞여서 고정되고 지문이 공개돼요. 연 뒤엔 상품 구성을 못 바꿔요.</div>
+      <button class="p" id="openBtn" style="width:100%">판 열기</button>
+      <div id="openMsg"></div>
+    </div>
+  </div>
+</div>
+
+<script src="../data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+(() => {
+'use strict';
+const D = window.LUCKY || {}, $ = s => document.querySelector(s);
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const won = n => (+n || 0).toLocaleString('ko-KR') + '원';
+const sb = window.supabase.createClient(D.SUPABASE_URL, D.SUPABASE_ANON_KEY);
+let KEY = '';
+try { KEY = sessionStorage.getItem('luckyslab-kuji-admin') || ''; } catch (e) {}
+const call = async (fn, args) => { const { data, error } = await sb.rpc(fn, args); if (error) throw new Error(error.message); return data; };
+const msg = (box, text, ok) => { box.textContent = ''; box.appendChild(el('div', 'msg ' + (ok ? 's' : 'e'), text)); };
+const SITE = location.origin + location.pathname.replace(/admin\.html$/, '');
+
+async function login(k) {
+  try {
+    if (!await call('kuji_admin_check', { p_key: k })) { msg($('#loginMsg'), '비밀번호가 틀렸어요'); return; }
+    KEY = k; try { sessionStorage.setItem('luckyslab-kuji-admin', k); } catch (e) {}
+    $('#login').classList.add('hidden'); $('#app').classList.remove('hidden'); loadBoards();
+  } catch (e) {
+    msg($('#loginMsg'), /kuji_admin_check/.test(e.message) ? '서버에 쿠지 SQL이 아직 설치 안 됐어요. supabase/kuji.sql 을 먼저 실행하세요.' : '오류: ' + e.message);
+  }
+}
+$('#loginBtn').onclick = () => login($('#pw').value);
+$('#pw').addEventListener('keydown', e => { if (e.key === 'Enter') login($('#pw').value); });
+if (KEY) login(KEY);
+
+async function loadBoards() {
+  const B = $('#boards'); B.textContent = '불러오는 중…';
+  let list; try { list = await call('kuji_list'); } catch (e) { B.textContent = '오류: ' + e.message; return; }
+  B.textContent = '';
+  if (!list.length) { B.appendChild(el('div', 'sub', '아직 연 판이 없어요. 아래에서 새 판을 열어보세요.')); return; }
+  list.forEach((b, i) => {
+    const w = el('div', i ? 'b' : ''), h = el('div', 'bh'), l = el('div');
+    l.appendChild(el('b', '', b.title)); l.appendChild(el('br'));
+    l.appendChild(el('span', 'tag ' + (b.status === 'open' ? 'o' : ''), b.status === 'open' ? '진행 중' : '마감'));
+    l.appendChild(el('span', 'tag ' + (b.mode === 'live' ? 'l' : ''), b.mode === 'live' ? '라이브' : '자동'));
+    if (b.test) l.appendChild(el('span', 'tag t', '테스트'));
+    l.appendChild(el('small', '', ` ${b.slug} · ${won(b.price)} · 남은 ${b.left}/${b.total} · 힛 ${b.hits_left}`));
+    const a = el('a', '', '열기'); a.href = SITE + '#/' + b.slug; a.target = '_blank';
+    h.append(l, a); w.appendChild(h);
+    const acts = el('div', 'acts'), out = el('div', 'out hidden');
+    const btn = (t, cls, f) => { const x = el('button', cls, t); x.onclick = async () => { x.disabled = true; try { await f(); } catch (e) { out.classList.remove('hidden'); out.textContent = '오류: ' + e.message; } x.disabled = false; }; acts.appendChild(x); };
+    if (b.status === 'open') {
+      btn('🎟️ 뽑기 코드 발급', 'p', async () => {
+        const q = parseInt(prompt('몇 회짜리 코드? (주문 수량)', '1'), 10); if (!(q > 0)) return;
+        const memo = prompt('메모 (주문번호·구매자 등, 선택)', '') || null;
+        const code = await call('kuji_issue_code', { p_key: KEY, p_slug: b.slug, p_qty: q, p_memo: memo });
+        out.classList.remove('hidden'); out.textContent = '';
+        out.appendChild(el('div', 'code', code));
+        out.appendChild(el('div', '', `${q}회 · 손님한테 이 링크를 보내면 바로 뽑기 화면으로 가요:`));
+        const link = SITE + '?code=' + code; const a2 = el('a', '', link); a2.href = link; a2.target = '_blank'; out.appendChild(a2);
+        const cp = el('button', '', '링크 복사'); cp.style.marginTop = '8px'; cp.onclick = () => navigator.clipboard && navigator.clipboard.writeText(link).then(() => { cp.textContent = '복사됨'; });
+        out.appendChild(el('br')); out.appendChild(cp);
+      });
+      btn('🔴 라이브 뽑기', '', async () => {
+        const n = parseInt(prompt('몇 장 뽑을까요? (손님 구매 수량)', '1'), 10); if (!(n > 0)) return;
+        const who = prompt('손님 닉네임 (당첨 시 광장에 표시)', '') || '익명';
+        const r = await call('kuji_live_draw', { p_key: KEY, p_slug: b.slug, p_count: n, p_who: who });
+        out.classList.remove('hidden');
+        out.textContent = `${who}님 결과\n` + r.results.map(x => `#${x.no}  ${x.grade}상  ${x.name}`).join('\n') + `\n\n남은 ${r.left}장${r.closed ? ' · 완판 마감!' : ''}`;
+        loadBoards();
+      });
+      btn('📜 코드 목록', '', async () => {
+        const L = await call('kuji_codes_list', { p_key: KEY, p_slug: b.slug });
+        out.classList.remove('hidden');
+        out.textContent = L.length ? L.map(c => `${c.code}  ${c.used}/${c.qty}회 사용${c.memo ? '  · ' + c.memo : ''}`).join('\n') : '발급한 코드가 없어요';
+      });
+      btn(b.test ? '실제 판으로 전환' : '테스트 판으로 전환', b.test ? 'g' : '', async () => {
+        if (!confirm(b.test ? '실제 판으로 바꾸면 뽑기 코드가 있어야만 뽑을 수 있어요. 바꿀까요?' : '테스트 판으로 바꾸면 누구나 무료로 뽑을 수 있어요. 바꿀까요?')) return;
+        await call('kuji_update', { p_key: KEY, p_slug: b.slug, p_test: !b.test, p_mode: null, p_sort: null }); loadBoards();
+      });
+      btn(b.mode === 'live' ? '자동 판으로 전환' : '라이브 판으로 전환', '', async () => {
+        await call('kuji_update', { p_key: KEY, p_slug: b.slug, p_test: null, p_mode: b.mode === 'live' ? 'auto' : 'live', p_sort: null }); loadBoards();
+      });
+      btn('⏹ 마감', 'r', async () => {
+        if (!confirm('마감하면 더 이상 뽑을 수 없고, 남은 표 순서가 공개돼요. 마감할까요?')) return;
+        await call('kuji_close', { p_key: KEY, p_slug: b.slug }); loadBoards();
+      });
+    }
+    if (b.test) btn('🗑 삭제', 'r', async () => {
+      if (!confirm(`테스트 판 "${b.title}"을(를) 기록까지 전부 지울까요?`)) return;
+      await call('kuji_delete', { p_key: KEY, p_slug: b.slug }); loadBoards();
+    });
+    w.append(acts, out); B.appendChild(w);
+  });
+}
+
+// ---- 새 판 ----
+const TPL = (D.BOARDS || []);
+TPL.forEach((b, i) => { const o = el('option', '', b.title); o.value = i; $('#tpl').appendChild(o); });
+$('#tpl').onchange = () => {
+  const b = TPL[+$('#tpl').value]; if (!b) return;
+  $('#title').value = b.title; $('#price').value = b.price;
+  $('#prizes').value = (b.tiers || []).flatMap(t => t.items.map(it => [t.g, it[0], it[2], it[3]].filter(x => x != null && x !== '').join(' | '))).join('\n');
+  if (!$('#slug').value) $('#slug').value = 'board-' + new Date().toISOString().slice(2, 10).replace(/-/g, '');
+  sum();
+};
+function parsePrizes() {
+  const out = [], errs = [];
+  $('#prizes').value.split('\n').map(l => l.trim()).filter(Boolean).forEach((l, i) => {
+    const [g, name, q, img] = l.split('|').map(x => (x || '').trim());
+    const grade = (g || '').toUpperCase().replace('상', '').replace('라스트', 'LAST');
+    if (!['S', 'A', 'B', 'C', 'D', 'LAST'].includes(grade)) errs.push(`${i + 1}번째 줄: 등급은 S/A/B/C/D/LAST`);
+    else if (!name) errs.push(`${i + 1}번째 줄: 상품명이 없어요`);
+    else if (!(+q >= 1)) errs.push(`${i + 1}번째 줄: 수량은 1 이상`);
+    else out.push({ grade, name, qty: +q, img: img || null });
+  });
+  return { out, errs };
+}
+function sum() {
+  const { out, errs } = parsePrizes(), tot = out.reduce((a, p) => a + p.qty, 0), hit = out.filter(p => ['S', 'A', 'B', 'LAST'].includes(p.grade)).reduce((a, p) => a + p.qty, 0);
+  $('#sum').textContent = errs.length ? errs.join(' / ') : `전체 ${tot.toLocaleString()}구 · 힛 ${hit}장 · 다 팔리면 ${won(tot * (+$('#price').value || 0))}`;
+}
+$('#prizes').oninput = sum; $('#price').oninput = sum;
+$('#openBtn').onclick = async () => {
+  const { out, errs } = parsePrizes(), box = $('#openMsg');
+  if (errs.length) return msg(box, errs.join('\n'));
+  const slug = $('#slug').value.trim().toLowerCase();
+  if (!/^[a-z0-9-]{2,40}$/.test(slug)) return msg(box, '주소용 이름은 영문 소문자·숫자·- 로 2~40자');
+  if (!$('#title').value.trim()) return msg(box, '판 이름을 넣어주세요');
+  if (!out.length) return msg(box, '상품을 한 줄 이상 넣어주세요');
+  if (!confirm(`"${$('#title').value}" 판을 열까요? (${out.reduce((a, p) => a + p.qty, 0)}구)`)) return;
+  $('#openBtn').disabled = true;
+  try {
+    const r = await call('kuji_open', { p_key: KEY, p_slug: slug, p_title: $('#title').value.trim(), p_price: +$('#price').value || 0, p_prizes: out,
+      p_mode: $('#mode').value, p_test: $('#test').value === '1', p_sort: 0 });
+    msg(box, `열렸어요! ${r.total}구 · 지문 ${r.hash.slice(0, 16)}…`, true); loadBoards();
+  } catch (e) { msg(box, /duplicate|unique/.test(e.message) ? '같은 주소용 이름의 판이 이미 있어요' : '오류: ' + e.message); }
+  $('#openBtn').disabled = false;
+};
+})();
+</script>
+</body>
+</html>

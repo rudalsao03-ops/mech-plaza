@@ -53,3 +53,12 @@ create policy "guestbook write" on guestbook for insert with check (true);
 
 ## 기술
 단일 `index.html` · 캔버스 아이소메트릭 · Supabase Realtime(presence/broadcast, 무료 한도 맞춰 전송량 제한) · GitHub Pages · PWA
+
+## 쿠지 서버 (supabase/kuji.sql)
+1. Supabase SQL Editor에 `supabase/kuji.sql` 전체를 붙여넣고, 맨 아래 `'여기에-비밀번호'`를 긴 비밀번호로 바꾼 뒤 Run
+2. `kuji/admin.html` 에서 그 비밀번호로 로그인 → 판 열기 / 뽑기 코드 발급 / 라이브 뽑기 / 마감
+3. SQL이 설치돼 있으면 쿠지 화면·광장이 자동으로 서버 모드로 바뀜 (없으면 데모 모드)
+
+- 표는 판을 열 때 서버가 섞어서 고정, 지문(SHA-256) 공개 → 마감 후 salt 공개로 검증
+- 테스트 판: 누구나 무료로 뽑기 / 실제 판: 뽑기 코드 필요 (나중에 카페24 결제와 자동 연동 예정)
+- 당첨은 서버 기록(kuji_draws) 실시간 구독으로 광장 전체에 폭죽

@@ -760,6 +760,7 @@ async function connectSupabase() {
     if (out.tr && now - out.lastT > 9000) { out.tr = false; out.lastT = now; m.chn.track(myMeta()).catch(() => {}); }
   }, 170);
   net.mode = 'live';
+  kujiInit();
   net.send = (event, payload) => { if (event === 'pos') out.pos = payload; else if (out.q.length < 20) out.q.push([event, payload]); };
   net.track = () => { out.tr = true; };
   net.live = () => m.live;
@@ -982,12 +983,29 @@ const deckCache = {};
 function deckStat(i) {
   const bd = CONFIG.BOARDS[i]; if (!bd) return null;
   if (deckCache[i] !== undefined) return deckCache[i];
-  const d = store.get('luckyslab-kuji-b' + i + '-' + bd.total, null);
-  if (!d || !d.tickets) return (deckCache[i] = null);
-  const rest = d.tickets.slice(d.next), rem = {};
+  const prizes = []; for (const t of bd.tiers || []) for (const it of t.items) prizes.push({ g: t.g, n: it[0], q: +it[2] });
+  const total = prizes.reduce((a, p) => a + p.q, 0);
+  const d = store.get('luckyslab-kujidemo-b' + i + '-' + total, null);
+  if (!d || !d.t) return (deckCache[i] = null);
+  const rest = d.t.slice(d.next).map(k => prizes[k]), rem = {};
   for (const t of rest) rem[t.g + '|' + t.n] = (rem[t.g + '|' + t.n] || 0) + 1;
   return (deckCache[i] = { left: rest.length, sold: d.next, sLeft: rest.filter(t => t.g === 'S').length, rem });
 }
+/* 쿠지 실서버 (supabase/kuji.sql 설치돼 있으면 자동으로 켜짐) */
+const KUJI = { live: false, list: [], t: 0 };
+const HIT_G = ['S', 'A', 'B', 'LAST'];
+async function kujiRefresh() { try { const { data, error } = await net.client.rpc('kuji_list'); if (!error && data) KUJI.list = data; } catch (e) {} }
+async function kujiInit() {
+  if (!net.client) return;
+  try { const { data, error } = await net.client.rpc('kuji_list'); if (error) return; KUJI.live = true; KUJI.list = data || []; } catch (e) { return; }
+  setInterval(kujiRefresh, 30000);
+  net.client.channel('kuji-plaza').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'kuji_draws' }, p => {
+    const d = p.new || {};
+    if (HIT_G.includes(d.grade)) celebrate({ name: clean(d.who || '익명').slice(0, 10), card: clean(d.name || '').slice(0, 40), grade: d.grade });
+    clearTimeout(KUJI.t); KUJI.t = setTimeout(kujiRefresh, 800);
+  }).subscribe();
+}
+const kujiMain = () => KUJI.live ? (KUJI.list.find(b => b.status === 'open') || KUJI.list[0] || null) : null;
 const resetDeckCache = () => { for (const k of Object.keys(deckCache)) delete deckCache[k]; };
 window.addEventListener('storage', resetDeckCache);
 function hallList() { return [...HIT_LOG, ...CONFIG.HALL, ...(demo ? DEMO_HALL : [])]; }
@@ -1069,11 +1087,11 @@ function drawKiosk(b, t) {
   const W = 108, Hh = 74, x0 = p.x - W / 2, y0 = p.y - 40 - Hh;
   ctx.fillStyle = '#d9b45a'; rr(x0 - 4, y0 - 4, W + 8, Hh + 8, 6); ctx.fill();
   ctx.fillStyle = '#10131c'; ctx.fillRect(x0, y0, W, Hh);
-  const bd = board0();
+  const kb = kujiMain(), bd = kb ? { title: kb.title, total: kb.total, sold: kb.total - kb.left, tiers: [] } : board0();
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillStyle = '#ffd760'; ctx.font = 'bold 11px "Galmuri11", sans-serif'; ctx.fillText('📋 판 현황', p.x, y0 + 11);
   if (bd) {
-    const ds = deckStat(0), sold = ds ? ds.sold : bd.sold, left = Math.max(0, bd.total - sold), ratio = bd.total ? sold / bd.total : 0;
+    const ds = kb ? { sold: bd.sold, sLeft: kb.s_left } : deckStat(0), sold = ds ? ds.sold : bd.sold, left = Math.max(0, bd.total - sold), ratio = bd.total ? sold / bd.total : 0;
     ctx.fillStyle = '#fff'; ctx.font = '9px "Galmuri11", sans-serif';
     let title = bd.title; while (ctx.measureText(title).width > W - 10 && title.length > 4) title = title.slice(0, -2) + '…';
     ctx.fillText(title, p.x, y0 + 27);
@@ -1534,6 +1552,23 @@ function openStage() {
   }, go: LIVE_ID ? () => { closeModal(); YTM.muted = false; YTM.big = true; refreshPlayer(); } : null, goText: '🔊 크게 · 소리 켜고 보기' });
 }
 function openBoards() {
+  if (KUJI.live) {
+    kujiRefresh();
+    return openModal({ tag: 'BOARD', title: '📋 판 현황', build: b => {
+      const open = KUJI.list.filter(x => x.status === 'open');
+      if (!open.length) { b.appendChild(el('div', 'muted', '지금 열린 판이 없어요. 곧 열려요!')); return; }
+      for (const bd of open) {
+        const box = el('div', 'bd'), top = el('div', 'bt'); top.appendChild(el('b', '', bd.title));
+        top.appendChild(el('span', 'st on', bd.mode === 'live' ? '🔴 라이브' : bd.test ? '테스트' : '진행 중')); box.appendChild(top);
+        const pb = el('div', 'pb'), f = el('div'); f.style.width = (bd.total ? (bd.total - bd.left) / bd.total * 100 : 0) + '%'; pb.appendChild(f); box.appendChild(pb);
+        const pi = el('div', 'pinfo'); pi.append(el('span', '', `1회 ${won(bd.price)}`), el('span', '', `남은 ${(+bd.left).toLocaleString()} / ${(+bd.total).toLocaleString()}`)); box.appendChild(pi);
+        box.appendChild(el('div', 'lo', `남은 힛 ${bd.hits_left}장 · S상 ${bd.s_left}장`));
+        const go = el('button', 'ghost', '🎰 이 판 뽑으러 가기'); go.onclick = () => { closeModal(); openKuji(bd.slug); }; box.appendChild(go);
+        b.appendChild(box);
+      }
+      b.appendChild(el('div', 'fine', '남은 수량은 서버 기준 실시간이에요. 누가 당첨되면 광장 전체에 폭죽이 터져요.'));
+    }, go: () => { closeModal(); openKuji(); }, goText: '🎰 쿠지 머신 열기' });
+  }
   openModal({ tag: 'BOARD', title: '📋 판 현황', build: b => {
     if (!CONFIG.BOARDS.length) { b.appendChild(el('div', 'muted', '지금 진행 중인 판이 없어요. 곧 열려요!')); return; }
     CONFIG.BOARDS.forEach((bd0, bi) => {
@@ -1833,15 +1868,19 @@ function celebrate(p) {
   burst(); Music.sfx('big'); if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
 }
 /* ---- 쿠지 머신 (광장 안에서 열림) ---- */
-function openKuji() {
-  const f = $('#kujiFrame');
-  if (!f.src) f.src = 'kuji/?embed=1#/b0';
+function openKuji(slug) {
+  const f = $('#kujiFrame'), m = kujiMain();
+  const want = 'kuji/?embed=1' + (slug ? '#/' + slug : KUJI.live ? (m ? '#/' + m.slug : '') : '#/b0');
+  if (f.dataset.src !== want) { f.src = want; f.dataset.src = want; }
+  $('#kuji .kh b').textContent = KUJI.live ? '🎰 럭키 쿠지 머신' : '🎰 럭키 쿠지 머신 · 데모';
   $('#kuji').classList.remove('hidden'); Music.duck(true);
 }
 function closeKuji() { $('#kuji').classList.add('hidden'); refreshPlayer(); resetDeckCache(); }
 $('#kujiClose').onclick = closeKuji;
 window.addEventListener('message', e => {
-  if (e.origin !== location.origin || !e.data || e.data.type !== 'kuji' || !me) return;
+  if (e.origin !== location.origin || !e.data) return;
+  if (e.data.type === 'kuji-refresh') { if (KUJI.live) kujiRefresh(); return; }
+  if (e.data.type !== 'kuji' || !me || KUJI.live) return;
   resetDeckCache();
   const hits = (e.data.got || []).filter(t => ['S', 'A', 'B', 'LAST'].includes(t.g));
   for (const h of hits) {
@@ -2043,7 +2082,7 @@ $('#enter').onclick = () => {
 };
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { scene.gcv = null; });
 { const p = iso(12, 11); camX = p.x; camY = p.y - 60; }
-if (FORCE_DEMO) window.__plaza = { me: () => me, doAct, celebrate, wild, openDex, openKuji };
+if (FORCE_DEMO || QS.has('e2e')) window.__plaza = { me: () => me, doAct, celebrate, wild, openDex, openKuji, kuji: () => KUJI };
 requestAnimationFrame(frame);
 })();
 </script>

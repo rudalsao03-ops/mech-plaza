@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0e111a">
 <link rel="icon" type="image/png" href="../icon-192.png">
-<title>럭키슬랩 쿠지 (데모)</title>
+<title>럭키슬랩 쿠지</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css">
 <style>
   :root{--bg:#0e111a;--card:#171b28;--card2:#1f2435;--bd:#323a54;--text:#f3edda;--sub:#9aa0b8;--gold:#d9a030;--gold2:#ffe08a;--ink:#14161f;
@@ -111,14 +111,27 @@
   body.embed header{display:none}
   body.embed{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
   @media (prefers-reduced-motion:reduce){.mini span{animation:none}.tk .in{transition:none}.tk.wait .in{animation:none}}
+  .demo.live{background:#12321f;color:#9ff0bf;border-bottom-color:#1f6b3a}
+  .who{display:flex;gap:8px;align-items:center;margin-top:12px;font-size:12.5px;color:var(--sub)}
+  .who input,.codebox input{flex:1;min-width:0;background:#0b0d14;border:1px solid var(--bd);border-radius:10px;color:var(--text);font:14px "Galmuri11",sans-serif;padding:9px 10px;outline:0}
+  .who input:focus,.codebox input:focus{border-color:var(--gold)}
+  .codebox{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:12px 14px;margin-top:12px;font-size:13px;color:var(--sub)}
+  .codebox .r{display:flex;gap:8px;margin-top:8px}
+  .codebox button{border:0;border-radius:10px;background:var(--card2);color:var(--gold2);font:bold 13px "Galmuri11",sans-serif;padding:0 14px}
+  .codebox b{color:var(--gold2)}
+  .tag{display:inline-block;font:bold 11px "Galmuri11",sans-serif;border-radius:7px;padding:3px 8px;margin:0 0 8px;background:#2a3048;color:var(--sub)}
+  .tag.test{background:#3a2a10;color:var(--gold2)}.tag.live{background:#4a1d1d;color:#ff9a9a}.tag.end{background:#2a2e3d;color:#9aa0b8}
+  .bcard .art img{width:62px;height:90px;object-fit:cover;object-position:top;border-radius:7px;border:2px solid #04050a;margin:0 -6px;box-shadow:0 6px 0 rgba(0,0,0,.35)}
+  .toast{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top));transform:translateX(-50%);z-index:12;background:linear-gradient(90deg,#b8322c,#d9a030);color:#fff;font:bold 13px "Galmuri11",sans-serif;padding:10px 14px;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.4);max-width:calc(100% - 24px);text-align:center}
+  .err{background:#4a1d1d;color:#ffb3b3;border-radius:12px;padding:10px 12px;font-size:13px;margin-top:10px}
 </style>
 </head>
 <body>
-<div class="demo">🧪 데모 화면 · 실제 결제·배송 없음 · 이 브라우저에서만 저장돼요</div>
+<div class="demo" id="modeBar">연결 확인 중…</div>
 <header><div class="wrap">
   <a class="logo" href="#">🍀 LUCKY<i>SLAB</i></a>
   <a class="pill" href="../">🌙 광장</a>
-  <a class="pill" href="../shop/">상점 홈</a>
+  <a class="pill" id="shopLink" href="../shop/">상점</a>
 </div></header>
 
 <main class="wrap" id="view"></main>
@@ -133,6 +146,7 @@
   <div class="grid" id="ovG"></div>
   <div class="act hidden" id="ovA"><button class="s" id="ovAll">전부 열기</button><button class="p" id="ovOk">확인</button></div>
 </div>
+<div class="toast hidden" id="toast"></div>
 <canvas id="fx"></canvas>
 
 <script src="../data.js"></script>
@@ -140,55 +154,109 @@
 (() => {
 'use strict';
 const D = window.LUCKY || {}, $ = s => document.querySelector(s);
-const EMBED = new URLSearchParams(location.search).has('embed') && window.parent !== window;
+const QS = new URLSearchParams(location.search);
+const EMBED = QS.has('embed') && window.parent !== window;
 if (EMBED) document.body.classList.add('embed');
-const tellPlaza = got => { if (EMBED) try { window.parent.postMessage({ type: 'kuji', got: got.map(t => ({ g: t.g, n: t.n })) }, location.origin); } catch (e) {} };
+const tellPlaza = msg => { if (EMBED) try { window.parent.postMessage(msg, location.origin); } catch (e) {} };
 const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
 const won = n => (+n || 0).toLocaleString('ko-KR') + '원';
 const COL = g => `var(--${['S', 'A', 'B', 'C', 'LAST'].includes(g) ? g : 'C'})`;
 const HIT = g => g === 'S' || g === 'A' || g === 'B' || g === 'LAST';
+const GN = g => g === 'LAST' ? '라스트' : g + '상';
+const imgUrl = u => !u ? '' : /^https?:/.test(u) ? u : '../' + u;
 const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
 };
-
-/* ---------- 판 → 표 뭉치 ----------
-   실제 운영에선 이 부분이 서버(Supabase)에서 돌아가고, 손님 브라우저엔 결과만 옴.
-   데모에선 브라우저에서 같은 방식으로 흉내냄. */
-const boards = (D.BOARDS || []).map((b, i) => ({ ...b, id: 'b' + i }));
-const IMG = {}; for (const b of boards) for (const t of b.tiers || []) for (const it of t.items) if (it[3]) IMG[it[0]] = /^https?:/.test(it[3]) ? it[3] : '../' + it[3];
-const thumb = (n, cls) => { if (!IMG[n]) return null; const im = el('img', cls); im.src = IMG[n]; im.alt = ''; im.loading = 'lazy'; return im; };
 const sha256 = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))].map(x => x.toString(16).padStart(2, '0')).join('');
-function rndInt(n) { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; }
-async function deckOf(b) {
-  const key = 'luckyslab-kuji-' + b.id + '-' + b.total;
-  let d = store.get(key, null);
-  if (d && d.tickets && d.tickets.length === b.total) return d;
-  const tickets = [];
-  for (const t of b.tiers || []) for (const [name, , tot] of t.items) for (let k = 0; k < +tot; k++) tickets.push({ g: t.g, n: name });
-  while (tickets.length < b.total) tickets.push({ g: 'C', n: '포인트' });
-  tickets.length = b.total;
-  for (let i = tickets.length - 1; i > 0; i--) { const j = rndInt(i + 1); [tickets[i], tickets[j]] = [tickets[j], tickets[i]]; }
-  const salt = [...crypto.getRandomValues(new Uint8Array(16))].map(x => x.toString(16).padStart(2, '0')).join('');
-  const order = tickets.map((t, i) => `${i + 1}:${t.g}:${t.n}`).join('|');
-  d = { tickets, next: 0, salt, hash: await sha256(salt + '|' + order), log: [] };
-  store.set(key, d); d._key = key; return d;
-}
-const saveDeck = (b, d) => store.set('luckyslab-kuji-' + b.id + '-' + b.total, d);
-function remaining(d) {
-  const m = {};
-  for (let i = d.next; i < d.tickets.length; i++) { const t = d.tickets[i]; const k = t.g + '|' + t.n; m[k] = (m[k] || 0) + 1; }
-  return m;
-}
+if (D.SHOP_URL) $('#shopLink').href = D.SHOP_URL;
+let myName = (store.get('luckyslab-me', null) || {}).name || store.get('luckyslab-kuji-name', '') || '';
 
-/* ---------- 화면 ---------- */
+/* =====================================================================
+   API: 서버(Supabase)가 있으면 서버, 없으면 이 브라우저 안에서 흉내 내는 데모
+   ===================================================================== */
+const Server = {
+  sb: null,
+  async init() {
+    if (QS.has('demo') || !D.SUPABASE_URL || !D.SUPABASE_ANON_KEY) return false;
+    try {
+      await new Promise((ok, no) => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js'; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+      this.sb = window.supabase.createClient(D.SUPABASE_URL, D.SUPABASE_ANON_KEY);
+      const { error } = await this.sb.rpc('kuji_list');
+      if (error) { console.warn('kuji server not ready', error.message); return false; }
+      return true;
+    } catch (e) { console.warn(e); return false; }
+  },
+  async call(fn, args) { const { data, error } = await this.sb.rpc(fn, args); if (error) throw new Error(error.message); return data; },
+  list() { return this.call('kuji_list'); },
+  state(slug) { return this.call('kuji_state', { p_slug: slug }); },
+  draw(slug, n, who, code) { return this.call('kuji_draw', { p_slug: slug, p_count: n, p_who: who, p_code: code || null }); },
+  reveal(slug) { return this.call('kuji_reveal', { p_slug: slug }); },
+  codeInfo(code) { return this.call('kuji_code_info', { p_code: code }); },
+  watch(boardId, cb) {
+    if (this.ch) this.sb.removeChannel(this.ch);
+    this.ch = this.sb.channel('kuji-' + boardId).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'kuji_draws', filter: 'board_id=eq.' + boardId }, p => cb(p.new)).subscribe();
+  },
+};
+
+// ---- 데모: data.js 판을 이 브라우저에서 섞고 뽑음 ----
+const Local = {
+  boards: (D.BOARDS || []).map((b, i) => {
+    const prizes = []; for (const t of b.tiers || []) for (const it of t.items) prizes.push({ grade: t.g, name: it[0], img: it[3] || null, qty: +it[2] });
+    return { slug: 'b' + i, title: b.title, price: b.price, total: prizes.reduce((a, p) => a + p.qty, 0), prizes };
+  }),
+  async deck(b) {
+    const key = 'luckyslab-kujidemo-' + b.slug + '-' + b.total;
+    let d = store.get(key, null);
+    if (d && d.t && d.t.length === b.total) return d;
+    const t = []; b.prizes.forEach((p, idx) => { for (let k = 0; k < p.qty; k++) t.push(idx); });
+    for (let i = t.length - 1; i > 0; i--) { const a = new Uint32Array(1); crypto.getRandomValues(a); const j = a[0] % (i + 1); [t[i], t[j]] = [t[j], t[i]]; }
+    const salt = [...crypto.getRandomValues(new Uint8Array(16))].map(x => x.toString(16).padStart(2, '0')).join('');
+    d = { t, next: 0, salt, log: [] };
+    d.hash = await sha256(salt + '|' + this.order(b, d));
+    store.set(key, d); return d;
+  },
+  order(b, d) { return d.t.map((idx, i) => `${i + 1}:${b.prizes[idx].grade}:${b.prizes[idx].name}`).join('|'); },
+  save(b, d) { store.set('luckyslab-kujidemo-' + b.slug + '-' + b.total, d); },
+  async list() {
+    const out = [];
+    for (const b of this.boards) {
+      const d = await this.deck(b), rest = d.t.slice(d.next).map(i => b.prizes[i].grade);
+      out.push({ slug: b.slug, title: b.title, price: b.price, total: b.total, mode: 'auto', test: true, status: rest.length ? 'open' : 'closed',
+        left: rest.length, hits_left: rest.filter(HIT).length, s_left: rest.filter(g => g === 'S').length, imgs: b.prizes.filter(p => p.img).slice(0, 3).map(p => p.img) });
+    }
+    return out;
+  },
+  async state(slug) {
+    const b = this.boards.find(x => x.slug === slug); if (!b) return null;
+    const d = await this.deck(b), left = d.t.length - d.next, rem = b.prizes.map(() => 0);
+    for (let i = d.next; i < d.t.length; i++) rem[d.t[i]]++;
+    return { id: slug, slug, title: b.title, price: b.price, total: b.total, mode: 'auto', test: true, status: left ? 'open' : 'closed', hash: d.hash, salt: left ? null : d.salt, left,
+      prizes: b.prizes.map((p, idx) => ({ idx, ...p, left: rem[idx] })), recent: d.log.slice(0, 30) };
+  },
+  async draw(slug, n, who) {
+    const b = this.boards.find(x => x.slug === slug), d = await this.deck(b), res = [];
+    n = Math.min(n, 10, d.t.length - d.next);
+    for (let i = 0; i < n; i++) { const p = b.prizes[d.t[d.next]]; res.push({ no: d.next + 1, grade: p.grade, name: p.name, img: p.img }); d.next++; }
+    d.log = res.slice().reverse().map(r => ({ ...r, who })).concat(d.log).slice(0, 100); this.save(b, d);
+    return { results: res, left: d.t.length - d.next, closed: d.next === d.t.length };
+  },
+  async reveal(slug) { const b = this.boards.find(x => x.slug === slug), d = await this.deck(b); return { salt: d.salt, hash: d.hash, order: this.order(b, d) }; },
+  async codeInfo() { return null; },
+  watch() {},
+};
+
+let API = Local, LIVE = false;
+
+/* ====================== 화면 ====================== */
 const V = $('#view');
-let cur = null, qty = 1;
+let cur = null, qty = 1, code = (QS.get('code') || store.get('luckyslab-kuji-code', '') || '').toUpperCase(), codeLeft = null;
+function toast(t) { const e = $('#toast'); e.textContent = t; e.classList.remove('hidden'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.add('hidden'), 4500); }
+
 async function route() {
-  const id = location.hash.replace(/^#\/?/, '');
-  const b = boards.find(x => x.id === id);
+  const slug = decodeURIComponent(location.hash.replace(/^#\/?/, ''));
   window.scrollTo(0, 0);
-  if (b) return showBoard(b);
+  if (slug) return showBoard(slug);
   cur = null; $('#buy').classList.add('hidden'); showList();
 }
 window.addEventListener('hashchange', route);
@@ -197,102 +265,155 @@ async function showList() {
   V.textContent = '';
   V.appendChild(el('h2', '', '🎴 지금 열린 판'));
   V.appendChild(el('p', 'lead', '남은 표에서 한 장씩 뽑는 쿠지 방식이에요. 마지막 표까지 다 팔리면 모든 상품이 반드시 나가요.'));
-  if (!boards.length) { V.appendChild(el('div', 'empty', '지금 열린 판이 없어요.')); return; }
-  for (const b of boards) {
-    const d = await deckOf(b), left = d.tickets.length - d.next;
-    const sLeft = d.tickets.slice(d.next).filter(t => t.g === 'S').length;
-    const c = el('button', 'bcard'); c.onclick = () => { location.hash = '#/' + b.id; };
+  let list;
+  try { list = await API.list(); } catch (e) { V.appendChild(el('div', 'err', '판 목록을 불러오지 못했어요: ' + e.message)); return; }
+  if (!list.length) { V.appendChild(el('div', 'empty', '지금 열린 판이 없어요. 곧 새 판이 열려요!')); return; }
+  for (const b of list) {
+    const c = el('button', 'bcard'); c.onclick = () => { location.hash = '#/' + b.slug; };
     const art = el('div', 'art');
-    const bd = el('span', 'badge', left === 0 ? '완판' : sLeft ? `S상 ${sLeft}장 남음` : '진행 중'); art.appendChild(bd);
-    [['S', -8, 10], ['A', 0, 0], ['B', 8, 10]].forEach(([g, r, y]) => {
-      const m = el('div', 'mini'); m.style.transform = `rotate(${r}deg) translateY(${y}px)`;
-      const t = el('b', '', g + '상'); t.style.background = COL(g); m.appendChild(t); m.appendChild(el('span')); art.appendChild(m);
-    });
+    art.appendChild(el('span', 'badge', b.status === 'closed' ? '마감' : b.mode === 'live' ? '🔴 라이브 판' : b.s_left ? `S상 ${b.s_left}장 남음` : '진행 중'));
+    const imgs = (b.imgs || []).filter(Boolean);
+    if (imgs.length) imgs.forEach((u, i) => { const im = el('img'); im.src = imgUrl(u); im.alt = ''; im.style.transform = `rotate(${[-8, 0, 8][i]}deg) translateY(${[10, 0, 10][i]}px)`; art.appendChild(im); });
+    else [['S', -8, 10], ['A', 0, 0], ['B', 8, 10]].forEach(([g, r, y]) => { const m = el('div', 'mini'); m.style.transform = `rotate(${r}deg) translateY(${y}px)`; const t = el('b', '', g + '상'); t.style.background = COL(g); m.append(t, el('span')); art.appendChild(m); });
     c.appendChild(art);
-    const body = el('div', 'body'); body.appendChild(el('h3', '', b.title));
-    const r = el('div', 'row2'), p = el('div', 'price'); p.textContent = won(b.price); p.appendChild(el('small', '', '/ 1회')); r.appendChild(p); body.appendChild(r);
-    const bar = el('div', 'bar'), f = el('i'); f.style.width = (left / d.tickets.length * 100) + '%'; bar.appendChild(f); body.appendChild(bar);
-    const meta = el('div', 'meta'); const m1 = el('span'); m1.appendChild(document.createTextNode('남은 ')); m1.appendChild(el('b', '', left.toLocaleString()));
-    m1.appendChild(document.createTextNode(' / ' + d.tickets.length.toLocaleString())); meta.appendChild(m1); meta.appendChild(el('span', '', `힛 ${d.tickets.slice(d.next).filter(t => HIT(t.g)).length}장 남음`));
-    body.appendChild(meta); c.appendChild(body); V.appendChild(c);
+    const body = el('div', 'body');
+    if (b.test && LIVE) body.appendChild(el('span', 'tag test', '테스트 판 · 무료'));
+    body.appendChild(el('h3', '', b.title));
+    const p = el('div', 'price'); p.textContent = won(b.price); p.appendChild(el('small', '', '/ 1회')); body.appendChild(p);
+    const bar = el('div', 'bar'), f = el('i'); f.style.width = (b.left / b.total * 100) + '%'; bar.appendChild(f); body.appendChild(bar);
+    const meta = el('div', 'meta'), m1 = el('span'); m1.append('남은 ', el('b', '', (+b.left).toLocaleString()), ' / ' + (+b.total).toLocaleString());
+    meta.append(m1, el('span', '', `힛 ${b.hits_left}장 남음`)); body.appendChild(meta); c.appendChild(body); V.appendChild(c);
   }
 }
 
-async function showBoard(b) {
-  cur = b; const d = await deckOf(b), left = d.tickets.length - d.next, rem = remaining(d);
+let st = null;
+async function showBoard(slug, keepScroll) {
+  let s;
+  try { s = await API.state(slug); } catch (e) { V.textContent = ''; V.appendChild(el('div', 'err', '판을 불러오지 못했어요: ' + e.message)); return; }
+  if (!s) { V.textContent = ''; V.appendChild(el('div', 'empty', '없는 판이에요.')); return; }
+  const y = window.scrollY;
+  st = s; cur = slug;
+  if (!keepScroll) API.watch(s.id, onRemoteDraw);
   V.textContent = '';
   const bk = el('button', 'back', '← 판 목록'); bk.onclick = () => { location.hash = ''; }; V.appendChild(bk);
-  const h = el('div', 'hero'); h.appendChild(el('h1', '', b.title));
-  const p = el('div', 'price'); p.textContent = won(b.price); p.appendChild(el('small', '', '/ 1회')); h.appendChild(p);
-  const bar = el('div', 'bar'), f = el('i'); f.style.width = (left / d.tickets.length * 100) + '%'; bar.appendChild(f); h.appendChild(bar);
-  const st = el('div', 'stats');
-  for (const [v, l] of [[left.toLocaleString(), '남은 구수'], [d.tickets.slice(d.next).filter(t => HIT(t.g)).length + '장', '남은 힛'], [d.next.toLocaleString(), '나간 구수']]) {
-    const x = el('div'); x.appendChild(el('b', '', v)); x.appendChild(el('small', '', l)); st.appendChild(x);
+  const h = el('div', 'hero');
+  if (s.status === 'closed') h.appendChild(el('span', 'tag end', '마감된 판'));
+  else if (s.mode === 'live') h.appendChild(el('span', 'tag live', '🔴 라이브 판 · 방송에서 개봉'));
+  else if (s.test && LIVE) h.appendChild(el('span', 'tag test', '테스트 판 · 결제 없이 무료로 뽑아요'));
+  h.appendChild(el('h1', '', s.title));
+  const p = el('div', 'price'); p.textContent = won(s.price); p.appendChild(el('small', '', '/ 1회')); h.appendChild(p);
+  const bar = el('div', 'bar'), f = el('i'); f.style.width = (s.left / s.total * 100) + '%'; bar.appendChild(f); h.appendChild(bar);
+  const hitsLeft = s.prizes.filter(x => HIT(x.grade)).reduce((a, x) => a + x.left, 0);
+  const sts = el('div', 'stats');
+  for (const [v, l] of [[(+s.left).toLocaleString(), '남은 구수'], [hitsLeft + '장', '남은 힛'], [(s.total - s.left).toLocaleString(), '나간 구수']]) { const x = el('div'); x.append(el('b', '', v), el('small', '', l)); sts.appendChild(x); }
+  h.appendChild(sts);
+  if (s.status === 'open' && s.mode === 'auto') {
+    const w = el('div', 'who'); w.appendChild(el('span', '', '닉네임'));
+    const inp = el('input'); inp.maxLength = 10; inp.placeholder = '당첨되면 광장에 표시돼요'; inp.value = myName;
+    inp.oninput = () => { myName = inp.value; store.set('luckyslab-kuji-name', myName); }; w.appendChild(inp); h.appendChild(w);
   }
-  h.appendChild(st); V.appendChild(h);
+  V.appendChild(h);
+
+  // 실제 판: 뽑기 코드
+  if (LIVE && s.status === 'open' && s.mode === 'auto' && !s.test) {
+    const cb = el('div', 'codebox');
+    cb.appendChild(document.createTextNode('결제하면 받는 '));
+    cb.appendChild(el('b', '', '뽑기 코드'));
+    cb.appendChild(document.createTextNode('를 넣어주세요.' + (codeLeft != null ? ` (남은 횟수 ${codeLeft}회)` : '')));
+    const r = el('div', 'r'), inp = el('input'), btn = el('button', '', '확인');
+    inp.placeholder = 'XXXX-XXXX-XXXX'; inp.value = code; inp.maxLength = 14; inp.autocapitalize = 'characters';
+    btn.onclick = async () => { code = inp.value.trim().toUpperCase(); store.set('luckyslab-kuji-code', code); await checkCode(); showBoard(slug, true); };
+    r.append(inp, btn); cb.appendChild(r);
+    if (D.SHOP_URL) { const a = el('a', '', '코드가 없으면 → 상점에서 구매하기'); a.href = D.SHOP_URL; a.target = '_blank'; a.rel = 'noopener'; a.style.cssText = 'display:block;margin-top:8px;color:#ffe08a;font-size:12.5px'; cb.appendChild(a); }
+    V.appendChild(cb);
+  }
 
   V.appendChild(el('h2', '', '🎁 상품 구성'));
   V.appendChild(el('p', 'lead', '숫자는 남은 수량 / 전체 수량이에요. 뽑힐 때마다 바로 줄어들어요.'));
-  for (const t of b.tiers || []) {
-    const box = el('div', 'tier'), th = el('div', 'th'), g = el('span', 'g', t.g + '상'); g.style.background = COL(t.g);
-    const tl = t.items.reduce((a, [n, , tot]) => a + (rem[t.g + '|' + n] || 0), 0), tt = t.items.reduce((a, i) => a + +i[2], 0);
-    th.append(g, el('b', '', t.g === 'C' ? '포인트상' : `${t.g}상`), el('span', '', `${tl.toLocaleString()} / ${tt.toLocaleString()}`)); box.appendChild(th);
-    for (const [n, , tot] of t.items) {
-      const l = rem[t.g + '|' + n] || 0, it = el('div', 'item' + (l === 0 ? ' gone' : ''));
-      const nm = el('span', 'nm'), tn = thumb(n); if (tn) nm.appendChild(tn); nm.appendChild(el('span', '', n));
-      it.append(nm, el('span', 'q', `${l.toLocaleString()} / ${(+tot).toLocaleString()}`)); box.appendChild(it);
+  const groups = [];
+  for (const pr of s.prizes) { let g = groups.find(x => x.g === pr.grade); if (!g) groups.push(g = { g: pr.grade, items: [] }); g.items.push(pr); }
+  for (const g of groups) {
+    const box = el('div', 'tier'), th = el('div', 'th'), gb = el('span', 'g', GN(g.g)); gb.style.background = COL(g.g);
+    const tl = g.items.reduce((a, x) => a + x.left, 0), tt = g.items.reduce((a, x) => a + x.qty, 0);
+    th.append(gb, el('b', '', g.g === 'C' ? '포인트상' : GN(g.g)), el('span', '', `${tl.toLocaleString()} / ${tt.toLocaleString()}`)); box.appendChild(th);
+    for (const it of g.items) {
+      const row = el('div', 'item' + (it.left === 0 ? ' gone' : '')), nm = el('span', 'nm');
+      if (it.img) { const im = el('img'); im.src = imgUrl(it.img); im.alt = ''; im.loading = 'lazy'; nm.appendChild(im); }
+      nm.appendChild(el('span', '', it.name)); row.append(nm, el('span', 'q', `${it.left.toLocaleString()} / ${it.qty.toLocaleString()}`)); box.appendChild(row);
     }
     V.appendChild(box);
   }
 
   V.appendChild(el('h2', '', '📜 최근 결과'));
   const lg = el('div', 'log');
-  if (!d.log.length) lg.appendChild(el('div', 'empty', '아직 아무도 안 뽑았어요'));
-  for (const x of d.log.slice(0, 15)) {
-    const r = el('div'), g = el('span', 'g', x.g); g.style.background = COL(x.g);
-    r.append(el('span', 'n', `#${x.no}`), g, el('span', '', x.n)); lg.appendChild(r);
+  if (!s.recent.length) lg.appendChild(el('div', 'empty', '아직 아무도 안 뽑았어요'));
+  for (const x of s.recent.slice(0, 20)) {
+    const r = el('div'), g = el('span', 'g', GN(x.grade)); g.style.background = COL(x.grade);
+    r.append(el('span', 'n', `#${x.no}`), g, el('span', '', `${x.name}${x.who ? ' · ' + x.who : ''}`)); lg.appendChild(r);
   }
   V.appendChild(lg);
 
   V.appendChild(el('h2', '', '🔒 조작 없음 증명'));
   const fr = el('div', 'fair');
-  fr.appendChild(document.createTextNode('판을 열 때 표 순서를 전부 섞어서 고정하고, 그 순서의 지문(SHA-256)을 먼저 공개해요. 판이 끝나면 원래 순서를 공개해서 누구나 지문이 맞는지 확인할 수 있어요.'));
-  fr.appendChild(el('code', '', d.hash));
-  fr.appendChild(document.createTextNode(left === 0 ? '완판! 아래 버튼으로 원래 순서를 확인할 수 있어요.' : '중간에 순서를 바꾸면 지문이 달라져서 바로 들통나요.'));
-  if (left === 0) { const vb = el('button', 'pill', '원래 순서 보기'); vb.style.marginTop = '8px'; vb.onclick = () => reveal(b, d); fr.appendChild(el('br')); fr.appendChild(vb); }
+  fr.appendChild(document.createTextNode('판을 열 때 서버가 표 순서를 전부 섞어서 고정하고, 그 순서의 지문(SHA-256)을 먼저 공개해요. 판이 끝나면 섞을 때 쓴 비밀값을 공개해서 누구나 지문이 맞는지 확인할 수 있어요.'));
+  fr.appendChild(el('code', '', s.hash));
+  if (s.status === 'closed') {
+    const vb = el('button', 'pill', '원래 순서로 지문 확인하기'); vb.style.marginTop = '6px';
+    const out = el('div'); vb.onclick = async () => {
+      out.textContent = '확인 중…';
+      try { const r = await API.reveal(slug), hh = await sha256(r.salt + '|' + r.order);
+        out.textContent = hh === r.hash ? '✅ 지문 일치 · 판을 연 뒤로 순서가 바뀌지 않았어요' : '❌ 지문 불일치';
+        const hits = r.order.split('|').filter(x => HIT(x.split(':')[1])).slice(0, 30);
+        if (hits.length) out.appendChild(el('div', '', '힛 위치: ' + hits.map(x => { const [n, g] = x.split(':'); return `#${n} ${GN(g)}`; }).join(', ')));
+      } catch (e) { out.textContent = '불러오지 못했어요: ' + e.message; }
+    };
+    fr.append(el('br'), vb, out);
+  } else fr.appendChild(document.createTextNode('중간에 순서를 바꾸면 지문이 달라져서 바로 들통나요.'));
   V.appendChild(fr);
 
-  const rs = el('button', 'pill', '↺ 데모 판 초기화'); rs.style.margin = '18px 0 0';
-  rs.onclick = () => { try { localStorage.removeItem('luckyslab-kuji-' + b.id + '-' + b.total); } catch (e) {} showBoard(b); };
-  V.appendChild(rs);
-
-  $('#buy').classList.remove('hidden'); syncBuy(left);
+  if (!LIVE) {
+    const rs = el('button', 'pill', '↺ 데모 판 초기화'); rs.style.margin = '18px 0 0';
+    rs.onclick = () => { try { for (const k of Object.keys(localStorage)) if (k.startsWith('luckyslab-kujidemo-' + slug + '-')) localStorage.removeItem(k); } catch (e) {} showBoard(slug, true); };
+    V.appendChild(rs);
+  }
+  syncBuy();
+  if (keepScroll) window.scrollTo(0, y);
 }
-function syncBuy(left) {
-  const n = Math.min(qty, left), go = $('#go');
-  go.disabled = left === 0; go.textContent = left === 0 ? '완판됐어요' : `${n}회 뽑기 · ${won(cur.price * n)}`;
+function syncBuy() {
+  const s = st, go = $('#go'), buy = $('#buy');
+  if (!s) { buy.classList.add('hidden'); return; }
+  buy.classList.remove('hidden');
+  const n = Math.min(qty, s.left);
+  let txt, dis = false;
+  if (s.status === 'closed' || s.left === 0) { txt = '마감된 판이에요'; dis = true; }
+  else if (s.mode === 'live') { txt = '🔴 라이브 방송에서 개봉해요'; dis = true; }
+  else if (!LIVE || s.test) txt = `${n}회 뽑기` + (LIVE ? ' · 테스트(무료)' : ` · ${won(s.price * n)}`);
+  else if (!code) { txt = '뽑기 코드를 넣어주세요'; dis = true; }
+  else if (codeLeft === 0) { txt = '이 코드는 다 썼어요'; dis = true; }
+  else txt = `${codeLeft != null ? Math.min(n, codeLeft) : n}회 뽑기 · 코드 사용`;
+  go.textContent = txt; go.disabled = dis || busy;
 }
-for (const bt of document.querySelectorAll('#qty button')) bt.onclick = async () => {
-  qty = +bt.dataset.n; for (const x of document.querySelectorAll('#qty button')) x.classList.toggle('on', x === bt);
-  if (cur) { const d = await deckOf(cur); syncBuy(d.tickets.length - d.next); }
+for (const bt of document.querySelectorAll('#qty button')) bt.onclick = () => {
+  qty = +bt.dataset.n; for (const x of document.querySelectorAll('#qty button')) x.classList.toggle('on', x === bt); syncBuy();
 };
-
-async function reveal(b, d) {
-  const order = d.tickets.map((t, i) => `${i + 1}:${t.g}:${t.n}`).join('|'), h = await sha256(d.salt + '|' + order);
-  const lines = d.tickets.filter(t => HIT(t.g)).map(t => `${d.tickets.indexOf(t) + 1}번째: ${t.g}상 ${t.n}`).join('\n');
-  alert(`지문 일치: ${h === d.hash ? 'O ✅' : 'X ❌'}\n\n힛 위치\n${lines}`);
+async function checkCode() {
+  codeLeft = null; if (!code || !LIVE) return null;
+  try { const r = await API.codeInfo(code); if (r) { codeLeft = r.left; return r; } toast('없는 코드예요. 다시 확인해주세요'); } catch (e) { toast(e.message); }
+  return null;
 }
 
 /* ---------- 뽑기 ---------- */
-let busy = false;
+let busy = false, myBatch = new Set();
 $('#go').onclick = async () => {
-  if (!cur || busy) return; busy = true;
-  const b = cur, d = await deckOf(b), n = Math.min(qty, d.tickets.length - d.next);
-  if (n <= 0) { busy = false; return; }
-  const got = [];
-  for (let i = 0; i < n; i++) { const t = d.tickets[d.next]; got.push({ ...t, no: d.next + 1 }); d.next++; }
-  d.log = got.slice().reverse().concat(d.log).slice(0, 100); saveDeck(b, d);
-  showResult(got, () => { busy = false; showBoard(b); });
+  if (!st || busy) return; busy = true; syncBuy();
+  const s = st;
+  try {
+    const r = await API.draw(s.slug, qty, (myName || '').trim() || '익명', code);
+    if (r.batch) myBatch.add(r.batch);
+    if (r.code_left != null) codeLeft = r.code_left;
+    if (!r.results.length) { toast('남은 표가 없어요'); busy = false; return showBoard(s.slug, true); }
+    showResult(r.results, () => { busy = false; showBoard(s.slug, true); });
+  } catch (e) { busy = false; syncBuy(); toast(e.message); }
 };
 function showResult(got, done) {
   const G = $('#ovG'); G.textContent = '';
@@ -300,23 +421,35 @@ function showResult(got, done) {
   $('#ovA').classList.add('hidden'); $('#ov').classList.remove('hidden');
   let opened = 0;
   const cards = got.map(t => {
-    const c = el('div', 'tk wait'), inn = el('div', 'in'), f = el('div', 'f', '?'), bk = el('div', 'b'), g = el('span', 'g', t.g + '상');
-    g.style.background = COL(t.g); const im = thumb(t.n); if (im) { bk.classList.add('ph'); bk.append(im, g, el('small', '', t.n.replace(' PSA10', ''))); } else bk.append(g, el('small', '', t.n));
-    if (HIT(t.g)) c.classList.add('big'); inn.append(f, bk); c.appendChild(inn);
-    c.onclick = () => open(c, t); G.appendChild(c); return [c, t];
+    const c = el('div', 'tk wait' + (HIT(t.grade) ? ' big' : '')), inn = el('div', 'in'), f = el('div', 'f', '?'), bk = el('div', 'b'), g = el('span', 'g', GN(t.grade));
+    g.style.background = COL(t.grade);
+    if (t.img) { const im = el('img'); im.src = imgUrl(t.img); im.alt = ''; bk.classList.add('ph'); bk.append(im, g, el('small', '', t.name.replace(' PSA10', ''))); }
+    else bk.append(g, el('small', '', t.name));
+    inn.append(f, bk); c.appendChild(inn); c.onclick = () => open(c, t); G.appendChild(c); return [c, t];
   });
   function open(c, t) {
     if (c.classList.contains('open')) return;
-    c.classList.remove('wait'); c.classList.add('open'); if (HIT(t.g)) { c.classList.add('hit'); setTimeout(() => burst(t.g === 'S' ? 180 : 90), 250); }
+    c.classList.remove('wait'); c.classList.add('open'); if (HIT(t.grade)) { c.classList.add('hit'); setTimeout(() => burst(t.grade === 'S' ? 180 : 90), 250); }
     if (++opened === cards.length) {
-      const hits = got.filter(x => HIT(x.g));
-      $('#ovT').textContent = hits.length ? `🎉 ${hits.map(x => x.g + '상').join(', ')} 당첨!` : '아쉽지만 포인트상';
-      $('#ovS').textContent = hits.length ? EMBED ? '확인 누르면 광장 전체에 폭죽이 터져요' : '실제 운영에선 광장에 폭죽이 터지고 명예의 전당에 올라가요' : '포인트는 다음 뽑기나 상점에서 쓸 수 있어요 (데모)';
+      const hits = got.filter(x => HIT(x.grade));
+      $('#ovT').textContent = hits.length ? `🎉 ${hits.map(x => GN(x.grade)).join(', ')} 당첨!` : '아쉽지만 포인트상';
+      $('#ovS').textContent = hits.length ? (LIVE ? '광장 전체에 폭죽이 터지고 명예의 전당에 올라가요' : '실제 운영에선 광장에 폭죽이 터지고 명예의 전당에 올라가요') : (LIVE ? '포인트는 상점에서 쓸 수 있어요' : '포인트는 다음 뽑기나 상점에서 쓸 수 있어요 (데모)');
     }
   }
   setTimeout(() => $('#ovA').classList.remove('hidden'), 400);
   $('#ovAll').onclick = () => cards.forEach(([c, t], i) => setTimeout(() => open(c, t), i * 120));
-  $('#ovOk').onclick = () => { cards.forEach(([c, t]) => open(c, t)); $('#ov').classList.add('hidden'); tellPlaza(got); done(); };
+  $('#ovOk').onclick = () => {
+    cards.forEach(([c, t]) => open(c, t)); $('#ov').classList.add('hidden');
+    tellPlaza(LIVE ? { type: 'kuji-refresh' } : { type: 'kuji', got: got.map(t => ({ g: t.grade, n: t.name })) });
+    done();
+  };
+}
+// 다른 사람이 뽑으면 실시간 반영
+let refreshT = 0;
+function onRemoteDraw(d) {
+  if (myBatch.has(d.batch)) return;
+  if (HIT(d.grade)) toast(`🎉 ${d.who}님 ${GN(d.grade)} ${d.name} 당첨!`);
+  clearTimeout(refreshT); refreshT = setTimeout(() => { if (cur && !busy) showBoard(cur, true); }, 600);
 }
 
 /* ---------- 폭죽 ---------- */
@@ -335,7 +468,16 @@ function burst(n) {
     raf = requestAnimationFrame(step); }
 }
 
-route();
+/* ---------- 시작 ---------- */
+(async () => {
+  LIVE = await Server.init();
+  API = LIVE ? Server : Local;
+  const bar = $('#modeBar');
+  if (LIVE) { bar.classList.add('live'); bar.textContent = '● 실시간 서버 연결됨 · 모든 손님이 같은 판을 함께 뽑아요'; }
+  else bar.textContent = '🧪 데모 화면 · 실제 결제·배송 없음 · 이 브라우저에서만 저장돼요';
+  if (LIVE && code) { const r = await checkCode(); if (r && !location.hash) { location.hash = '#/' + r.slug; return; } }
+  route();
+})();
 })();
 </script>
 </body>
