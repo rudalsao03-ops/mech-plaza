@@ -545,8 +545,9 @@ async function showBoard(slug, keep) {
 }
 function buyArea(s) {
   const box = el('div');
-  const realPay = LIVE && !s.test && s.mode === 'auto' && s.status === 'open' && s.left > 0 && !code;
-  const canSelf = s.status === 'open' && s.left > 0 && s.mode === 'auto' && (!LIVE || s.test || code);
+  const hasCode = !!code && codeLeft !== 0;
+  const realPay = LIVE && !s.test && s.mode === 'auto' && s.status === 'open' && s.left > 0 && !hasCode;
+  const canSelf = s.status === 'open' && s.left > 0 && s.mode === 'auto' && (!LIVE || s.test || hasCode);
   if (canSelf) {
     const q = el('div', 'qtyrow');
     for (const n of [1, 5, 10]) { const b = el('button', n === qty ? 'on' : '', n + '회'); b.onclick = () => { qty = n; showBoard(cur, true); }; q.appendChild(b); }
@@ -555,10 +556,10 @@ function buyArea(s) {
     const inp = el('input'); inp.maxLength = 10; inp.placeholder = '당첨되면 광장에 표시돼요'; inp.value = myName;
     inp.oninput = () => { myName = inp.value; store.set('luckyslab-kuji-name', myName); }; w.appendChild(inp); box.appendChild(w);
   }
-  if (LIVE && code && s.status === 'open' && s.mode === 'auto' && !s.test) {
+  if (LIVE && hasCode && s.status === 'open' && s.mode === 'auto' && !s.test) {
     const cb = el('div', 'codebox'); cb.append('뽑기 코드' + (codeLeft != null ? ` · 남은 ${codeLeft}회` : ''));
     const r = el('div', 'r'), inp = el('input'), btn = el('button', '', '확인');
-    inp.value = code; inp.maxLength = 14; btn.onclick = async () => { code = inp.value.trim().toUpperCase(); store.set('luckyslab-kuji-code', code); await checkCode(); showBoard(cur, true); };
+    inp.value = code; inp.maxLength = 14; btn.onclick = async () => { code = inp.value.trim().toUpperCase(); if (await checkCode()) store.set('luckyslab-kuji-code', code); showBoard(cur, true); };
     r.append(inp, btn); cb.appendChild(r); box.appendChild(cb);
   }
   const mkBtn = () => {
@@ -660,9 +661,10 @@ function showLive() {
 }
 
 /* ====================== 뽑기 ====================== */
+function dropCode(msg) { code = ''; codeLeft = null; try { localStorage.removeItem('luckyslab-kuji-code'); } catch (e) {} if (msg) toast(msg); }
 async function checkCode() {
   codeLeft = null; if (!code || !LIVE) return null;
-  try { const r = await API.codeInfo(code); if (r) { codeLeft = r.left; return r; } toast('없는 코드예요. 다시 확인해주세요'); } catch (e) { toast(e.message); }
+  try { const r = await API.codeInfo(code); if (r) { codeLeft = r.left; if (r.left <= 0) dropCode('이 코드는 다 썼어요'); return r; } dropCode('없는 코드예요. 결제해서 뽑아주세요'); } catch (e) { dropCode(e.message); }
   return null;
 }
 async function doDraw() {
@@ -671,7 +673,7 @@ async function doDraw() {
   try {
     const r = await API.draw(s.slug, qty, (myName || '').trim() || '익명', code);
     if (r.batch) myBatch.add(r.batch);
-    if (r.code_left != null) codeLeft = r.code_left;
+    if (r.code_left != null) { codeLeft = r.code_left; if (codeLeft <= 0) dropCode(); }
     if (!r.results.length) { toast('남은 표가 없어요'); busy = false; return showBoard(s.slug, true); }
     showResult(r.results, () => { busy = false; showBoard(s.slug, true); });
   } catch (e) { busy = false; toast(e.message); showBoard(s.slug, true); }
@@ -789,7 +791,7 @@ function burst(n) {
   try { listCache = await API.list(); } catch (e) {}
   const orderId = (QS.get('order') || '').trim();
   if (LIVE && orderId) return landOrder(orderId);
-  if (LIVE && code) { const r = await checkCode(); if (r && !location.hash) { location.hash = '#/p/' + r.slug; return; } }
+  if (LIVE && code) { const r = await checkCode(); if (r && codeLeft > 0) store.set('luckyslab-kuji-code', code); if (r && !location.hash) { location.hash = '#/p/' + r.slug; return; } }
   route();
 })();
 })();
