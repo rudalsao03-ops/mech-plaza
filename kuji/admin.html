@@ -32,7 +32,7 @@
   .acts button{flex:none;padding:8px 10px;font-size:12px}
   .out{background:#0b0d14;border:1px solid var(--bd);border-radius:10px;padding:10px;margin-top:10px;font-size:13px;white-space:pre-wrap;word-break:break-all}
   .code{font:bold 20px ui-monospace,Menlo,monospace;color:var(--gold2);letter-spacing:1px}
-  .msg{border-radius:10px;padding:9px 11px;margin:8px 0;font-size:13px}
+  .msg{border-radius:10px;padding:9px 11px;margin:8px 0;font-size:13px;white-space:pre-wrap}
   .msg.e{background:#4a1d1d;color:#ffb3b3}.msg.s{background:#12321f;color:#9ff0bf}
   .hidden{display:none!important}
   a{color:var(--gold2)}
@@ -69,7 +69,7 @@
       <div class="sub" id="sum" style="margin-top:6px"></div>
       <div class="row">
         <div><label>방식</label><select id="mode"><option value="auto">자동 (손님이 직접 뽑기)</option><option value="live">라이브 (방송에서 운영자가 뽑기)</option></select></div>
-        <div><label>테스트 판?</label><select id="test"><option value="1">테스트 (결제 없이 누구나 무료로 뽑기)</option><option value="0">실제 (뽑기 코드 필요)</option></select></div>
+        <div><label>테스트 판?</label><select id="test"><option value="1">테스트 (결제 없이 누구나 무료로 뽑기)</option><option value="0">실제 (카페24 결제로 판매 · 상품 자동 생성)</option></select></div>
       </div>
       <div class="msg e" style="margin-top:12px">판을 여는 순간 표 순서가 섞여서 고정되고 지문이 공개돼요. 연 뒤엔 상품 구성을 못 바꿔요.</div>
       <button class="p" id="openBtn" style="width:100%">판 열기</button>
@@ -110,6 +110,14 @@ $('#pw').addEventListener('keydown', e => { if (e.key === 'Enter') login($('#pw'
 if (KEY) login(KEY);
 
 const FN = D.SUPABASE_URL + '/functions/v1/kuji-order';
+async function fnCall(body) {
+  const r = await fetch(FN, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(() => null);
+  let j = {}; try { j = r ? await r.json() : {}; } catch (e) {}
+  if (j.status !== 'ok') throw new Error(j.message || (r ? '서버 오류 (' + r.status + ') · kuji-order 함수를 최신 코드로 다시 배포했는지 확인해주세요' : '서버에 연결하지 못했어요'));
+  return j;
+}
+const c24Msg = r => r.existed ? `이미 카페24 상품 #${r.product_no}과 연결돼 있어요` :
+  `✅ 카페24 상품 #${r.product_no} 만들고 연결까지 끝! 재고 ${r.stock}개` + (r.warnings && r.warnings.length ? '\n⚠️ ' + r.warnings.join('\n⚠️ ') : '') + '\n이제 쿠지 사이트에 "구매하기" 버튼이 떠요.';
 async function loadC24() {
   const C = $('#c24'); C.textContent = '';
   let st = null; try { st = await call('kuji_cafe24_status', { p_key: KEY }); } catch (e) { C.textContent = '오류: ' + e.message; return; }
@@ -155,9 +163,18 @@ async function loadBoards() {
         const r = await call('kuji_live_draw', { p_key: KEY, p_slug: b.slug, p_count: n, p_who: who });
         out.classList.remove('hidden');
         out.textContent = `${who}님 결과\n` + r.results.map(x => `#${x.no}  ${x.grade}상  ${x.name}`).join('\n') + `\n\n남은 ${r.left}장${r.closed ? ' · 완판 마감!' : ''}`;
+        if (b.product_no) fnCall({ action: 'sync_stock', key: KEY, slug: b.slug }).catch(() => {});
         loadBoards();
       });
-      btn('🔗 카페24 상품 연결', b.product_no ? '' : 'p', async () => {
+      if (!b.test && !b.product_no) btn('🛒 카페24 상품 자동 만들기', 'p', async () => {
+        out.classList.remove('hidden'); out.textContent = '카페24에 상품 만드는 중…';
+        out.textContent = c24Msg(await fnCall({ action: 'make_product', key: KEY, slug: b.slug })); loadBoards();
+      });
+      if (b.product_no) btn('🔄 카페24 재고 맞추기', '', async () => {
+        const r = await fnCall({ action: 'sync_stock', key: KEY, slug: b.slug });
+        out.classList.remove('hidden'); out.textContent = `카페24 상품 #${r.product_no} 재고를 ${r.stock}개로 맞췄어요`;
+      });
+      btn('🔗 상품번호 직접 연결', '', async () => {
         const v = prompt('카페24 상품번호 (상품 상세 주소의 product_no= 뒤 숫자)\n※ 그 상품 재고를 이 판 남은 구수(' + b.left + ')로 맞춰두세요', b.product_no || '');
         const no = parseInt(v, 10); if (!(no > 0)) return;
         await call('kuji_link_product', { p_key: KEY, p_slug: b.slug, p_product: no }); loadBoards();
@@ -173,7 +190,7 @@ async function loadBoards() {
         out.textContent = L.length ? L.map(c => `${c.code}  ${c.used}/${c.qty}회 사용${c.memo ? '  · ' + c.memo : ''}`).join('\n') : '발급한 코드가 없어요';
       });
       btn(b.test ? '실제 판으로 전환' : '테스트 판으로 전환', b.test ? 'g' : '', async () => {
-        if (!confirm(b.test ? '실제 판으로 바꾸면 뽑기 코드가 있어야만 뽑을 수 있어요. 바꿀까요?' : '테스트 판으로 바꾸면 누구나 무료로 뽑을 수 있어요. 바꿀까요?')) return;
+        if (!confirm(b.test ? '실제 판으로 바꾸면 카페24 결제(또는 뽑기 코드)로만 뽑을 수 있어요. 바꿀까요?' : '테스트 판으로 바꾸면 누구나 무료로 뽑을 수 있어요. 바꿀까요?')) return;
         await call('kuji_update', { p_key: KEY, p_slug: b.slug, p_test: !b.test, p_mode: null, p_sort: null }); loadBoards();
       });
       btn(b.mode === 'live' ? '자동 판으로 전환' : '라이브 판으로 전환', '', async () => {
@@ -181,7 +198,9 @@ async function loadBoards() {
       });
       btn('⏹ 마감', 'r', async () => {
         if (!confirm('마감하면 더 이상 뽑을 수 없고, 남은 표 순서가 공개돼요. 마감할까요?')) return;
-        await call('kuji_close', { p_key: KEY, p_slug: b.slug }); loadBoards();
+        await call('kuji_close', { p_key: KEY, p_slug: b.slug });
+        if (b.product_no) await fnCall({ action: 'sync_stock', key: KEY, slug: b.slug }).catch(() => {});
+        loadBoards();
       });
     }
     if (b.test) btn('🗑 삭제', 'r', async () => {
@@ -231,7 +250,13 @@ $('#openBtn').onclick = async () => {
   try {
     const r = await call('kuji_open', { p_key: KEY, p_slug: slug, p_title: $('#title').value.trim(), p_price: +$('#price').value || 0, p_prizes: out,
       p_mode: $('#mode').value, p_test: $('#test').value === '1', p_sort: 0 });
-    msg(box, `열렸어요! ${r.total}구 · 지문 ${r.hash.slice(0, 16)}…`, true); loadBoards();
+    msg(box, `열렸어요! ${r.total}구 · 지문 ${r.hash.slice(0, 16)}…`, true);
+    if ($('#test').value === '0' && $('#mode').value === 'auto') {
+      msg(box, `열렸어요! ${r.total}구 · 카페24 상품 만드는 중…`, true);
+      try { msg(box, `판 열림 (${r.total}구)\n` + c24Msg(await fnCall({ action: 'make_product', key: KEY, slug })), true); }
+      catch (e) { msg(box, `판은 열렸는데 카페24 상품 생성은 실패했어요: ${e.message}\n판 목록에서 "카페24 상품 자동 만들기"를 다시 눌러주세요.`); }
+    }
+    loadBoards();
   } catch (e) { msg(box, /duplicate|unique/.test(e.message) ? '같은 주소용 이름의 판이 이미 있어요' : '오류: ' + e.message); }
   $('#openBtn').disabled = false;
 };

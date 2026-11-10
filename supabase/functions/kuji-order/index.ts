@@ -3,6 +3,8 @@
 //
 //  POST /kuji-order            {"order_id":"20261111-0000001"}          → 결제 확인 후 즉시 뽑기, 결과 반환
 //  POST /kuji-order            {"order_id":"...", "check":true}          → 쿠지 상품 주문인지만 확인 (주문완료 페이지용)
+//  POST /kuji-order            {"action":"make_product","key":"관리자비번","slug":"판"}  → 카페24 상품 자동 생성·재고·연결
+//  POST /kuji-order            {"action":"sync_stock","key":"관리자비번","slug":"판"}    → 카페24 재고를 남은 표 수로 맞춤
 //  GET  /kuji-order/connect                                              → 카페24 연결 시작 (운영자가 한 번만)
 //  GET  /kuji-order/callback?code=..&state=..                             → 카페24가 돌려보내는 주소
 //
@@ -22,7 +24,8 @@ const CLIENT_SECRET = env('CAFE24_CLIENT_SECRET');
 const SB_URL = env('SUPABASE_URL');
 const API = `https://${MALL}.cafe24api.com/api/v2`;
 const REDIRECT = `${SB_URL}/functions/v1/kuji-order/callback`;
-const SCOPES = 'mall.read_order';
+const SCOPES = 'mall.read_order,mall.read_product,mall.write_product';
+const SITE = 'https://plaza.luckyslab.shop/';
 
 const sb = createClient(SB_URL, env('SUPABASE_SERVICE_ROLE_KEY'), { auth: { persistSession: false } });
 
@@ -117,6 +120,81 @@ async function handleOrder(orderId: string, check: boolean) {
   return json({ status: 'ok', kuji: true, order_id: orderId, who: buyer, boards });
 }
 
+// ---------- 상품 자동 생성 (관리자) ----------
+async function c24(path: string, method = 'GET', body?: unknown) {
+  const tok = await accessToken();
+  const r = await fetch(`${API}/admin/${path}`, {
+    method, headers: { Authorization: `Bearer ${tok}`, 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    const t = JSON.stringify(j);
+    if (r.status === 403 || /scope/i.test(t)) throw new Error('카페24 상품 권한이 없어요. 개발자센터 앱 권한에 "상품 읽기·쓰기"를 추가하고, 관리자 페이지에서 "카페24 연결하기"를 다시 눌러주세요.');
+    throw new Error(`카페24 ${method} ${path.split('?')[0]} 실패(${r.status}): ${t.slice(0, 300)}`);
+  }
+  return j;
+}
+const b64 = (buf: ArrayBuffer) => { const u = new Uint8Array(buf); let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s); };
+const esc = (t: string) => t.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+type Prize = { grade: string; name: string; img?: string | null; qty: number; left: number };
+type Board = { slug: string; title: string; price: number; total: number; left: number; test: boolean; status: string; product_no?: number | null; prizes: Prize[] };
+
+async function boardFor(key: string, slug: string) {
+  if (!(await rpc<boolean>('kuji_admin_check', { p_key: key }))) throw Object.assign(new Error('관리자 비밀번호가 틀렸어요'), { code: 403 });
+  const s = await rpc<Board | null>('kuji_state', { p_slug: slug });
+  if (!s) throw Object.assign(new Error('없는 판이에요'), { code: 404 });
+  return s;
+}
+async function setStock(no: number, qty: number) {
+  const v = await c24(`products/${no}/variants`);
+  const code = v.variants?.[0]?.variant_code;
+  if (!code) throw new Error('카페24 품목 코드를 못 찾았어요');
+  await c24(`products/${no}/variants/${code}/inventories`, 'PUT', { shop_no: 1, request: { use_inventory: 'T', important_inventory: 'A', inventory_control_type: 'A', display_soldout: 'T', quantity: Math.max(0, qty) } });
+}
+async function makeProduct(key: string, slug: string) {
+  const s = await boardFor(key, slug);
+  if (s.test) return json({ status: 'error', message: '테스트 판은 카페24 상품을 안 만들어요. 실제 판으로 바꾼 뒤 눌러주세요.' }, 400);
+  if (s.status !== 'open') return json({ status: 'error', message: '마감된 판이에요' }, 400);
+  if (s.product_no) return json({ status: 'ok', product_no: s.product_no, existed: true, url: `${SITE.replace(/\/$/, '')}/kuji/#/p/${s.slug}` });
+  const hits = s.prizes.filter(p => ['S', 'A', 'B', 'LAST'].includes(p.grade));
+  const gn = (g: string) => g === 'LAST' ? '라스트원' : g + '상';
+  const desc = `<div style="text-align:center;padding:20px">
+<h2>${esc(s.title)}</h2>
+<p>결제가 끝나면 럭키슬랩 쿠지 사이트에서 바로 개봉돼요. 수량 = 뽑기 횟수예요.</p>
+<p>전체 ${s.total.toLocaleString()}구 · 남은 표에서 한 장씩 뽑는 쿠지 방식 · 마지막 표까지 모든 상품이 반드시 나가요.</p>
+<h3>힛 카드</h3><ul style="list-style:none;padding:0">${hits.map(p => `<li>${gn(p.grade)} · ${esc(p.name)} × ${p.qty}</li>`).join('')}</ul>
+<p><a href="${SITE}kuji/#/p/${encodeURIComponent(s.slug)}">👉 남은 수량·전체 구성 실시간으로 보기</a></p>
+<p style="color:#888;font-size:12px">개봉(추첨)이 끝난 주문은 교환·환불이 안 돼요. 표가 모자라 못 뽑은 회차는 전액 환불해드려요. 만 19세 이상만 구매할 수 있어요.</p>
+</div>`;
+  const name = `[PSA 10] ${s.title} 쿠지 1회`.slice(0, 250);
+  const made = await c24('products', 'POST', { shop_no: 1, request: {
+    product_name: name, price: String(s.price), supply_price: String(s.price), display: 'T', selling: 'T',
+    simple_description: '결제 완료 즉시 럭키슬랩 쿠지 사이트에서 개봉', description: desc,
+  } });
+  const no = Number(made.product?.product_no);
+  if (!no) throw new Error('카페24가 상품번호를 안 돌려줬어요: ' + JSON.stringify(made).slice(0, 200));
+  await rpc('kuji_link_product', { p_key: key, p_slug: s.slug, p_product: no });
+  const warnings: string[] = [];
+  try { await setStock(no, s.left); } catch (e) { warnings.push('재고 설정 실패: ' + (e as Error).message); }
+  const img = hits.find(p => p.img)?.img;
+  if (img) {
+    try {
+      const r = await fetch(/^https?:/.test(img) ? img : SITE + img.replace(/^\//, ''));
+      if (!r.ok) throw new Error('사진을 못 불러왔어요 (' + r.status + ')');
+      await c24(`products/${no}/images`, 'POST', { shop_no: 1, requests: [{ detail_image: b64(await r.arrayBuffer()), image_upload_type: 'A' }] });
+    } catch (e) { warnings.push('대표사진 등록 실패: ' + (e as Error).message); }
+  }
+  return json({ status: 'ok', product_no: no, stock: s.left, warnings });
+}
+async function syncStock(key: string, slug: string) {
+  const s = await boardFor(key, slug);
+  if (!s.product_no) return json({ status: 'error', message: '카페24 상품이 아직 연결 안 됐어요' }, 400);
+  const qty = s.status === 'open' && s.prizes ? s.left : 0;
+  await setStock(Number(s.product_no), qty);
+  return json({ status: 'ok', product_no: s.product_no, stock: qty });
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
   const url = new URL(req.url);
@@ -140,11 +218,14 @@ Deno.serve(async (req) => {
 
     if (req.method === 'POST') {
       const body = await req.json().catch(() => ({}));
+      if (body.action === 'make_product') return await makeProduct(String(body.key ?? ''), String(body.slug ?? ''));
+      if (body.action === 'sync_stock') return await syncStock(String(body.key ?? ''), String(body.slug ?? ''));
       return await handleOrder(String(body.order_id ?? '').trim(), !!body.check);
     }
     return json({ status: 'bad_request' }, 400);
   } catch (e) {
     console.error(e);
-    return json({ status: 'error', message: e instanceof Error ? e.message : String(e) }, 500);
+    const code = (e as { code?: number }).code;
+    return json({ status: 'error', message: e instanceof Error ? e.message : String(e) }, code === 403 || code === 404 ? code : 500);
   }
 });
