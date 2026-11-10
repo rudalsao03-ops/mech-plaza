@@ -33,10 +33,10 @@ const CORS = {
 };
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...CORS, 'Content-Type': 'application/json; charset=utf-8' } });
-const page = (title: string, msg: string, status = 200) =>
-  new Response(`<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title>
-<body style="font-family:sans-serif;background:#0e111a;color:#f3edda;display:flex;align-items:center;justify-content:center;min-height:90vh;text-align:center">
-<div><h2>${title}</h2><p>${msg}</p></div></body>`, { status, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+// Supabase 함수 주소에선 HTML이 글자로만 보여서, 결과는 관리자 페이지로 돌려보내서 보여줌
+const ADMIN_PAGE = 'https://plaza.luckyslab.shop/kuji/admin.html';
+const page = (title: string, msg: string, _status = 200) =>
+  Response.redirect(`${ADMIN_PAGE}?cafe24=${encodeURIComponent(title)}&msg=${encodeURIComponent(msg)}`, 302);
 
 async function rpc<T = unknown>(fn: string, args: Record<string, unknown> = {}): Promise<T> {
   const { data, error } = await sb.rpc(fn, args);

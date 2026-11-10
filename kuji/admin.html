@@ -104,6 +104,9 @@ async function login(k) {
 }
 $('#loginBtn').onclick = () => login($('#pw').value);
 $('#pw').addEventListener('keydown', e => { if (e.key === 'Enter') login($('#pw').value); });
+{ const q = new URLSearchParams(location.search); if (q.get('cafe24')) {
+  const ok = q.get('cafe24').includes('완료'), d = el('div', 'msg ' + (ok ? 's' : 'e'), q.get('cafe24') + (q.get('msg') ? ' · ' + q.get('msg') : ''));
+  document.querySelector('.wrap').insertBefore(d, document.querySelector('#login')); history.replaceState(null, '', location.pathname); } }
 if (KEY) login(KEY);
 
 const FN = D.SUPABASE_URL + '/functions/v1/kuji-order';
