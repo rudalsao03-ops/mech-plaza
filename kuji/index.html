@@ -59,6 +59,15 @@
   .tier .th span{font-size:12px;color:var(--sub)}
   .item{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;padding:4px 0}
   .item.gone{color:#59607a;text-decoration:line-through}
+  .item{align-items:center}
+  .item .nm{display:flex;align-items:center;gap:9px;min-width:0}
+  .item img{width:40px;height:56px;object-fit:cover;object-position:top;border-radius:5px;flex:none;border:1px solid var(--bd)}
+  .item.gone img{opacity:.3;filter:grayscale(1)}
+  .tk .b img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;border-radius:8px}
+  .tk .b .g{position:relative;z-index:1}
+  .tk .b.ph{justify-content:flex-end;padding-bottom:8px}
+  .tk .b.ph small{position:relative;z-index:1;background:rgba(10,12,20,.82);border-radius:6px;padding:2px 4px}
+  .tk.big{width:104px;height:150px}
   .item .q{color:var(--sub);white-space:nowrap}
   .fair{background:var(--card);border:1px dashed var(--bd);border-radius:16px;padding:12px 14px;font-size:12.5px;color:var(--sub);line-height:1.6}
   .fair code{display:block;word-break:break-all;color:var(--gold2);font:11px/1.5 ui-monospace,Menlo,monospace;background:#0b0d14;border-radius:8px;padding:8px;margin:6px 0}
@@ -147,6 +156,8 @@ const store = {
    실제 운영에선 이 부분이 서버(Supabase)에서 돌아가고, 손님 브라우저엔 결과만 옴.
    데모에선 브라우저에서 같은 방식으로 흉내냄. */
 const boards = (D.BOARDS || []).map((b, i) => ({ ...b, id: 'b' + i }));
+const IMG = {}; for (const b of boards) for (const t of b.tiers || []) for (const it of t.items) if (it[3]) IMG[it[0]] = /^https?:/.test(it[3]) ? it[3] : '../' + it[3];
+const thumb = (n, cls) => { if (!IMG[n]) return null; const im = el('img', cls); im.src = IMG[n]; im.alt = ''; im.loading = 'lazy'; return im; };
 const sha256 = async s => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)))].map(x => x.toString(16).padStart(2, '0')).join('');
 function rndInt(n) { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; }
 async function deckOf(b) {
@@ -228,7 +239,8 @@ async function showBoard(b) {
     th.append(g, el('b', '', t.g === 'C' ? '포인트상' : `${t.g}상`), el('span', '', `${tl.toLocaleString()} / ${tt.toLocaleString()}`)); box.appendChild(th);
     for (const [n, , tot] of t.items) {
       const l = rem[t.g + '|' + n] || 0, it = el('div', 'item' + (l === 0 ? ' gone' : ''));
-      it.append(el('span', '', n), el('span', 'q', `${l.toLocaleString()} / ${(+tot).toLocaleString()}`)); box.appendChild(it);
+      const nm = el('span', 'nm'), tn = thumb(n); if (tn) nm.appendChild(tn); nm.appendChild(el('span', '', n));
+      it.append(nm, el('span', 'q', `${l.toLocaleString()} / ${(+tot).toLocaleString()}`)); box.appendChild(it);
     }
     V.appendChild(box);
   }
@@ -289,7 +301,8 @@ function showResult(got, done) {
   let opened = 0;
   const cards = got.map(t => {
     const c = el('div', 'tk wait'), inn = el('div', 'in'), f = el('div', 'f', '?'), bk = el('div', 'b'), g = el('span', 'g', t.g + '상');
-    g.style.background = COL(t.g); bk.append(g, el('small', '', t.n)); inn.append(f, bk); c.appendChild(inn);
+    g.style.background = COL(t.g); const im = thumb(t.n); if (im) { bk.classList.add('ph'); bk.append(im, g, el('small', '', t.n.replace(' PSA10', ''))); } else bk.append(g, el('small', '', t.n));
+    if (HIT(t.g)) c.classList.add('big'); inn.append(f, bk); c.appendChild(inn);
     c.onclick = () => open(c, t); G.appendChild(c); return [c, t];
   });
   function open(c, t) {

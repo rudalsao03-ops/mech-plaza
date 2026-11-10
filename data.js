@@ -26,9 +26,9 @@ window.LUCKY = {
     { title: 'PSA10 피카츄·리자몽 10종', price: 2500, total: 1334, sold: 0, status: '오픈 예정', url: '',
       lastOne: null,
       tiers: [
-        { g: 'S', items: [['리자몽 VMAX SSR (s4a) PSA10', 1, 1], ['피카츄 ex UR (sv8) PSA10', 1, 1]] },
-        { g: 'A', items: [['히로시마의 피카츄 PSA10', 1, 1], ['라이츄 포켓큥 1st PSA10', 1, 1], ['토호쿠의 피카츄 PSA10', 1, 1], ['님피아 ex SAR PSA10', 1, 1]] },
-        { g: 'B', items: [['팬텀 VMAX (SCG) PSA10', 1, 1], ['피카츄&제크로무 GX PSA10', 1, 1], ['메가리자몽X ex MA PSA10', 1, 1], ['심향의 블레이범 AR PSA10', 1, 1]] },
+        { g: 'S', items: [['리자몽 VMAX SSR (s4a) PSA10', 1, 1, 'cards/charizard_vmax.jpg'], ['피카츄 ex UR (sv8) PSA10', 1, 1, 'cards/pikachu_ex_ur.jpg']] },
+        { g: 'A', items: [['히로시마의 피카츄 PSA10', 1, 1, 'cards/hiroshima_pikachu.jpg'], ['라이츄 포켓큥 1st PSA10', 1, 1, 'cards/raichu_pokekyun.jpg'], ['토호쿠의 피카츄 PSA10', 1, 1, 'cards/tohoku_pikachu.jpg'], ['님피아 ex SAR PSA10', 1, 1, 'cards/nymphia_sar.jpg']] },
+        { g: 'B', items: [['팬텀 VMAX (SCG) PSA10', 1, 1, 'cards/gengar_vmax.jpg'], ['피카츄&제크로무 GX PSA10', 1, 1, 'cards/pika_zekrom_gx.jpg'], ['메가리자몽X ex MA PSA10', 1, 1, 'cards/mega_charizard_x.jpg'], ['심향의 블레이범 AR PSA10', 1, 1, 'cards/typhlosion_ar.jpg']] },
         { g: 'C', items: [['골드·실버·브론즈 포인트', 1324, 1324]] },
       ] },
   ],

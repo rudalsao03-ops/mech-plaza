@@ -79,7 +79,7 @@
   .row .n{flex:1;min-width:0}
   .row .q{color:var(--sub);font-size:12.5px;white-space:nowrap}
   .row.gone .n{text-decoration:line-through;color:#5d6278}
-  .row img{width:34px;height:46px;object-fit:cover;border-radius:5px;border:1px solid var(--line);flex:none}
+  .row img{width:34px;height:46px;object-fit:cover;object-position:top;border-radius:5px;border:1px solid var(--line);flex:none}
   .lo{background:#2a1f45;border:2px solid var(--LAST);border-radius:10px;padding:8px 10px;font-size:13px;margin:10px 0 0}
   .board .btn{margin-top:14px}
 
@@ -223,7 +223,7 @@
     const det = el('details'); det.appendChild(el('summary', '', '상품 전체 보기'));
     for (const t of b.tiers || []) for (const it of t.items) {
       const r = el('div', 'row' + (+it[1] === 0 ? ' gone' : '')), g = el('span', 'g', t.g); g.style.background = COL(t.g); r.appendChild(g);
-      if (it[3]) { const im = el('img'); im.src = it[3]; im.alt = ''; im.loading = 'lazy'; r.appendChild(im); }
+      if (it[3]) { const im = el('img'); im.src = /^https?:/.test(it[3]) ? it[3] : '../' + it[3]; im.alt = ''; im.loading = 'lazy'; r.appendChild(im); }
       r.appendChild(el('span', 'n', it[0])); r.appendChild(el('span', 'q', `${(+it[1]).toLocaleString()} / ${(+it[2]).toLocaleString()}`)); det.appendChild(r);
     }
     card.appendChild(det);
