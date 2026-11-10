@@ -10,7 +10,7 @@
    · BIZ       : 사업자 정보 (상점 홈 맨 아래 표시 — 통신판매업 필수 표시사항)
    ====================================================================== */
 window.LUCKY = {
-  SHOP_URL: '',
+  SHOP_URL: 'https://luckyslab.shop/',
   KAKAO_URL: '',
   LIVE: { youtube: '', schedule: '매일 저녁 8시 LIVE' },
   NOTICES: [
