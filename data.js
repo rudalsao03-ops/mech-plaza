@@ -35,5 +35,5 @@ window.LUCKY = {
   HALL: [
     // { name: '닉네임', card: '리자몽 VMAX PSA10', grade: 'S', date: '11/12' },
   ],
-  BIZ: { name: '', ceo: '', bizno: '', mailorder: '', addr: '', tel: '', email: '' },
+  BIZ: { name: '럭키슬랩', ceo: '박경민', bizno: '695-27-02176', mailorder: '', addr: '', tel: '', email: '' },
 };
