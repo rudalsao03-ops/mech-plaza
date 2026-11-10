@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f6f1e4">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<title>럭키슬랩 — PSA10 오리파</title>
+<meta name="description" content="남은 수량을 전부 공개하는 PSA10 오리파. 개봉은 라이브로, 구경은 광장에서.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/galmuri@2.40.3/dist/galmuri.css">
+<style>
+  :root{--paper:#f6f1e4;--card:#fffdf7;--ink:#1d2030;--sub:#6d6a5f;--line:#e4dcc8;--green:#12402c;--green2:#1f7a4d;--gold:#d9a030;--gold2:#ffe08a;--red:#d8452f;
+    --S:#d8452f;--A:#d9a030;--B:#3a6fd8;--C:#8a8778;--LAST:#7a3ad0}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 -apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  .px{font-family:"Galmuri11",sans-serif}
+  .wrap{max-width:520px;margin:0 auto;padding:0 16px}
+  a{color:inherit}
+  header{position:sticky;top:0;z-index:5;background:rgba(246,241,228,.94);backdrop-filter:blur(8px);border-bottom:2px solid var(--ink)}
+  header .wrap{display:flex;align-items:center;gap:10px;height:58px}
+  .logo{font:bold 20px "Galmuri11",sans-serif;letter-spacing:.5px;flex:1;text-decoration:none}
+  .logo i{font-style:normal;color:var(--green2)}
+  .pill{font:bold 12px "Galmuri11",sans-serif;border:2px solid var(--ink);border-radius:99px;padding:6px 11px;text-decoration:none;background:var(--card);white-space:nowrap}
+  .pill.live{background:var(--red);color:#fff;border-color:var(--red)}
+  .pill .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#b9b4a4;margin-right:5px;vertical-align:1px}
+  .pill.live .dot{background:#fff;animation:bl 1s infinite}
+  @keyframes bl{50%{opacity:.25}}
+
+  .hero{margin:18px 0 8px;background:var(--green);color:#fff;border-radius:22px;border:2px solid var(--ink);box-shadow:5px 5px 0 var(--ink);padding:22px 20px 0;overflow:hidden;position:relative}
+  .hero .kick{font:12px "Galmuri11",sans-serif;color:var(--gold2);letter-spacing:2px}
+  .hero h1{font:bold 27px/1.25 "Galmuri11",sans-serif;margin:8px 0 10px}
+  .hero h1 em{font-style:normal;color:var(--gold2)}
+  .hero p{margin:0;color:#cfe3d6;font-size:14px;max-width:26em}
+  .cta{display:flex;gap:8px;margin:16px 0 0;flex-wrap:wrap}
+  .btn{display:inline-block;font:bold 14px "Galmuri11",sans-serif;text-decoration:none;border:2px solid var(--ink);border-radius:12px;padding:11px 15px;background:var(--gold2);color:var(--ink);box-shadow:3px 3px 0 var(--ink);cursor:pointer}
+  .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  .btn.ghost{background:transparent;color:#fff;border-color:#fff;box-shadow:none}
+  .btn.dark{background:var(--ink);color:var(--gold2)}
+  .btn.off{background:#e9e3d2;color:#9b9686;box-shadow:none;border-color:#c9c2ae;cursor:default}
+  .btn.wide{display:block;text-align:center;width:100%}
+  .slabs{display:flex;justify-content:center;gap:0;height:150px;margin-top:20px}
+  .slab{width:92px;height:134px;border-radius:10px;background:#f2ead6;border:2px solid var(--ink);padding:6px;transform:rotate(var(--r)) translateY(var(--y));margin:0 -8px;box-shadow:0 8px 0 rgba(0,0,0,.25)}
+  .slab b{display:block;height:17px;border-radius:4px;background:var(--red);color:#fff;font:bold 9px/17px "Galmuri11",sans-serif;text-align:center;letter-spacing:1px}
+  .slab span{display:flex;align-items:center;justify-content:center;height:97px;margin-top:5px;border-radius:6px;font:bold 34px "Galmuri11",sans-serif;color:rgba(255,255,255,.95);
+    background:linear-gradient(135deg,#ff9a5c,#ffd760 30%,#7be0a8 55%,#6aa8ff 78%,#c58bff);background-size:220% 220%;animation:holo 5s ease-in-out infinite alternate}
+  @keyframes holo{to{background-position:100% 100%}}
+  @media (prefers-reduced-motion:reduce){.slab span,.pill .dot{animation:none}}
+
+  .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0 6px}
+  .facts div{background:var(--card);border:2px solid var(--ink);border-radius:14px;padding:10px 8px;text-align:center}
+  .facts b{display:block;font:bold 18px "Galmuri11",sans-serif}
+  .facts small{color:var(--sub);font-size:11.5px}
+
+  h2{font:bold 20px "Galmuri11",sans-serif;margin:30px 0 4px;display:flex;align-items:center;gap:8px}
+  h2 + .lead{color:var(--sub);font-size:13.5px;margin:0 0 12px}
+  section{scroll-margin-top:70px}
+
+  .board{background:var(--card);border:2px solid var(--ink);border-radius:18px;box-shadow:4px 4px 0 var(--ink);padding:16px;margin-bottom:16px}
+  .board .top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+  .board h3{margin:0;font:bold 17px/1.35 "Galmuri11",sans-serif}
+  .st{font:bold 11px "Galmuri11",sans-serif;border-radius:99px;padding:4px 9px;background:var(--ink);color:var(--gold2);white-space:nowrap}
+  .st.on{background:var(--green2);color:#fff}.st.end{background:#b9b4a4;color:#fff}
+  .price{font:bold 24px "Galmuri11",sans-serif;margin:8px 0 2px}
+  .price small{font-size:13px;color:var(--sub);font-weight:normal;margin-right:4px}
+  .bar{height:14px;border:2px solid var(--ink);border-radius:99px;overflow:hidden;background:#ece5d2;margin:10px 0 5px}
+  .bar i{display:block;height:100%;background:repeating-linear-gradient(-45deg,var(--gold),var(--gold) 8px,#e9b84a 8px,#e9b84a 16px)}
+  .left{display:flex;justify-content:space-between;font-size:12.5px;color:var(--sub)}
+  .left b{color:var(--ink)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+  .chip{font:bold 12px "Galmuri11",sans-serif;color:#fff;border-radius:8px;padding:5px 9px}
+  .chip.zero{opacity:.35;text-decoration:line-through}
+  details{border-top:2px dashed var(--line);margin-top:4px}
+  summary{cursor:pointer;font:bold 13px "Galmuri11",sans-serif;padding:11px 0;list-style:none;display:flex;justify-content:space-between}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:'＋'} details[open] summary::after{content:'－'}
+  .row{display:flex;gap:9px;align-items:center;padding:6px 0;font-size:13.5px}
+  .row .g{flex:none;width:28px;height:22px;border-radius:6px;color:#fff;font:bold 11px/22px "Galmuri11",sans-serif;text-align:center}
+  .row .n{flex:1;min-width:0}
+  .row .q{color:var(--sub);font-size:12.5px;white-space:nowrap}
+  .row.gone .n{text-decoration:line-through;color:#b0ab9b}
+  .row img{width:34px;height:46px;object-fit:cover;border-radius:5px;border:1px solid var(--line);flex:none}
+  .lo{background:#f1e7ff;border:2px solid var(--LAST);border-radius:10px;padding:8px 10px;font-size:13px;margin:10px 0 0}
+  .board .btn{margin-top:14px}
+
+  .win{display:flex;gap:11px;align-items:center;background:var(--card);border:2px solid var(--ink);border-radius:14px;padding:11px 12px;margin-bottom:8px}
+  .win .m{flex:none;width:38px;height:38px;border-radius:10px;color:#fff;font:bold 13px/38px "Galmuri11",sans-serif;text-align:center}
+  .win b{display:block;font-size:14.5px}.win small{color:var(--sub);font-size:12.5px}
+  .empty{border:2px dashed #c9c2ae;border-radius:14px;padding:18px;text-align:center;color:var(--sub);font-size:13.5px}
+
+  .steps{display:grid;gap:8px;counter-reset:s}
+  .steps div{background:var(--card);border:2px solid var(--ink);border-radius:14px;padding:12px 12px 12px 52px;position:relative;font-size:13.5px}
+  .steps div::before{counter-increment:s;content:counter(s);position:absolute;left:12px;top:12px;width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--gold2);font:bold 14px/28px "Galmuri11",sans-serif;text-align:center}
+  .steps b{display:block;font:bold 14.5px "Galmuri11",sans-serif}
+
+  .plaza{background:#181c3a;color:#fff;border:2px solid var(--ink);border-radius:20px;box-shadow:5px 5px 0 var(--ink);padding:18px;margin-top:10px;position:relative;overflow:hidden}
+  .plaza h3{font:bold 19px "Galmuri11",sans-serif;margin:0 0 6px;color:var(--gold2)}
+  .plaza p{margin:0 0 12px;color:#c9cbe0;font-size:13.5px}
+  .plaza ul{list-style:none;padding:0;margin:0 0 14px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px}
+  .plaza li{background:rgba(255,255,255,.08);border-radius:10px;padding:8px 10px}
+  .stars{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(#fff 1px,transparent 1.5px),radial-gradient(#ffe08a 1px,transparent 1.5px);background-size:90px 70px,130px 110px;background-position:10px 14px,50px 40px;opacity:.35}
+  .plaza>*:not(.stars){position:relative}
+
+  .faq details{background:var(--card);border:2px solid var(--ink);border-radius:14px;margin-bottom:8px;padding:0 13px}
+  .faq p{margin:0 0 12px;font-size:13.5px;color:#45433c}
+
+  footer{margin-top:34px;border-top:2px solid var(--ink);padding:18px 0 6px;font-size:12px;color:var(--sub);line-height:1.7}
+  footer b{color:var(--ink)}
+  nav.tab{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--card);border-top:2px solid var(--ink);padding-bottom:env(safe-area-inset-bottom)}
+  nav.tab .wrap{display:grid;grid-template-columns:repeat(4,1fr);padding:0}
+  nav.tab a{text-align:center;text-decoration:none;font:bold 12px "Galmuri11",sans-serif;padding:9px 0 10px}
+  nav.tab a span{display:block;font-size:20px;line-height:1.2}
+  nav.tab a.go{background:var(--ink);color:var(--gold2)}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="logo" href="#home">🍀 LUCKY<i>SLAB</i></a>
+  <a class="pill" id="livePill" href="../"><span class="dot"></span>OFF AIR</a>
+  <a class="pill" id="kakaoPill" href="#faq">문의</a>
+</div></header>
+
+<main class="wrap">
+  <section class="hero" id="home">
+    <div class="kick">PSA 10 ORIPA</div>
+    <h1>뭐가 남았는지<br><em>다 보여주고</em> 뽑아요</h1>
+    <p>판마다 남은 구수와 상품을 그대로 공개해요. 개봉은 라이브로, 구경은 광장에서.</p>
+    <div class="cta"><a class="btn" href="#boards">진행 중인 판 보기</a><a class="btn ghost" href="../">광장 놀러가기</a></div>
+    <div class="slabs" aria-hidden="true">
+      <div class="slab" style="--r:-9deg;--y:14px"><b>LUCKY 10</b><span>★</span></div>
+      <div class="slab" style="--r:0deg;--y:0px"><b>LUCKY 10</b><span>?</span></div>
+      <div class="slab" style="--r:9deg;--y:14px"><b>LUCKY 10</b><span>♣</span></div>
+    </div>
+  </section>
+
+  <div class="facts" id="facts"></div>
+
+  <section id="boards">
+    <h2>🎴 진행 중인 판</h2><p class="lead">남은 수량은 운영자가 직접 갱신해요. 최종 수량은 결제 페이지 기준이에요.</p>
+    <div id="boardList"></div>
+  </section>
+
+  <section id="hall">
+    <h2>🏆 최근 당첨</h2><p class="lead">실제 당첨만 올려요.</p>
+    <div id="hallList"></div>
+  </section>
+
+  <section id="how">
+    <h2>📦 이용 방법</h2><p class="lead">처음이어도 3단계면 끝.</p>
+    <div class="steps">
+      <div><b>판 고르기</b>남은 상품과 구수를 보고 마음에 드는 판을 골라요.</div>
+      <div><b>상점에서 결제</b>구매 버튼을 누르면 결제 페이지로 넘어가요. 결제는 거기서만 해요.</div>
+      <div><b>라이브 개봉 → 배송</b>방송에서 개봉하고, 당첨 상품은 안전하게 포장해서 보내드려요.</div>
+    </div>
+  </section>
+
+  <section id="plaza">
+    <h2>🌙 럭키슬랩 광장</h2><p class="lead">안 사도 놀 수 있는 곳.</p>
+    <div class="plaza"><div class="stars"></div>
+      <h3>캐릭터로 모여서 같이 봐요</h3>
+      <p>라이브 무대 앞에 모여서 개봉을 같이 보고, 당첨이 나오면 광장 전체에 폭죽이 터져요.</p>
+      <ul><li>✨ 야생 몬스터 잡기</li><li>🎰 무료 꾸미기 가챠</li><li>📖 방명록</li><li>🍀 오늘의 운세</li></ul>
+      <a class="btn wide" href="../">광장 입장하기</a>
+    </div>
+  </section>
+
+  <section id="faq" class="faq">
+    <h2>💬 자주 묻는 질문</h2><p class="lead"></p>
+    <details><summary>남은 수량은 믿을 수 있나요?</summary><p>판마다 전체 구수와 등급별 남은 상품을 공개하고, 팔릴 때마다 갱신해요. 개봉은 라이브로 진행해요.</p></details>
+    <details><summary>미성년자도 구매할 수 있나요?</summary><p>아니요. 만 19세 이상만 이용할 수 있어요.</p></details>
+    <details><summary>교환·환불은 어떻게 되나요?</summary><p>개봉(추첨) 전에는 취소할 수 있어요. 자세한 기준은 결제 페이지의 교환·환불 안내를 따라요.</p></details>
+    <details><summary>문의는 어디로 하나요?</summary><p id="askLine">오픈카톡 채널을 준비 중이에요.</p></details>
+  </section>
+
+  <footer id="biz"></footer>
+</main>
+
+<nav class="tab"><div class="wrap">
+  <a href="#home"><span>🏠</span>홈</a><a href="#boards"><span>🎴</span>판</a><a href="#hall"><span>🏆</span>당첨</a><a class="go" href="../"><span>🌙</span>광장</a>
+</div></nav>
+
+<script src="../data.js"></script>
+<script>
+(() => {
+  'use strict';
+  const D = window.LUCKY || {}, $ = s => document.querySelector(s);
+  const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+  const won = n => (+n || 0).toLocaleString('ko-KR') + '원';
+  const safe = u => typeof u === 'string' && /^https?:\/\//.test(u) ? u : '';
+  const COL = g => `var(--${['S', 'A', 'B', 'C', 'LAST'].includes(g) ? g : 'C'})`;
+  const boards = D.BOARDS || [], hall = D.HALL || [];
+
+  // 헤더
+  if (D.LIVE && D.LIVE.youtube) { const p = $('#livePill'); p.classList.add('live'); p.lastChild.textContent = 'LIVE'; }
+  const kakao = safe(D.KAKAO_URL);
+  if (kakao) { const k = $('#kakaoPill'); k.href = kakao; k.target = '_blank'; k.rel = 'noopener'; k.textContent = '오픈카톡';
+    const a = $('#askLine'); a.textContent = ''; const l = el('a', '', '오픈카톡으로 문의하기'); l.href = kakao; l.target = '_blank'; l.rel = 'noopener'; a.appendChild(l); }
+
+  // 요약 숫자
+  const hits = boards.reduce((a, b) => a + (b.tiers || []).filter(t => t.g !== 'C' && t.g !== 'D').reduce((x, t) => x + t.items.reduce((y, i) => y + (+i[1] || 0), 0), 0), 0);
+  const leftAll = boards.reduce((a, b) => a + Math.max(0, b.total - b.sold), 0);
+  for (const [v, l] of [[boards.length + '개', '진행 중인 판'], [hits + '장', '남은 힛 카드'], [leftAll.toLocaleString() + '구', '남은 구수']]) {
+    const d = el('div'); d.appendChild(el('b', '', v)); d.appendChild(el('small', '', l)); $('#facts').appendChild(d);
+  }
+
+  // 판
+  const BL = $('#boardList');
+  if (!boards.length) BL.appendChild(el('div', 'empty', '지금 진행 중인 판이 없어요. 곧 새 판이 열려요!'));
+  for (const b of boards) {
+    const left = Math.max(0, b.total - b.sold), card = el('div', 'board');
+    const top = el('div', 'top'); top.appendChild(el('h3', '', b.title));
+    top.appendChild(el('span', 'st' + (left === 0 ? ' end' : b.sold > 0 ? ' on' : ''), left === 0 ? '완판' : b.status || '진행 중')); card.appendChild(top);
+    const pr = el('div', 'price'); pr.appendChild(el('small', '', '1회')); pr.appendChild(document.createTextNode(won(b.price))); card.appendChild(pr);
+    const bar = el('div', 'bar'), fill = el('i'); fill.style.width = (b.total ? left / b.total * 100 : 0) + '%'; bar.appendChild(fill); card.appendChild(bar);
+    const lf = el('div', 'left'); const l1 = el('span'); l1.appendChild(document.createTextNode('남은 구수 ')); l1.appendChild(el('b', '', left.toLocaleString())); l1.appendChild(document.createTextNode(' / ' + (+b.total).toLocaleString()));
+    lf.appendChild(l1); lf.appendChild(el('span', '', b.sold > 0 ? `${(+b.sold).toLocaleString()}구 나감` : '아직 아무도 안 뽑았어요')); card.appendChild(lf);
+    const chips = el('div', 'chips');
+    for (const t of b.tiers || []) {
+      const n = t.items.reduce((a, i) => a + (+i[1] || 0), 0), c = el('span', 'chip' + (n === 0 ? ' zero' : ''), `${t.g}상 ${n.toLocaleString()}`); c.style.background = COL(t.g); chips.appendChild(c);
+    }
+    card.appendChild(chips);
+    if (b.lastOne) card.appendChild(el('div', 'lo', '👑 라스트원: ' + b.lastOne));
+    const det = el('details'); det.appendChild(el('summary', '', '상품 전체 보기'));
+    for (const t of b.tiers || []) for (const it of t.items) {
+      const r = el('div', 'row' + (+it[1] === 0 ? ' gone' : '')), g = el('span', 'g', t.g); g.style.background = COL(t.g); r.appendChild(g);
+      if (it[3]) { const im = el('img'); im.src = it[3]; im.alt = ''; im.loading = 'lazy'; r.appendChild(im); }
+      r.appendChild(el('span', 'n', it[0])); r.appendChild(el('span', 'q', `${(+it[1]).toLocaleString()} / ${(+it[2]).toLocaleString()}`)); det.appendChild(r);
+    }
+    card.appendChild(det);
+    const url = safe(b.url) || safe(D.SHOP_URL);
+    const btn = el(url && left > 0 ? 'a' : 'span', 'btn wide ' + (url && left > 0 ? 'dark' : 'off'), left === 0 ? '완판됐어요' : url ? '구매하러 가기 →' : '오픈 준비 중');
+    if (url && left > 0) { btn.href = url; btn.target = '_blank'; btn.rel = 'noopener'; }
+    card.appendChild(btn); BL.appendChild(card);
+  }
+
+  // 당첨
+  const HL = $('#hallList');
+  if (!hall.length) HL.appendChild(el('div', 'empty', '아직 당첨자가 없어요. 첫 번째 주인공을 기다리는 중 🍀'));
+  for (const h of hall.slice(0, 12)) {
+    const w = el('div', 'win'), m = el('div', 'm', h.grade === 'LAST' ? '라스트' : (h.grade || '★')); m.style.background = COL(h.grade); if (h.grade === 'LAST') m.style.fontSize = '10px'; w.appendChild(m);
+    const t = el('div'); t.appendChild(el('b', '', h.card)); t.appendChild(el('small', '', `${h.name}님${h.date ? ' · ' + h.date : ''}`)); w.appendChild(t); HL.appendChild(w);
+  }
+
+  // 사업자 정보
+  const B = D.BIZ || {}, F = $('#biz');
+  const line = (k, v) => { const d = el('div'); d.appendChild(el('b', '', k + ' ')); d.appendChild(document.createTextNode(v || '등록 준비 중')); F.appendChild(d); };
+  line('상호', B.name); line('대표', B.ceo); line('사업자등록번호', B.bizno); line('통신판매업 신고', B.mailorder);
+  if (B.addr) line('주소', B.addr); if (B.tel) line('전화', B.tel); if (B.email) line('이메일', B.email);
+  F.appendChild(el('div', '', '만 19세 이상만 이용할 수 있어요. 결제·배송·환불은 결제 페이지(쇼핑몰)에서 진행돼요.'));
+  F.appendChild(el('div', '', '본 사이트는 카드 제조사·등급사와 제휴 관계가 없는 개인 판매 사이트예요.'));
+})();
+</script>
+</body>
+</html>

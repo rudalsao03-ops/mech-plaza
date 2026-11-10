@@ -270,56 +270,24 @@
   </div>
 </div>
 
+<script src="data.js"></script>
 <script>
 (() => {
 'use strict';
 
 /* ======================================================================
-   운영 설정 — 여기만 고치면 됨
-   ----------------------------------------------------------------------
-   · SHOP_URL     : 상점(쇼핑몰) 주소. 비워두면 "준비 중"으로 표시
-   · KAKAO_URL    : 오픈카톡 주소 (교환소·문의)
-   · LIVE.youtube : 라이브 무대에 띄울 유튜브 링크 (라이브 링크 그대로 붙여넣기)
-   · BOARDS       : 판 현황판에 보이는 판 목록. 팔릴 때마다 left / sold 숫자 고치고 푸시
-                    items 형식 = [상품명, 남은 개수, 전체 개수, (선택) 사진 주소]
-                    사진 주소를 넣으면 진열장에 실물 사진이 뜸 (인증번호·바코드는 가린 사진으로!)
-   · HALL         : 명예의 전당 (최근 당첨자). 새 당첨자는 맨 위에 추가
-   · ADMIN_KEY    : 주소 뒤에 ?admin=이 값 붙여서 들어오면 "📣 당첨 알림" 버튼이 생김
-                    (공개 페이지라 완벽한 보안은 아님 — 테스트용)
-   주소 뒤에 ?demo 붙이면 서버 없이 봇이랑 노는 미리보기 모드
+   운영 데이터(상점 주소, 라이브 링크, 판 목록, 당첨자)는 data.js 에서 고침
+   · ADMIN_KEY : 주소 뒤에 ?admin=이 값 붙여서 들어오면 "📣 당첨 알림" 버튼이 생김 (공개 페이지라 테스트용 보안)
+   · 주소 뒤에 ?demo 붙이면 서버 없이 봇이랑 노는 미리보기 모드
    ====================================================================== */
-const CONFIG = {
+const CONFIG = Object.assign({
   SUPABASE_URL: 'https://jxkicwyioopekmsajowh.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_HkZjK14uHrUpVgybOEhdkA_liVHEb71',
   ROOM: 'luckyslab-plaza',
-  SHOP_URL: '',
-  KAKAO_URL: '',
   ADMIN_KEY: 'lucky-admin-0000',
-  LIVE: { youtube: '', schedule: '매일 저녁 8시 LIVE' },
   GACHA_COST: 30,
-  NOTICES: [
-    '럭키슬랩 광장 오픈! 친구 불러와요',
-    '라이브 무대 앞에 모여서 같이 개봉 보기',
-    '판 현황판에서 남은 상품 바로 확인',
-    '무료 가챠는 출석 코인으로 돌려요',
-    '풀숲에 야생 몬스터가 나타나요. 잡아서 도감 채우기!',
-    '방명록에 한마디 남기고 가요',
-    '서로 존중하는 대화 부탁해요. 불편한 사람은 눌러서 차단',
-  ],
-  BOARDS: [
-    { title: 'PSA10 피카츄·리자몽 10종', price: 2500, total: 1334, sold: 0, status: '오픈 예정',
-      lastOne: null,
-      tiers: [
-        { g: 'S', items: [['리자몽 VMAX SSR (s4a) PSA10', 1, 1], ['피카츄 ex UR (sv8) PSA10', 1, 1]] },
-        { g: 'A', items: [['히로시마의 피카츄 PSA10', 1, 1], ['라이츄 포켓큥 1st PSA10', 1, 1], ['토호쿠의 피카츄 PSA10', 1, 1], ['님피아 ex SAR PSA10', 1, 1]] },
-        { g: 'B', items: [['팬텀 VMAX (SCG) PSA10', 1, 1], ['피카츄&제크로무 GX PSA10', 1, 1], ['메가리자몽X ex MA PSA10', 1, 1], ['심향의 블레이범 AR PSA10', 1, 1]] },
-        { g: 'C', items: [['골드·실버·브론즈 포인트', 1324, 1324]] },
-      ] },
-  ],
-  HALL: [
-    // { name: '닉네임', card: '리자몽 VMAX PSA10', grade: 'S', date: '11/12' },
-  ],
-};
+  SHOP_URL: '', KAKAO_URL: '', LIVE: { youtube: '', schedule: '' }, NOTICES: [], BOARDS: [], HALL: [],
+}, window.LUCKY || {});   // 판·당첨자·링크 같은 운영 데이터는 data.js 에 있음
 const BANNED = ['씨발','시발','ㅅㅂ','ㅆㅂ','병신','ㅂㅅ','좆','개새','지랄','니애미','fuck'];
 const QS = new URLSearchParams(location.search);
 const IS_ADMIN = !!CONFIG.ADMIN_KEY && QS.get('admin') === CONFIG.ADMIN_KEY;
@@ -1585,7 +1553,7 @@ function openShopGate() {
   openModal({ tag: 'SHOP', title: '🛒 럭키슬랩 상점', build: b => {
     b.appendChild(el('div', 'muted', CONFIG.SHOP_URL ? '상점(쇼핑몰)으로 이동해요. 구매·결제·배송은 상점에서 진행돼요.' : '상점은 곧 오픈해요! 오픈 소식은 공지사항이랑 라이브에서 알려드릴게요.'));
     const bd = board0(); if (bd) b.appendChild(el('div', 'notice', `진행 중: ${bd.title} · 1회 ${won(bd.price)}`));
-  }, go: CONFIG.SHOP_URL ? () => { closeModal(); openLink(CONFIG.SHOP_URL); } : null, goText: '상점으로 이동' });
+  }, go: () => { closeModal(); openLink('shop/'); }, goText: '상점 홈 열기' });
 }
 function openNotice() {
   openModal({ tag: 'NOTICE', title: '📢 공지사항', build: b => { for (const n of CONFIG.NOTICES) b.appendChild(el('div', 'notice', n)); } });
