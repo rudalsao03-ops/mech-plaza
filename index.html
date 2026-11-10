@@ -122,6 +122,12 @@
   .big{font-size:44px;font-weight:bold;text-align:center;margin:6px 0;color:#1d2030}
   .steps{text-align:left;font-size:14px;line-height:1.7;background:#f5f6f9;border-radius:12px;padding:12px 14px;margin:8px 0}
   /* DM */
+  #kuji{position:fixed;inset:0;z-index:9;background:rgba(5,8,15,.6);display:flex;align-items:flex-end;justify-content:center}
+  #kuji .kw{width:100%;max-width:520px;height:min(92vh,860px);background:#0e111a;border-radius:22px 22px 0 0;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 -10px 40px rgba(0,0,0,.5)}
+  #kuji .kh{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #323a54;color:#ffe08a;font:bold 14px "Galmuri11",sans-serif}
+  #kuji .kh b{flex:1}
+  #kuji .kh button{border:0;background:#1f2435;color:#fff;width:34px;height:34px;border-radius:50%;font-size:16px}
+  #kuji iframe{flex:1;width:100%;border:0;background:#0e111a}
   #dm{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));height:62vh;max-width:480px;margin:0 auto;background:#fff;border-radius:22px;box-shadow:0 10px 40px rgba(0,0,0,.35);z-index:6;display:flex;flex-direction:column;overflow:hidden}
   .dmhead{display:flex;align-items:center;gap:8px;padding:12px 12px 10px;border-bottom:1px solid #eef0f4}
   .dmhead b{flex:1;font-size:15px}.dmhead button{border:0;background:#f0f2f5;width:34px;height:34px;border-radius:50%;font-size:16px}
@@ -198,6 +204,10 @@
 </div>
 
 <!-- 공용 모달 -->
+<div id="kuji" class="hidden"><div class="kw">
+  <div class="kh"><b>🎰 럭키 쿠지 머신 · 데모</b><button id="kujiClose" aria-label="닫기">✕</button></div>
+  <iframe id="kujiFrame" title="쿠지 뽑기"></iframe>
+</div></div>
 <div id="modal" class="overlay hidden">
   <div class="card">
     <div id="mTag" class="tag"></div>
@@ -708,6 +718,10 @@ async function connectSupabase() {
       if (it.r === 'E' || it.r === 'L') { sys(`🎰 ${c.name}님 가챠에서 ${RARITY[it.r].name} ${it.name} 뽑음!`); addReact(c, it.icon); }
     });
     ch.on('broadcast', { event: 'hit' }, ({ payload: p }) => receiveHit(p));
+    ch.on('broadcast', { event: 'kuji' }, ({ payload: p }) => {
+      const c = chars[p.id]; if (!c || isBlocked(c) || typeof p.card !== 'string' || !['S', 'A', 'B', 'LAST'].includes(p.grade)) return;
+      celebrate({ name: c.name, card: clean(p.card).slice(0, 40) + ' (데모)', grade: p.grade });
+    });
     ch.on('broadcast', { event: 'catch' }, ({ payload: p }) => {
       const c = chars[p.id], m = MON_BY[p.m]; if (!c || !m || isBlocked(c)) return;
       sys(`✨ ${c.name}님이 ${RARITY[m.r].name} 몬스터 ${m.name} 포획!`); addReact(c, '✨');
@@ -963,6 +977,19 @@ function isoBox(x, y, w, h, z, hh, T, L, R) {
   poly([u(Wp), u(S), uu(S), uu(Wp)], L); poly([u(S), u(E), uu(E), uu(S)], R); poly([uu(N), uu(E), uu(S), uu(Wp)], T);
 }
 const board0 = () => CONFIG.BOARDS[0];
+/* 쿠지 데모 판 상태 (kuji/ 페이지와 같은 브라우저 저장소 공유). 실제 운영에선 서버에서 읽어옴 */
+const deckCache = {};
+function deckStat(i) {
+  const bd = CONFIG.BOARDS[i]; if (!bd) return null;
+  if (deckCache[i] !== undefined) return deckCache[i];
+  const d = store.get('luckyslab-kuji-b' + i + '-' + bd.total, null);
+  if (!d || !d.tickets) return (deckCache[i] = null);
+  const rest = d.tickets.slice(d.next), rem = {};
+  for (const t of rest) rem[t.g + '|' + t.n] = (rem[t.g + '|' + t.n] || 0) + 1;
+  return (deckCache[i] = { left: rest.length, sold: d.next, sLeft: rest.filter(t => t.g === 'S').length, rem });
+}
+const resetDeckCache = () => { for (const k of Object.keys(deckCache)) delete deckCache[k]; };
+window.addEventListener('storage', resetDeckCache);
 function hallList() { return [...HIT_LOG, ...CONFIG.HALL, ...(demo ? DEMO_HALL : [])]; }
 
 function drawStage(b, t) {
@@ -1046,14 +1073,14 @@ function drawKiosk(b, t) {
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillStyle = '#ffd760'; ctx.font = 'bold 11px "Galmuri11", sans-serif'; ctx.fillText('📋 판 현황', p.x, y0 + 11);
   if (bd) {
-    const left = Math.max(0, bd.total - bd.sold), ratio = bd.total ? bd.sold / bd.total : 0;
+    const ds = deckStat(0), sold = ds ? ds.sold : bd.sold, left = Math.max(0, bd.total - sold), ratio = bd.total ? sold / bd.total : 0;
     ctx.fillStyle = '#fff'; ctx.font = '9px "Galmuri11", sans-serif';
     let title = bd.title; while (ctx.measureText(title).width > W - 10 && title.length > 4) title = title.slice(0, -2) + '…';
     ctx.fillText(title, p.x, y0 + 27);
     ctx.fillStyle = '#2a2e3d'; ctx.fillRect(x0 + 8, y0 + 38, W - 16, 8);
     ctx.fillStyle = '#e2453c'; ctx.fillRect(x0 + 8, y0 + 38, (W - 16) * ratio, 8);
     ctx.fillStyle = '#ffd760'; ctx.font = 'bold 10px "Galmuri11", sans-serif'; ctx.fillText(`남은 ${left.toLocaleString()} / ${bd.total.toLocaleString()}`, p.x, y0 + 56);
-    const sLeft = (bd.tiers.find(x => x.g === 'S') || { items: [] }).items.reduce((a, i) => a + (+i[1] || 0), 0);
+    const sLeft = ds ? ds.sLeft : (bd.tiers.find(x => x.g === 'S') || { items: [] }).items.reduce((a, i) => a + (+i[1] || 0), 0);
     ctx.fillStyle = Math.floor(t * 2) % 2 ? '#7ef0a8' : '#2fa860'; ctx.font = '9px "Galmuri11", sans-serif';
     ctx.fillText(`S상 ${sLeft}개 남음`, p.x, y0 + 67);
   }
@@ -1341,7 +1368,7 @@ function cmp(a, b) {
   return inFront(a, b) ? 1 : -1;
 }
 let camX = 0, camY = 0, last = 0, nearAct = null;
-const ACT_LABEL = { stage: '🎥 라이브 무대', board: '📋 판 현황 보기', gacha: '🎰 무료 가챠 돌리기', hall: '🏆 명예의 전당', trade: '🔄 교환소', shop: '🛒 상점으로 가기', notice: '📢 공지사항', statue: '🍀 오늘의 운세 보기', guest: '📖 방명록 쓰기', case: '💎 상품 진열장 보기' };
+const ACT_LABEL = { stage: '🎥 라이브 무대', board: '🎰 판 현황 · 쿠지 뽑기', gacha: '🎰 무료 가챠 돌리기', hall: '🏆 명예의 전당', trade: '🔄 교환소', shop: '🛒 상점으로 가기', notice: '📢 공지사항', statue: '🍀 오늘의 운세 보기', guest: '📖 방명록 쓰기', case: '💎 상품 진열장 보기' };
 function update(dt, now) {
   for (const c of Object.values(chars)) {
     c.moving = false;
@@ -1509,7 +1536,8 @@ function openStage() {
 function openBoards() {
   openModal({ tag: 'BOARD', title: '📋 판 현황', build: b => {
     if (!CONFIG.BOARDS.length) { b.appendChild(el('div', 'muted', '지금 진행 중인 판이 없어요. 곧 열려요!')); return; }
-    for (const bd of CONFIG.BOARDS) {
+    CONFIG.BOARDS.forEach((bd0, bi) => {
+      const ds = deckStat(bi), bd = { ...bd0, sold: ds ? ds.sold : bd0.sold };
       const box = el('div', 'bd'), left = Math.max(0, bd.total - bd.sold);
       const top = el('div', 'bt'); top.appendChild(el('b', '', bd.title));
       const st = el('span', 'st' + (left === 0 ? ' end' : bd.sold > 0 ? ' on' : ''), left === 0 ? '완판' : bd.status || '진행 중'); top.appendChild(st);
@@ -1520,16 +1548,17 @@ function openBoards() {
       for (const tr of bd.tiers || []) {
         const row = el('div', 'tier'), tg = el('div', 'tg', tr.g); tg.style.background = TIER_COL[tr.g] || '#7e8591'; row.appendChild(tg);
         const ti = el('div', 'ti');
-        for (const [name, l, tot] of tr.items) {
+        for (const [name, l0, tot] of tr.items) {
+          const l = ds ? (ds.rem[tr.g + '|' + name] || 0) : l0;
           const line = el('div'); const nm = el('span', +l === 0 ? 'gone' : '', name); line.appendChild(nm);
           line.appendChild(el('span', +l === 0 ? 'gone' : '', `${(+l).toLocaleString()}/${(+tot).toLocaleString()}`)); ti.appendChild(line);
         }
         row.appendChild(ti); box.appendChild(row);
       }
       b.appendChild(box);
-    }
-    b.appendChild(el('div', 'fine', '표시 수량은 운영자가 업데이트해요. 실제 남은 수량은 상점 페이지 기준입니다.'));
-  }, go: () => { closeModal(); openShopGate(); }, goText: '🛒 구매하러 가기' });
+    });
+    b.appendChild(el('div', 'fine', '남은 수량은 뽑힐 때마다 바로 반영돼요. (지금은 데모 · 실제 결제 없음)'));
+  }, go: () => { closeModal(); openKuji(); }, goText: '🎰 쿠지 머신으로 뽑기' });
 }
 function openHall() {
   openModal({ tag: 'HALL OF FAME', title: '🏆 명예의 전당', build: b => {
@@ -1573,7 +1602,7 @@ function openCase() {
       d.appendChild(el('b', '', `${it.g}상`)); d.appendChild(el('div', '', it.name + (it.left === 0 ? ' (나감)' : ''))); g.appendChild(d);
     }
     b.appendChild(g);
-  }, go: () => { closeModal(); openShopGate(); }, goText: '🛒 구매하러 가기' });
+  }, go: () => { closeModal(); openKuji(); }, goText: '🎰 쿠지 머신으로 뽑기' });
 }
 /* ---- 오늘의 운세 (럭키 슬랩 동상) ---- */
 function openFortune() {
@@ -1803,6 +1832,25 @@ function celebrate(p) {
   for (const c2 of Object.values(chars)) if (c2 !== me && Math.random() < 0.6) addReact(c2, ['🎉', '👏', '🔥'][Math.floor(Math.random() * 3)]);
   burst(); Music.sfx('big'); if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
 }
+/* ---- 쿠지 머신 (광장 안에서 열림) ---- */
+function openKuji() {
+  const f = $('#kujiFrame');
+  if (!f.src) f.src = 'kuji/?embed=1#/b0';
+  $('#kuji').classList.remove('hidden'); Music.duck(true);
+}
+function closeKuji() { $('#kuji').classList.add('hidden'); refreshPlayer(); resetDeckCache(); }
+$('#kujiClose').onclick = closeKuji;
+window.addEventListener('message', e => {
+  if (e.origin !== location.origin || !e.data || e.data.type !== 'kuji' || !me) return;
+  resetDeckCache();
+  const hits = (e.data.got || []).filter(t => ['S', 'A', 'B', 'LAST'].includes(t.g));
+  for (const h of hits) {
+    const card = String(h.n).slice(0, 40);
+    celebrate({ name: me.name, card: card + ' (데모)', grade: h.g });
+    net.send('kuji', { id: me.id, card, grade: h.g });
+  }
+  if (!hits.length && e.data.got && e.data.got.length) addReact(me, '😭');
+});
 function receiveHit(p) {
   if (!p || typeof p.name !== 'string' || typeof p.card !== 'string' || p.k !== CONFIG.ADMIN_KEY) return;
   celebrate({ name: clean(p.name).slice(0, 10), card: clean(p.card).slice(0, 40), grade: ['S', 'A', 'B', 'C', 'LAST'].includes(p.grade) ? p.grade : '' });
@@ -1989,13 +2037,13 @@ $('#enter').onclick = () => {
   if (IS_ADMIN) $('#adminBtn').classList.remove('hidden');
   loadYT(); refreshPlayer(); offerInstallLater();
   sys('럭키슬랩 광장에 오신 걸 환영해요 🍀');
-  sys('풀숲에서 몬스터 잡기 · 동상에서 오늘의 운세 · 방명록도 남겨봐요');
+  sys('판 현황판에서 쿠지 뽑기(데모) · 풀숲에서 몬스터 잡기 · 방명록도 남겨봐요');
   const h = $('#hint'); h.classList.remove('hidden'); hintTimer = setTimeout(hideHint, 6000);
   updateOnline(); initNet().then(loadGB);
 };
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { scene.gcv = null; });
 { const p = iso(12, 11); camX = p.x; camY = p.y - 60; }
-if (FORCE_DEMO) window.__plaza = { me: () => me, doAct, celebrate, wild, openDex };
+if (FORCE_DEMO) window.__plaza = { me: () => me, doAct, celebrate, wild, openDex, openKuji };
 requestAnimationFrame(frame);
 })();
 </script>

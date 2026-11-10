@@ -99,6 +99,8 @@
   .ov .act .s{background:var(--card2);color:var(--text)}
   canvas#fx{position:fixed;inset:0;pointer-events:none;z-index:11}
   .hidden{display:none!important}
+  body.embed header{display:none}
+  body.embed{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
   @media (prefers-reduced-motion:reduce){.mini span{animation:none}.tk .in{transition:none}.tk.wait .in{animation:none}}
 </style>
 </head>
@@ -129,6 +131,9 @@
 (() => {
 'use strict';
 const D = window.LUCKY || {}, $ = s => document.querySelector(s);
+const EMBED = new URLSearchParams(location.search).has('embed') && window.parent !== window;
+if (EMBED) document.body.classList.add('embed');
+const tellPlaza = got => { if (EMBED) try { window.parent.postMessage({ type: 'kuji', got: got.map(t => ({ g: t.g, n: t.n })) }, location.origin); } catch (e) {} };
 const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
 const won = n => (+n || 0).toLocaleString('ko-KR') + '원';
 const COL = g => `var(--${['S', 'A', 'B', 'C', 'LAST'].includes(g) ? g : 'C'})`;
@@ -293,12 +298,12 @@ function showResult(got, done) {
     if (++opened === cards.length) {
       const hits = got.filter(x => HIT(x.g));
       $('#ovT').textContent = hits.length ? `🎉 ${hits.map(x => x.g + '상').join(', ')} 당첨!` : '아쉽지만 포인트상';
-      $('#ovS').textContent = hits.length ? '실제 운영에선 광장에 폭죽이 터지고 명예의 전당에 올라가요' : '포인트는 다음 뽑기나 상점에서 쓸 수 있어요 (데모)';
+      $('#ovS').textContent = hits.length ? EMBED ? '확인 누르면 광장 전체에 폭죽이 터져요' : '실제 운영에선 광장에 폭죽이 터지고 명예의 전당에 올라가요' : '포인트는 다음 뽑기나 상점에서 쓸 수 있어요 (데모)';
     }
   }
   setTimeout(() => $('#ovA').classList.remove('hidden'), 400);
   $('#ovAll').onclick = () => cards.forEach(([c, t], i) => setTimeout(() => open(c, t), i * 120));
-  $('#ovOk').onclick = () => { cards.forEach(([c, t]) => open(c, t)); $('#ov').classList.add('hidden'); done(); };
+  $('#ovOk').onclick = () => { cards.forEach(([c, t]) => open(c, t)); $('#ov').classList.add('hidden'); tellPlaza(got); done(); };
 }
 
 /* ---------- 폭죽 ---------- */
