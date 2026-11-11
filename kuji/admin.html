@@ -203,8 +203,8 @@ async function loadBoards() {
         loadBoards();
       });
     }
-    if (b.test) btn('🗑 삭제', 'r', async () => {
-      if (!confirm(`테스트 판 "${b.title}"을(를) 기록까지 전부 지울까요?`)) return;
+    if (b.test || b.status !== 'open') btn('🗑 삭제', 'r', async () => {
+      if (!confirm(`"${b.title}" 판을 기록까지 전부 지울까요? (결제 주문이 있는 판은 못 지워요)`)) return;
       await call('kuji_delete', { p_key: KEY, p_slug: b.slug }); loadBoards();
     });
     w.append(acts, out); B.appendChild(w);

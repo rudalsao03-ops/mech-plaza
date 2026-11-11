@@ -354,7 +354,10 @@ create or replace function kuji_delete(p_key text, p_slug text) returns void
 language plpgsql security definer set search_path = public, extensions as $$
 begin
   if not _kuji_is_admin(p_key) then raise exception '관리자 비밀번호가 틀렸어요'; end if;
-  if exists (select 1 from kuji_boards where slug = p_slug and not test_mode) then raise exception '실제 판은 삭제할 수 없어요. 마감만 가능'; end if;
+  -- 테스트 판, 또는 카페24 결제 주문이 하나도 없는 판만 삭제 가능 (실제 주문 기록은 보존)
+  if exists (select 1 from kuji_boards b where b.slug = p_slug and not b.test_mode
+             and exists (select 1 from kuji_orders o where o.board_id = b.id)) then
+    raise exception '실제 결제 주문이 있는 판은 삭제할 수 없어요. 마감만 가능'; end if;
   delete from kuji_boards where slug = p_slug;
 end $$;
 
