@@ -176,6 +176,8 @@ async function makeProduct(key: string, slug: string) {
   if (!no) throw new Error('카페24가 상품번호를 안 돌려줬어요: ' + JSON.stringify(made).slice(0, 200));
   await rpc('kuji_link_product', { p_key: key, p_slug: s.slug, p_product: no });
   const warnings: string[] = [];
+  // 생성 때 진열·판매 값이 무시되는 경우가 있어서 한 번 더 확실히 켬
+  try { await c24(`products/${no}`, 'PUT', { shop_no: 1, request: { display: 'T', selling: 'T' } }); } catch (e) { warnings.push('진열·판매 켜기 실패: ' + (e as Error).message); }
   try { await setStock(no, s.left); } catch (e) { warnings.push('재고 설정 실패: ' + (e as Error).message); }
   const img = hits.find(p => p.img)?.img;
   if (img) {
