@@ -30,7 +30,6 @@
   #coinBtn{background:#6b4f12;height:42px}
   #dmBtn{background:#2fa860}
   #installBtn{background:#ff7a2f}
-  #adminBtn{background:#e2453c}
   #vsound{background:#2f7cf6}
   #log{position:fixed;left:12px;right:80px;bottom:calc(74px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:4px;pointer-events:none}
   #log div{font-size:12px;color:#fff;background:rgba(5,8,15,.6);padding:5px 9px;border-radius:10px;align-self:flex-start;max-width:100%;word-break:break-all;transition:opacity .8s}
@@ -173,7 +172,6 @@
   <div class="row"><button id="coinBtn" class="rbtn hidden">🪙 0</button><button id="music" class="rbtn" aria-label="브금">🔊</button></div>
   <div class="row"><button id="dexBtn" class="rbtn hidden">📖 0/9</button><button id="dmBtn" class="rbtn hidden">💬 대화</button></div>
   <button id="installBtn" class="rbtn hidden">📲 앱으로 설치</button>
-  <button id="adminBtn" class="rbtn hidden">📣 당첨 알림</button>
   <button id="vsound" class="rbtn hidden">🔈 방송 소리 켜기</button>
   <button id="vbig" class="rbtn hidden">⛶ 크게 보기</button>
 </div>
@@ -287,20 +285,18 @@
 
 /* ======================================================================
    운영 데이터(상점 주소, 라이브 링크, 판 목록, 당첨자)는 data.js 에서 고침
-   · ADMIN_KEY : 주소 뒤에 ?admin=이 값 붙여서 들어오면 "📣 당첨 알림" 버튼이 생김 (공개 페이지라 테스트용 보안)
+   · 당첨 알림은 서버 추첨 기록(kuji_draws)에서만 나옴. 수동 알림 버튼은 키가 공개 코드에 노출돼서 없앰
    · 주소 뒤에 ?demo 붙이면 서버 없이 봇이랑 노는 미리보기 모드
    ====================================================================== */
 const CONFIG = Object.assign({
   SUPABASE_URL: 'https://jxkicwyioopekmsajowh.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_HkZjK14uHrUpVgybOEhdkA_liVHEb71',
   ROOM: 'luckyslab-plaza',
-  ADMIN_KEY: 'lucky-admin-0000',
   GACHA_COST: 30,
   SHOP_URL: '', KAKAO_URL: '', LIVE: { youtube: '', schedule: '' }, NOTICES: [], BOARDS: [], HALL: [],
 }, window.LUCKY || {});   // 판·당첨자·링크 같은 운영 데이터는 data.js 에 있음
 const BANNED = ['씨발','시발','ㅅㅂ','ㅆㅂ','병신','ㅂㅅ','좆','개새','지랄','니애미','fuck'];
 const QS = new URLSearchParams(location.search);
-const IS_ADMIN = !!CONFIG.ADMIN_KEY && QS.get('admin') === CONFIG.ADMIN_KEY;
 const FORCE_DEMO = QS.has('demo');
 
 const $ = s => document.querySelector(s);
@@ -717,7 +713,6 @@ async function connectSupabase() {
       const c = chars[p.id], it = GACHA.find(i => i.id === p.item); if (!c || !it || isBlocked(c)) return;
       if (it.r === 'E' || it.r === 'L') { sys(`🎰 ${c.name}님 가챠에서 ${RARITY[it.r].name} ${it.name} 뽑음!`); addReact(c, it.icon); }
     });
-    ch.on('broadcast', { event: 'hit' }, ({ payload: p }) => receiveHit(p));
     ch.on('broadcast', { event: 'kuji' }, ({ payload: p }) => {
       const c = chars[p.id]; if (!c || isBlocked(c) || typeof p.card !== 'string' || !['S', 'A', 'B', 'LAST'].includes(p.grade)) return;
       celebrate({ name: c.name, card: clean(p.card).slice(0, 40) + ' (데모)', grade: p.grade });
@@ -1890,27 +1885,6 @@ window.addEventListener('message', e => {
   }
   if (!hits.length && e.data.got && e.data.got.length) addReact(me, '😭');
 });
-function receiveHit(p) {
-  if (!p || typeof p.name !== 'string' || typeof p.card !== 'string' || p.k !== CONFIG.ADMIN_KEY) return;
-  celebrate({ name: clean(p.name).slice(0, 10), card: clean(p.card).slice(0, 40), grade: ['S', 'A', 'B', 'C', 'LAST'].includes(p.grade) ? p.grade : '' });
-}
-$('#adminBtn').onclick = () => {
-  openModal({ tag: 'ADMIN', title: '📣 당첨 알림 보내기', build: b => {
-    b.appendChild(el('div', 'muted', '광장에 있는 모두에게 폭죽 + 배너가 떠요. 명예의 전당에 영구로 남기려면 CONFIG.HALL에도 추가하세요.'));
-    const l1 = el('label', '', '당첨자 닉네임'), i1 = el('input'); i1.id = 'hName'; i1.maxLength = 10;
-    const l2 = el('label', '', '카드 이름'), i2 = el('input'); i2.id = 'hCard'; i2.maxLength = 40;
-    const l3 = el('label', '', '등급'), seg = el('div', 'seg'); seg.id = 'hGrade';
-    for (const g of ['S', 'A', 'B', 'LAST']) { const bt = el('button', g === 'S' ? 'on' : '', g === 'LAST' ? '라스트' : g); bt.dataset.g = g; bt.onclick = () => { for (const x of seg.children) x.classList.toggle('on', x === bt); }; seg.appendChild(bt); }
-    b.append(l1, i1, l2, i2, l3, seg);
-  }, go: () => {
-    const name = clean($('#hName').value).slice(0, 10), card = clean($('#hCard').value).slice(0, 40);
-    const g = ($('#hGrade .on') || {}).dataset?.g || '';
-    if (!name || !card) return;
-    const p = { name, card, grade: g, k: CONFIG.ADMIN_KEY };
-    net.send('hit', p); celebrate(p); closeModal();
-  }, goText: '🎉 알림 보내기' });
-};
-
 /* ================== 1:1 대화 · 차단 ==================
    ※ 공개 채널로 전달돼서 완전한 비밀 대화는 아님 (테스트 단계) */
 const blocked = new Set(store.get('luckyslab-blocked', []));
@@ -2073,7 +2047,6 @@ $('#enter').onclick = () => {
   Music.start(); syncMusicBtn();
   $('#coinBtn').classList.remove('hidden'); Wallet.save(); checkAttendance();
   $('#dmBtn').classList.remove('hidden'); $('#dexBtn').classList.remove('hidden');
-  if (IS_ADMIN) $('#adminBtn').classList.remove('hidden');
   loadYT(); refreshPlayer(); offerInstallLater();
   sys('럭키슬랩 광장에 오신 걸 환영해요 🍀');
   sys('판 현황판에서 쿠지 뽑기(데모) · 풀숲에서 몬스터 잡기 · 방명록도 남겨봐요');
