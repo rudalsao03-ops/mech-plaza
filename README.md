@@ -21,13 +21,12 @@
 판 목록·남은 수량·최근 당첨·이용 방법을 보여주는 랜딩 페이지. 구매 버튼은 `SHOP_URL`(카페24 등)로 나감. 결제 기능은 없음.
 
 ## 운영 방법
-`data.js` 하나만 고치면 광장과 상점 홈이 같이 바뀜. (`ADMIN_KEY`만 `index.html`에 있음)
+`data.js` 하나만 고치면 광장과 상점 홈이 같이 바뀜.
 - `BIZ` 사업자 정보 — 상점 홈 맨 아래 표시
 - `SHOP_URL` 상점 주소, `KAKAO_URL` 오픈카톡 주소
 - `LIVE.youtube` 방송 링크, `LIVE.schedule` 방송 시간 문구
 - `BOARDS` 판 목록 — 팔릴 때마다 `sold`, 상품별 남은 개수 수정
 - `HALL` 명예의 전당 — 새 당첨자 맨 위에 추가
-- `ADMIN_KEY` — `?admin=키` 로 들어오면 📣 당첨 알림 버튼 생김 (전원에게 폭죽+배너)
 
 ## 방명록 서버 저장 켜기 (한 번만)
 Supabase 대시보드 → SQL Editor에 아래를 붙여넣고 Run. 안 하면 방명록이 접속 중인 사람한테만 보이고 각자 기기에만 저장됨.
@@ -49,7 +48,6 @@ create policy "guestbook write" on guestbook for insert with check (true);
 
 ## 주소 옵션
 - `?demo` 서버 없이 봇이랑 미리보기
-- `?admin=키` 운영자 당첨 알림
 
 ## 기술
 단일 `index.html` · 캔버스 아이소메트릭 · Supabase Realtime(presence/broadcast, 무료 한도 맞춰 전송량 제한) · GitHub Pages · PWA
@@ -61,7 +59,7 @@ create policy "guestbook write" on guestbook for insert with check (true);
 
 - 표는 판을 열 때 서버가 섞어서 고정, 지문(SHA-256) 공개 → 마감 후 salt 공개로 검증
 - 테스트 판: 누구나 무료로 뽑기 / 실제 판: 뽑기 코드 필요 (나중에 카페24 결제와 자동 연동 예정)
-- 당첨은 서버 기록(kuji_draws) 실시간 구독으로 광장 전체에 폭죽
+- 당첨은 서버 기록(kuji_draws) 실시간 구독으로 광장 전체에 폭죽 (광장에서 손으로 보내는 알림은 없음 — 공개 키로는 막을 수 없어서 뺐음)
 
 ## 카페24 결제 → 바로 뽑기 (A 방식)
 흐름: 쿠지 판 "결제하고 바로 뽑기" → 카페24 상품 결제 → 주문완료 페이지가 자동으로 `kuji/?order=주문번호` 로 이동 → 서버가 카페24에 결제 확인 → 즉시 카드 공개
@@ -71,7 +69,9 @@ create policy "guestbook write" on guestbook for insert with check (true);
 4. 카페24 개발자센터 앱: Redirect URI = `https://jxkicwyioopekmsajowh.supabase.co/functions/v1/kuji-order/callback`, 권한 = 주문(Order) 읽기
 5. 관리자 페이지 → "카페24 연결하기" → 카페24 로그인·승인
 6. 관리자 페이지 → 판마다 "카페24 상품 연결" (상품번호). 카페24 상품 재고 = 판 구수로 맞추기
+   - 레전드 쿠지 1회차는 카페24 상품번호 **57** 로 이미 만들어 둠 → 자동 생성 말고 이 번호로 연결
 7. 카페24 주문완료 페이지 맨 아래에 `supabase/cafe24-order-complete.html` 붙여넣기
+8. **카페24 쿠지 상품은 고객 직접 주문취소를 꺼둘 것.** 결제 → 즉시 뽑기라서, 결과 보고 취소·환불이 되면 꽝 표만 공짜로 빼내는 리롤이 가능함. 취소 요청은 운영자가 `kuji_orders_list`로 뽑았는지 확인한 뒤 처리 (안 뽑은 주문만 환불)
 
 ### 카페24 상품 자동 생성
 - 관리자에서 **실제 · 자동** 판을 열면 카페24 상품이 자동으로 만들어지고(이름 `[PSA 10] 판이름 쿠지 1회`, 가격, 재고 = 표 수, 대표사진 = 첫 힛 카드) 판에 연결돼요.
